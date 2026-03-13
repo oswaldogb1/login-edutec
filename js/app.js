@@ -1,14 +1,6 @@
 let DB = {};
 
-// URL infalível para a tela limpa de login do Google
-function loginUrl() {
-  return "https://accounts.google.com/ServiceLogin";
-}
-function loginUrl() {
-  return "https://accounts.google.com/AccountChooser/signinchooser?prompt=select_account";
-}
-
-// elementos
+// Elementos da Interface
 const serieSelect = document.getElementById("serie");
 const countPill = document.getElementById("countPill");
 const studentsView = document.getElementById("studentsView");
@@ -18,174 +10,104 @@ const shownPill = document.getElementById("shownPill");
 const searchInput = document.getElementById("search");
 const list = document.getElementById("list");
 
-// carregar banco
+// Carregar os dados
 async function carregarBancoDeDados() {
   try {
-    const response = await fetch("data/banco_dados.txt");
+    const response = await fetch('data/banco_dados.txt');
     if (!response.ok) throw new Error("Erro na rede");
-
     const texto = await response.text();
-
     processarTexto(texto);
     configurarSelectTurmas();
-
   } catch (erro) {
     console.error("Falha ao carregar:", erro);
     alert("Erro ao carregar banco_dados.txt.");
   }
 }
 
-// processar txt
+// Processar o TXT
 function processarTexto(texto) {
-  const linhas = texto.split("\n");
-
+  const linhas = texto.split('\n');
   for (let linha of linhas) {
-
     linha = linha.trim();
-
-    if (!linha) continue;
-    if (linha.toLowerCase().startsWith("turma")) continue;
-
-    const colunas = linha.split(";");
-
+    if (!linha || linha.toLowerCase().startsWith('turma')) continue;
+    const colunas = linha.split(';');
     if (colunas.length >= 3) {
-
       const turma = colunas[0].trim();
       const nome = colunas[1].trim();
       const email = colunas[2].trim();
-
       if (!DB[turma]) DB[turma] = [];
-
-      DB[turma].push({
-        name: nome,
-        email: email
-      });
+      DB[turma].push({ name: nome, email: email });
     }
   }
 }
 
-// configurar select
+// Configurar select
 function configurarSelectTurmas() {
-
-  serieSelect.innerHTML =
-    '<option value="">-- Selecione a Turma --</option>';
-
-  const turmas = Object.keys(DB)
-    .sort((a, b) => a.localeCompare(b, "pt-BR"));
-
+  serieSelect.innerHTML = '<option value="">-- Selecione a Turma --</option>';
+  const turmas = Object.keys(DB).sort((a, b) => a.localeCompare(b, "pt-BR"));
   for (const t of turmas) {
-
     const opt = document.createElement("option");
-
     opt.value = t;
     opt.textContent = t;
-
     serieSelect.appendChild(opt);
   }
 }
 
-// estudantes atuais
 function obterEstudantesAtuais() {
-
   const turmaSelecionada = serieSelect.value;
-
   return (DB[turmaSelecionada] || []).slice();
 }
 
-// mostrar estudantes
+// Mostrar estudantes
 function mostrarEstudantes() {
-
   if (!serieSelect.value) {
     esconderEstudantes();
     return;
   }
-
   studentsPlaceholder.classList.add("hidden");
   studentsView.classList.remove("hidden");
-
   const qtd = obterEstudantesAtuais().length;
-
-  countPill.textContent =
-    qtd + (qtd === 1 ? " estudante" : " estudantes");
-
+  countPill.textContent = qtd + (qtd === 1 ? " estudante" : " estudantes");
   renderizarLista();
-
   searchInput.focus();
 }
 
-// esconder
 function esconderEstudantes() {
-
   studentsView.classList.add("hidden");
   studentsPlaceholder.classList.remove("hidden");
-
   countPill.textContent = "0 estudantes";
-
   searchInput.value = "";
-
   list.innerHTML = "";
 }
 
-// copiar
+// Copiar para a área de transferência
 async function copiarParaAreaDeTransferencia(texto) {
-
   try {
-
     await navigator.clipboard.writeText(texto);
-
-  } catch {
-
+  } catch (e) {
     const ta = document.createElement("textarea");
-
     ta.value = texto;
-
     document.body.appendChild(ta);
-
     ta.select();
-
     document.execCommand("copy");
-
     document.body.removeChild(ta);
   }
 }
 
-// render lista
+// Renderizar lista (Apenas botão Copiar)
 function renderizarLista() {
-
   const turma = serieSelect.value;
-
   const estudantes = obterEstudantesAtuais();
+  const termoBusca = (searchInput.value || "").trim().toLowerCase();
+  seriePill.textContent = "Turma: " + turma;
 
-  const termoBusca =
-    (searchInput.value || "")
-      .trim()
-      .toLowerCase();
-
-  seriePill.textContent =
-    "Turma: " + turma;
-
-  const filtrados =
-    !termoBusca
-      ? estudantes
-      : estudantes.filter(st =>
-          (st.name || "")
-            .toLowerCase()
-            .includes(termoBusca) ||
-          (st.email || "")
-            .toLowerCase()
-            .includes(termoBusca)
-        );
-
-  shownPill.textContent =
-    "Mostrando: " +
-    filtrados.length +
-    " de " +
-    estudantes.length;
+  const filtrados = !termoBusca ? estudantes : estudantes.filter(st =>
+    (st.name || "").toLowerCase().includes(termoBusca) || (st.email || "").toLowerCase().includes(termoBusca)
+  );
+  shownPill.textContent = "Mostrando: " + filtrados.length + " de " + estudantes.length;
 
   list.innerHTML = "";
-
   for (const st of filtrados) {
-
     const row = document.createElement("div");
     row.className = "student";
 
@@ -194,13 +116,11 @@ function renderizarLista() {
 
     const name = document.createElement("div");
     name.className = "name";
-    name.textContent =
-      st.name || "(sem nome)";
+    name.textContent = st.name || "(sem nome)";
 
     const email = document.createElement("div");
     email.className = "email";
-    email.textContent =
-      st.email || "(sem e-mail)";
+    email.textContent = st.email || "(sem e-mail)";
 
     meta.appendChild(name);
     meta.appendChild(email);
@@ -208,74 +128,27 @@ function renderizarLista() {
     const actions = document.createElement("div");
     actions.className = "actions";
 
-    // copiar email
+    // Botão Único: Copiar E-mail
     const btnCopiar = document.createElement("button");
-
-    btnCopiar.textContent =
-      "Copiar E-mail";
-
-    btnCopiar.className =
-      "btn-secondary";
-
-    btnCopiar.addEventListener(
-      "click",
-      async () => {
-
-        await copiarParaAreaDeTransferencia(
-          st.email
-        );
-
-        btnCopiar.textContent = "Copiado!";
-
-        setTimeout(() => {
-          btnCopiar.textContent =
-            "Copiar E-mail";
-        }, 1500);
-      }
-    );
-
-    // iniciar sessão
-    const btnEntrar =
-      document.createElement("button");
-
-    btnEntrar.textContent =
-      "Iniciar sessão";
-
-    btnEntrar.className =
-      "btn-primary";
-
-    btnEntrar.addEventListener(
-      "click",
-      () => {
-
-        window.open(
-          loginUrl(st.email),
-          "_blank",
-          "noopener"
-        );
-      }
-    );
+    btnCopiar.textContent = "Copiar E-mail";
+    btnCopiar.className = "btn-primary"; // Mudei para primary para dar mais destaque
+    btnCopiar.addEventListener("click", async () => {
+      await copiarParaAreaDeTransferencia(st.email);
+      btnCopiar.textContent = "Copiado!";
+      btnCopiar.style.backgroundColor = "#2c3e35"; // Escurece o botão ao copiar para dar feedback visual
+      setTimeout(() => {
+        btnCopiar.textContent = "Copiar E-mail";
+        btnCopiar.style.backgroundColor = ""; // Retorna à cor original
+      }, 1500);
+    });
 
     actions.appendChild(btnCopiar);
-    actions.appendChild(btnEntrar);
-
     row.appendChild(meta);
     row.appendChild(actions);
-
     list.appendChild(row);
   }
 }
 
-// eventos
-serieSelect.addEventListener(
-  "change",
-  mostrarEstudantes
-);
-
-searchInput.addEventListener(
-  "input",
-  renderizarLista
-);
-
-// iniciar
+serieSelect.addEventListener("change", mostrarEstudantes);
+searchInput.addEventListener("input", renderizarLista);
 carregarBancoDeDados();
