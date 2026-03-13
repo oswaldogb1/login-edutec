@@ -1,9 +1,8 @@
 let DB = {};
 
-// Função com a URL corrigida do Google (AccountChooser)
-function loginUrl(email) {
-  // O parâmetro 'continue' redireciona o aluno para a conta Google após o login.
-  return `https://accounts.google.com/AccountChooser/signinchooser?Email=${encodeURIComponent(email)}&continue=https://myaccount.google.com/`;
+// URL genérica e limpa para a página de login do Google
+function loginUrl() {
+  return "https://accounts.google.com/signin";
 }
 
 // Elementos da Interface
@@ -52,7 +51,7 @@ function processarTexto(texto) {
   }
 }
 
-// Preencher a caixa de seleção de turmas com opção padrão
+// Preencher a caixa de seleção de turmas
 function configurarSelectTurmas() {
   serieSelect.innerHTML = '<option value="">-- Selecione a Turma --</option>';
   const turmas = Object.keys(DB).sort((a, b) => a.localeCompare(b, "pt-BR"));
@@ -95,6 +94,7 @@ function esconderEstudantes() {
   list.innerHTML = "";
 }
 
+// Função para copiar o texto para a área de transferência
 async function copiarParaAreaDeTransferencia(texto) {
   try {
     await navigator.clipboard.writeText(texto);
@@ -108,6 +108,7 @@ async function copiarParaAreaDeTransferencia(texto) {
   }
 }
 
+// Renderizar a lista de alunos com os botões atualizados
 function renderizarLista() {
   const turma = serieSelect.value;
   const estudantes = obterEstudantesAtuais();
@@ -143,21 +144,23 @@ function renderizarLista() {
     const actions = document.createElement("div");
     actions.className = "actions";
 
-    const btnEntrar = document.createElement("a");
-    btnEntrar.href = loginUrl(st.email);
-    btnEntrar.target = "_blank";
-    btnEntrar.rel = "noopener";
-    btnEntrar.textContent = "Entrar";
-    btnEntrar.className = "btn-primary";
-
+    // Botão 1: Copiar E-mail
     const btnCopiar = document.createElement("button");
-    btnCopiar.textContent = "Copiar";
+    btnCopiar.textContent = "Copiar E-mail";
     btnCopiar.className = "btn-secondary";
     btnCopiar.addEventListener("click", async () => {
       await copiarParaAreaDeTransferencia(st.email);
       btnCopiar.textContent = "Copiado!";
-      setTimeout(() => btnCopiar.textContent = "Copiar", 1500);
+      setTimeout(() => btnCopiar.textContent = "Copiar E-mail", 1500);
     });
+
+    // Botão 2: Abrir Login
+    const btnEntrar = document.createElement("a");
+    btnEntrar.href = loginUrl();
+    btnEntrar.target = "_blank";
+    btnEntrar.rel = "noopener";
+    btnEntrar.textContent = "Abrir Login";
+    btnEntrar.className = "btn-primary";
 
     actions.appendChild(btnCopiar);
     actions.appendChild(btnEntrar);
@@ -168,7 +171,7 @@ function renderizarLista() {
   }
 }
 
-// Escuta a mudança no select e já aciona a lista
+// Escuta a mudança no select e a busca
 serieSelect.addEventListener("change", mostrarEstudantes);
 searchInput.addEventListener("input", renderizarLista);
 
