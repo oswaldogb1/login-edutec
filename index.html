@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login Google - EE Dr. Arnaldo</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <img src="assets/logoescola.jpg" alt="Logo EE Dr. Arnaldo" class="logo">
+      <div class="header-text">
+        <h1>Login Google (EduTec)</h1>
+        <p>Acesso rápido aos e-mails institucionais dos estudantes da <b>EE Dr. Arnaldo Estevão de Figueiredo</b>.</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <h2>1. Selecione a Turma</h2>
+        <label for="serie">Série/Turma</label>
+        <select id="serie">
+          <option value="">Carregando turmas...</option>
+        </select>
+
+        <div class="row info-row">
+          <div class="pill" id="countPill">0 estudantes</div>
+          <div class="spacer"></div>
+          <button id="goBtn" class="btn-primary" title="Ir para a lista de estudantes">Ver Estudantes →</button>
+        </div>
+        
+        <p class="footer-note">
+          Dica: Segure <span class="kbd">Ctrl</span> e clique no botão para abrir em uma nova guia.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>2. Lista de Estudantes</h2>
+
+        <div id="studentsPlaceholder" class="placeholder-text">
+          <p>Selecione uma turma ao lado e clique em <b>Ver Estudantes</b>.</p>
+        </div>
+
+        <div id="studentsView" class="hidden">
+          <div class="row">
+            <div class="search-box">
+              <label for="search">Buscar estudante</label>
+              <input id="search" placeholder="Digite o nome ou e-mail..." />
+            </div>
+            <button id="backBtn" class="btn-secondary">← Voltar</button>
+          </div>
+
+          <div class="row info-row">
+            <div class="pill highlight" id="seriePill"></div>
+            <div class="pill" id="shownPill"></div>
+            <div class="spacer"></div>
+            <button id="openAllBtn" class="btn-outline" title="Abre a página de login para todos os filtrados">Abrir Todos</button>
+          </div>
+
+          <div id="warnBox" class="warn hidden"></div>
+
+          <div class="list" id="list"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

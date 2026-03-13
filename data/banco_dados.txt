@@ -1,0 +1,388 @@
+Turma;Nome;Email
+1º ANO “A”;Aderaldo Fernandes Barbosa Neto;Aderaldo.1284871@edutec.sed.ms.gov.br
+1º ANO “A”;Ana Beatriz Ferreira Bruno;Ana.1306200@edutec.sed.ms.gov.br
+1º ANO “A”;Ana Júlia Garcia Amorim;Ana.1284921@edutec.sed.ms.gov.br
+1º ANO “A”;Gabriel Lima Coelho Nunes;Gabriel.1294353@edutec.sed.ms.gov.br
+1º ANO “A”;Giovanna Zotelli Oliveira;Giovanna.1287586@edutec.sed.ms.gov.br
+1º ANO “A”;Grazielly Da Silva Bruno;Grazielly.1289296@edutec.sed.ms.gov.br
+1º ANO “A”;Jamilly Belchior Barbosa;Jamilly.1298987@edutec.sed.ms.gov.br
+1º ANO “A”;José Guilherme Da Silva;Jose.1469277@edutec.sed.ms.gov.br
+1º ANO “A”;Júlia Menezes Malaquias;Julia.1299871@edutec.sed.ms.gov.br
+1º ANO “A”;Kaio Leonardo Gomes De Oliveira;Kaio.1276247@edutec.sed.ms.gov.br
+1º ANO “A”;Kamily Vitória Ferreira De Queiroz;Kamily.1284898@edutec.sed.ms.gov.br
+1º ANO “A”;Kauã Gabriel Salvador De Oliveira;Kaua.1087252@edutec.sed.ms.gov.br
+1º ANO “A”;Kaylla Cristina Custódio Amorim;Kaylla.1284490@edutec.sed.ms.gov.br
+1º ANO “A”;Lara Pinheiro Lacerda;Lara.1293235@edutec.sed.ms.gov.br
+1º ANO “A”;Laura Fernandes Barbosa;Laura.1284473@edutec.sed.ms.gov.br
+1º ANO “A”;Luiz Fabiano Martins De Souza;Luiz.1284524@edutec.sed.ms.gov.br
+1º ANO “A”;Marcella Aparecida Rodrigues Nogueira;Marcella.1284547@edutec.sed.ms.gov.br
+1º ANO “A”;Maria Fernanda Aimi Ramos;Maria.1284504@edutec.sed.ms.gov.br
+1º ANO “A”;Maria Fernanda Moreira Mota;Maria.941826@edutec.sed.ms.gov.br
+1º ANO “A”;Mikael Rodrigues De Souza;Mikael.1296997@edutec.sed.ms.gov.br
+1º ANO “A”;Mileny Gabriely Amorim Barbosa;Mileny.1059361@edutec.sed.ms.gov.br
+1º ANO “A”;Murilo Lemos Farias;Murilo.1293214@edutec.sed.ms.gov.br
+1º ANO “A”;Muryllo Domingos De Oliveira;Muryllo.1025695@edutec.sed.ms.gov.br
+1º ANO “A”;Nayana Negrão Da Rocha;Nayana.1293260@edutec.sed.ms.gov.br
+1º ANO “A”;Paulo Henrique Brandão De Arruda;Paulo.1033918@edutec.sed.ms.gov.br
+1º ANO “A”;Pedro Henrick Da Silva Martins;Pedro.911747@edutec.sed.ms.gov.br
+1º ANO “A”;Pedro Henrique Venancia De Mattos;Pedro.1476233@edutec.sed.ms.gov.br
+1º ANO “A”;Pietro Henrique Palhares Da Rocha Dias;Pietro.1032950@edutec.sed.ms.gov.br
+1º ANO “A”;Ryan Carvalho De Oliveira;Ryan.1296968@edutec.sed.ms.gov.br
+1º ANO “A”;Samuel Souza Ferreira;Samuel.793203@edutec.sed.ms.gov.br
+1º ANO “A”;Sophia Martins Godoy;Sophia.1279945@edutec.sed.ms.gov.br
+1º ANO B;Amanda Vitória Pereira Da Silva;Amanda.1032041@edutec.sed.ms.gov.br
+1º ANO B;Arthur Gabriel Narciso;Arthur.1328654@edutec.sed.ms.gov.br
+1º ANO B;Dieniffer Gomes De Amorim;Dieniffer.1054302@edutec.sed.ms.gov.br
+1º ANO B;Esttefany Patricia Pimenta De Souza;Esttefany.1296276@edutec.sed.ms.gov.br
+1º ANO B;Gabriel Lima Coelho Nunes;Gabriel.1294353@edutec.sed.ms.gov.br
+1º ANO B;Gabriel Ortiz Pereira Da Silva;Gabriel.1293094@edutec.sed.ms.gov.br
+1º ANO B;Henrique Kauã Marques Araújo;Henrique.1387801@edutec.sed.ms.gov.br
+1º ANO B;Jamilly Belchior Barbosa;Jamilly.1298987@edutec.sed.ms.gov.br
+1º ANO B;Jhenifer Vitória Pereira Santos;Jhenifer.1303534@edutec.sed.ms.gov.br
+1º ANO B;João Filho Caldeira De Souza;Joao.1379322@edutec.sed.ms.gov.br
+1º ANO B;Kauã Gabriel Salvador De Oliveira;Kaua.1087252@edutec.sed.ms.gov.br
+1º ANO B;Kemilly Vitoria Garcia Nogueira;Kemilly.1296515@edutec.sed.ms.gov.br
+1º ANO B;Luiz Gustavo Oliveira Benincá;Luiz.1284949@edutec.sed.ms.gov.br
+1º ANO B;Marcos Antonio Guimarães De Oliveira;Marcos.1284863@edutec.sed.ms.gov.br
+1º ANO B;Maria Luiza Furtado Sandin;Maria.1284965@edutec.sed.ms.gov.br
+1º ANO B;Mikael Rodrigues De Souza;Mikael.1296997@edutec.sed.ms.gov.br
+1º ANO B;Paulo Henrique Brandão De Arruda;Paulo.1033918@edutec.sed.ms.gov.br
+1º ANO B;Pedro Henrique Venancia De Mattos;Pedro.1476233@edutec.sed.ms.gov.br
+1º ANO B;Pietro Antonio Narciso Dos Santos;Pietro.1328669@edutec.sed.ms.gov.br
+1º ANO B;Rafael Moreira Costa Ferreira;Rafael.1294732@edutec.sed.ms.gov.br
+1º ANO B;Rianny Vitória Carvalho Batista;Rianny.1388090@edutec.sed.ms.gov.br
+1º ANO B;Vanusa De Jesus Assis;Vanusa.1067591@edutec.sed.ms.gov.br
+1º ANO B;Victor Meneguesse Corrêa;Victor.1284533@edutec.sed.ms.gov.br
+1º ANO B;Vitor Hugo Silveira Da Silva;Vitor.960232@edutec.sed.ms.gov.br
+1º ANO B;Vitor Matheus Narciso;Vitor.1302326@edutec.sed.ms.gov.br
+1º ANO B;Yasmim Bercó Dos Santos;Yasmim.1060177@edutec.sed.ms.gov.br
+2º ANO “A”;Abner Moura Souza;Abner.627761@edutec.sed.ms.gov.br
+2º ANO “A”;Adriely Pereira Bartmeyer;Adriely.1245447@edutec.sed.ms.gov.br
+2º ANO “A”;Alison Caldeira Da Silva Pereira;Alison.1258670@edutec.sed.ms.gov.br
+2º ANO “A”;Andressa Pereira Bartmeyer;Andressa.1245442@edutec.sed.ms.gov.br
+2º ANO “A”;Anna Alice Mendes De Lima Queiroz;Anna.1320965@edutec.sed.ms.gov.br
+2º ANO “A”;Breno De Andrade Ferreira;Breno.1300909@edutec.sed.ms.gov.br
+2º ANO “A”;Cássio Arico Dos Santos;Cassio.716877@edutec.sed.ms.gov.br
+2º ANO “A”;Deivson Valdez Silva;Deivson.971519@edutec.sed.ms.gov.br
+2º ANO “A”;Fabricio Oliveira Camargo;Fabricio.1248472@edutec.sed.ms.gov.br
+2º ANO “A”;Gabriel Dolfini Silva;Gabriel.1248468@edutec.sed.ms.gov.br
+2º ANO “A”;Gabriel Morais Da Silva;Gabriel.1250924@edutec.sed.ms.gov.br
+2º ANO “A”;Gabriele Salustiano Souza;Gabriele.1128740@edutec.sed.ms.gov.br
+2º ANO “A”;Hitalo Depoli Furtado;Hitalo.1389923@edutec.sed.ms.gov.br
+2º ANO “A”;Izabella Crisostomo De Oliveira;Izabella.1241965@edutec.sed.ms.gov.br
+2º ANO “A”;Kauan Fernando Iracet De Souza;Kauan.802018@edutec.sed.ms.gov.br
+2º ANO “A”;Leticia Medeiros Da Silva;Leticia.1241926@edutec.sed.ms.gov.br
+2º ANO “A”;Loane Aragão De Sousa;Loane.1442155@edutec.sed.ms.gov.br
+2º ANO “A”;Lucas Mateus Barbosa Furtado;Lucas.1241983@edutec.sed.ms.gov.br
+2º ANO “A”;Maria Clara Gamas Martins;Maria.1260832@edutec.sed.ms.gov.br
+2º ANO “A”;Maria Eduarda Furtado Pereira;Maria.1241974@edutec.sed.ms.gov.br
+2º ANO “A”;Maria Eduarda Jesus Da Silva;Maria.1254478@edutec.sed.ms.gov.br
+2º ANO “A”;Maria Eduarda Resende Ribeiro;Maria.951306@edutec.sed.ms.gov.br
+2º ANO “A”;Maria Julia Rodrigues De Amorim;Maria.1260614@edutec.sed.ms.gov.br
+2º ANO “A”;Mariana Estevão De Amorim;Mariana.1241454@edutec.sed.ms.gov.br
+2º ANO “A”;Micaeli Silva Brandão;Micaeli.1248460@edutec.sed.ms.gov.br
+2º ANO “A”;Milena Ferreira De Oliveira;Milena.1255731@edutec.sed.ms.gov.br
+2º ANO “A”;Nathalia Pereira Da Silva;Nathalia.926440@edutec.sed.ms.gov.br
+2º ANO “A”;Nicolly Victória Melo Assis;Nicolly.1195430@edutec.sed.ms.gov.br
+2º ANO “A”;Pyetra Donega De Souza;Pyetra.1156404@edutec.sed.ms.gov.br
+2º ANO “A”;Samuel Santana Lopes De Freitas;Samuel.1258049@edutec.sed.ms.gov.br
+2º ANO “A”;Victória Silva;Victoria.1408624@edutec.sed.ms.gov.br
+3º ANO “A”;Airan Amorim Passarelli;Airan.1220182@edutec.sed.ms.gov.br
+3º ANO “A”;Carla Aparecida Silva Oliveira;Carla.1223724@edutec.sed.ms.gov.br
+3º ANO “A”;Claudiane Dos Santos Brum;Claudiane.1179919@edutec.sed.ms.gov.br
+3º ANO “A”;Eduardo Oliveira De Souza;Eduardo.857628@edutec.sed.ms.gov.br
+3º ANO “A”;Emanuelli Rodrigues Camargo;Emanuelli.1219139@edutec.sed.ms.gov.br
+3º ANO “A”;Fabiano Pina Martins;Fabiano.1223850@edutec.sed.ms.gov.br
+3º ANO “A”;Heron Lourenço Furtado;Heron.1219387@edutec.sed.ms.gov.br
+3º ANO “A”;Iasmin De Paula Tavares;Iasmin.1217835@edutec.sed.ms.gov.br
+3º ANO “A”;Jennifer Alana Berquó Sales;Jennifer.1223221@edutec.sed.ms.gov.br
+3º ANO “A”;Lêster Albino Vilhalta;Lester.1217870@edutec.sed.ms.gov.br
+3º ANO “A”;Mariana Rodrigues Matias;Mariana.1227208@edutec.sed.ms.gov.br
+3º ANO “A”;Natacha Rocha Garcia;Natacha.1318505@edutec.sed.ms.gov.br
+3º ANO “A”;Noemi Dos Santos Quequeto;Noemi.858996@edutec.sed.ms.gov.br
+3º ANO “A”;Stefany Guimarães Ferreira;Stefany.1226170@edutec.sed.ms.gov.br
+3º ANO “A”;Suelen Aparecida Soares;Suelen.1229031@edutec.sed.ms.gov.br
+3º ANO “A”;Vitor Soares Rodrigues;Vitor.1229048@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Ana Beatriz Ferreira Bruno;Ana.1306200@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Breno De Andrade Ferreira;Breno.1300909@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Claudiane Dos Santos Brum;Claudiane.1179919@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Gustavo Carvalho De Lima;Gustavo.1474409@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Henrique Rodrigues Negrão;Henrique.1251889@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;João Filho Caldeira De Souza;Joao.1379322@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;João Victor Belchior Da Rocha;Joao.1249894@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Kaio Leonardo Gomes De Oliveira;Kaio.1276247@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Lorena Queiroz Souza;Lorena.1219177@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Lucas Moraes Sandim;Lucas.1219225@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Matheo Lima Teixeira;Matheo.1368581@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Nathan Souza Nabhan;Nathan.1219104@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Paulo Henrique Da Silva De Oliveira;Paulo.1221686@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Priscylla De Moura Vilhalba;Priscylla.1161032@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Ricardo Santos De Jesus;Ricardo.1345218@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Samuel Santana Lopes De Freitas;Samuel.1258049@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Wendel Souza Vieira;Wendel.1123987@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Yan Carlos Rocha De Oliveira;Yan.1229288@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Yasmim Oliveira Soares;Yasmim.1225035@edutec.sed.ms.gov.br
+6º ANO “A”;Afonso Henrique Oliviera De Paula;Afonso.1477135@edutec.sed.ms.gov.br
+6º ANO “A”;Alice De Oliveira Costa;Alice.1473087@edutec.sed.ms.gov.br
+6º ANO “A”;Ana Cristina Zotelli Siravegna;Ana.1475870@edutec.sed.ms.gov.br
+6º ANO “A”;Anna Beatriz Consolaro Rodrigues;Anna.1476019@edutec.sed.ms.gov.br
+6º ANO “A”;Cecilia Rezende Franca Mortari;Cecilia.1468507@edutec.sed.ms.gov.br
+6º ANO “A”;Daniel Da Silva Amorim;Daniel.1476435@edutec.sed.ms.gov.br
+6º ANO “A”;Davi Luiz Dos Santos Barbosa;Davi.1466377@edutec.sed.ms.gov.br
+6º ANO “A”;Davi Xeres Rodrigues;Davi.1476573@edutec.sed.ms.gov.br
+6º ANO “A”;Enzo Daniel Dos Anjos Zotelli;Enzo.1474550@edutec.sed.ms.gov.br
+6º ANO “A”;Gabriel Amorim Barbosa;Gabriel.1260798@edutec.sed.ms.gov.br
+6º ANO “A”;Gabriel Bernardo Jonas;Gabriel.1475112@edutec.sed.ms.gov.br
+6º ANO “A”;Isaque Camargo Da Silva;Isaque.1474016@edutec.sed.ms.gov.br
+6º ANO “A”;João José Barbosa Dos Santos;Joao.1469440@edutec.sed.ms.gov.br
+6º ANO “A”;João Lucas Berquó;Joao.1475674@edutec.sed.ms.gov.br
+6º ANO “A”;João Miguel Albano De Oliveira;Joao.1473964@edutec.sed.ms.gov.br
+6º ANO “A”;João Pedro Sandin Botelho;Joao.1472913@edutec.sed.ms.gov.br
+6º ANO “A”;Kauany Vitória Pereira Da Rocha;Kauany.1443966@edutec.sed.ms.gov.br
+6º ANO “A”;Kemilly Alarcon De Oliveira;Kemilly.1474668@edutec.sed.ms.gov.br
+6º ANO “A”;Klara Amorim Almeida;Klara.1472018@edutec.sed.ms.gov.br
+6º ANO “A”;Lavínia Ferreira Silva;Lavinia.1472891@edutec.sed.ms.gov.br
+6º ANO “A”;Luiz Henrique Ubiali Morais;Luiz.1474380@edutec.sed.ms.gov.br
+6º ANO “A”;Lívia Elizabeth Baldonado Nabhan;Livia.1469572@edutec.sed.ms.gov.br
+6º ANO “A”;Maria Brunelly Silva Santos;Maria.1475014@edutec.sed.ms.gov.br
+6º ANO “A”;Maria Clara Mota Do Nascimento;Maria.1478498@edutec.sed.ms.gov.br
+6º ANO “A”;Maria Luiza Corrêa Gomes;Maria.1470490@edutec.sed.ms.gov.br
+6º ANO “A”;Mariáh Chalub Amaroo De Oliveira;Mariah.1475049@edutec.sed.ms.gov.br
+6º ANO “A”;Maykon Flaynck Gonçalves De Amorim;Maykon.1469993@edutec.sed.ms.gov.br
+6º ANO “A”;Nataly Maria Da Cunha Fabrin;Nataly.1475842@edutec.sed.ms.gov.br
+6º ANO “A”;Nathan Dias De Melo;Nathan.1477343@edutec.sed.ms.gov.br
+6º ANO “A”;Pablo Arthur Antunes Ferreira;Pablo.1474726@edutec.sed.ms.gov.br
+6º ANO “A”;Pedro Henrique Silva De Sousa;Pedro.1473985@edutec.sed.ms.gov.br
+6º ANO “A”;Pedro Xavier Gobbi;Pedro.1477313@edutec.sed.ms.gov.br
+6º ANO “A”;Rafaela Bernardes Alves;Rafaela.1474363@edutec.sed.ms.gov.br
+6º ANO “A”;Raysa Santos Brum;Raysa.1469483@edutec.sed.ms.gov.br
+6º ANO “A”;Saymon Jhonas Beto Almeida Santos;Saymon.1477283@edutec.sed.ms.gov.br
+6º ANO “A”;Silvio Luiz Bispo Da Silva;Silvio.1475062@edutec.sed.ms.gov.br
+6º ANO “A”;Sophia Meneguessi De Araújo;Sophia.1479069@edutec.sed.ms.gov.br
+6º ANO “A”;Thalia Martins De Melo;Thalia.1476894@edutec.sed.ms.gov.br
+6º ANO “A”;Victor De Oliveira Benincá;Victor.1475473@edutec.sed.ms.gov.br
+6º ANO “A”;Vitor Barreto De Souza;Vitor.1469972@edutec.sed.ms.gov.br
+6º ANO “A”;Wender Alves De Amorim;Wender.1470266@edutec.sed.ms.gov.br
+6º ANO “A”;Weslley Miguel Rodrigues Do Nascimento;Weslley.1474531@edutec.sed.ms.gov.br
+6º ANO “A”;Yasmin Severino Prado;Yasmin.1474371@edutec.sed.ms.gov.br
+6º ANO “B”;Alice De Oliveira Costa;Alice.1473087@edutec.sed.ms.gov.br
+6º ANO “B”;Arthur Felipe Oliveira Venancio;Arthur.1477544@edutec.sed.ms.gov.br
+6º ANO “B”;Cecília Custódio Braga;Cecilia.1475133@edutec.sed.ms.gov.br
+6º ANO “B”;Enzo Gabriel Ferreira Domingos;Enzo.1474339@edutec.sed.ms.gov.br
+6º ANO “B”;Enzo Gabriel Santos Severo Souza;Enzo.1475670@edutec.sed.ms.gov.br
+6º ANO “B”;Guilherme Caceres Cavalheiro;Guilherme.1470014@edutec.sed.ms.gov.br
+6º ANO “B”;Guilherme Marques Pietro;Guilherme.1468717@edutec.sed.ms.gov.br
+6º ANO “B”;João Guilherme Braga Da Rocha;Joao.1475138@edutec.sed.ms.gov.br
+6º ANO “B”;João José Barbosa Dos Santos;Joao.1469440@edutec.sed.ms.gov.br
+6º ANO “B”;João Pedro Oliveira Silva;Joao.1475657@edutec.sed.ms.gov.br
+6º ANO “B”;Luan Martins Da Silva;Luan.1478949@edutec.sed.ms.gov.br
+6º ANO “B”;Luis Carlos Conceição Da Costa;Luis.1300125@edutec.sed.ms.gov.br
+6º ANO “B”;Luisa Ferreira De Moraes;Luisa.1475582@edutec.sed.ms.gov.br
+6º ANO “B”;Luiz Henrique Ubiali Morais;Luiz.1474380@edutec.sed.ms.gov.br
+6º ANO “B”;Lívia Elizabeth Baldonado Nabhan;Livia.1469572@edutec.sed.ms.gov.br
+6º ANO “B”;Maria Brunelly Silva Santos;Maria.1475014@edutec.sed.ms.gov.br
+6º ANO “B”;Maria Clara Mota Do Nascimento;Maria.1478498@edutec.sed.ms.gov.br
+6º ANO “B”;Maria Luiza Corrêa Gomes;Maria.1470490@edutec.sed.ms.gov.br
+6º ANO “B”;Mateus Alejandro Alves Rodrigues;Mateus.1477404@edutec.sed.ms.gov.br
+6º ANO “B”;Maykon Flaynck Gonçalves De Amorim;Maykon.1469993@edutec.sed.ms.gov.br
+6º ANO “B”;Mickaela Dias Amorim;Mickaela.1474491@edutec.sed.ms.gov.br
+6º ANO “B”;Nathan Dias De Melo;Nathan.1477343@edutec.sed.ms.gov.br
+6º ANO “B”;Olímpio Eduardo Oliveira De Amorim;Olimpio.1474377@edutec.sed.ms.gov.br
+6º ANO “B”;Pablo Arthur Antunes Ferreira;Pablo.1474726@edutec.sed.ms.gov.br
+6º ANO “B”;Paulo Ricardo Alves Da Silva;Paulo.1477971@edutec.sed.ms.gov.br
+6º ANO “B”;Pedro Xavier Gobbi;Pedro.1477313@edutec.sed.ms.gov.br
+6º ANO “B”;Raysa Santos Brum;Raysa.1469483@edutec.sed.ms.gov.br
+6º ANO “B”;Ricardo Moreira Meneguesso;Ricardo.1473034@edutec.sed.ms.gov.br
+6º ANO “B”;Saymon Jhonas Beto Almeida Santos;Saymon.1477283@edutec.sed.ms.gov.br
+6º ANO “B”;Sofhia Souza Martins;Sofhia.1475959@edutec.sed.ms.gov.br
+6º ANO “B”;Theilon Santos Amorim;Theilon.1475786@edutec.sed.ms.gov.br
+6º ANO “B”;Thiago Silva Cavalete;Thiago.1394694@edutec.sed.ms.gov.br
+6º ANO “B”;Victor De Oliveira Benincá;Victor.1475473@edutec.sed.ms.gov.br
+6º ANO “B”;Vitor Barreto De Souza;Vitor.1469972@edutec.sed.ms.gov.br
+6º ANO “B”;Vivian Barcelos De Oliveira;Vivian.1477982@edutec.sed.ms.gov.br
+6º ANO “B”;Wender Alves De Amorim;Wender.1470266@edutec.sed.ms.gov.br
+7º ANO A;Alice Zotelli Pereira;Alice.1422819@edutec.sed.ms.gov.br
+7º ANO A;Asafe Emanuel Botelho Costa;Asafe.1430664@edutec.sed.ms.gov.br
+7º ANO A;Carla Vitória Fronio Moreira;Carla.1426145@edutec.sed.ms.gov.br
+7º ANO A;Cauane Nogueira Fernandes;Cauane.1429986@edutec.sed.ms.gov.br
+7º ANO A;Daniel Camilo De Moura Dutra;Daniel.1426387@edutec.sed.ms.gov.br
+7º ANO A;Davi Barbosa De Amorim;Davi.1426323@edutec.sed.ms.gov.br
+7º ANO A;Diandra Rodrigues De Souza;Diandra.1427216@edutec.sed.ms.gov.br
+7º ANO A;Eliandra Correa Flexa;Eliandra.1441861@edutec.sed.ms.gov.br
+7º ANO A;Emanuely Ferreira Costa;Emanuely.1141220@edutec.sed.ms.gov.br
+7º ANO A;Guilherme De Oliveira Santana;Guilherme.1426357@edutec.sed.ms.gov.br
+7º ANO A;Heitor De Oliveira Araujo;Heitor.1426340@edutec.sed.ms.gov.br
+7º ANO A;Heloisa Da Silva Russo;Heloisa.1426078@edutec.sed.ms.gov.br
+7º ANO A;Isamara Oliveira De Souza;Isamara.1308980@edutec.sed.ms.gov.br
+7º ANO A;José Renato Camargo Cavalcante;Jose.1441293@edutec.sed.ms.gov.br
+7º ANO A;Kauã Vinicius Dos Anjos Zotelli;Kaua.1429334@edutec.sed.ms.gov.br
+7º ANO A;Kemilly Paola Palhares Talaveira;Kemilly.1155707@edutec.sed.ms.gov.br
+7º ANO A;Luís Davi De Sousa De Araújo;Luis.1438288@edutec.sed.ms.gov.br
+7º ANO A;Luísa De Paula Reis;Luisa.1427234@edutec.sed.ms.gov.br
+7º ANO A;Maria Sara Moreira Oliveira;Maria.1382836@edutec.sed.ms.gov.br
+7º ANO A;Miguel Moreira Costa Nogueira;Miguel.1426372@edutec.sed.ms.gov.br
+7º ANO A;Miriã Camilo De Aquino;Miria.1268862@edutec.sed.ms.gov.br
+7º ANO A;Nathalia Furtado Oliveira;Nathalia.1430443@edutec.sed.ms.gov.br
+7º ANO A;Vitor Gabriel Dos Anjos Queiroz;Vitor.1429331@edutec.sed.ms.gov.br
+7º ANO A;Ícaro Torres Ferreira;Icaro.1427272@edutec.sed.ms.gov.br
+7º ANO “B”;Ana Clara Pereira Do Nascimento;Ana.1298244@edutec.sed.ms.gov.br
+7º ANO “B”;Any Isabelly Donega Ortiz;Any.1429474@edutec.sed.ms.gov.br
+7º ANO “B”;Arthur Ferreira De Amorim;Arthur.1423406@edutec.sed.ms.gov.br
+7º ANO “B”;Cauane Nogueira Fernandes;Cauane.1429986@edutec.sed.ms.gov.br
+7º ANO “B”;Danyllo Antonio Almeida Borges;Danyllo.1428244@edutec.sed.ms.gov.br
+7º ANO “B”;Elsio Henrique Domingos Cardoso;Elsio.1473216@edutec.sed.ms.gov.br
+7º ANO “B”;Fabio Oliveira Da Silva;Fabio.1476936@edutec.sed.ms.gov.br
+7º ANO “B”;Fernando De Melo Lemes;Fernando.1272473@edutec.sed.ms.gov.br
+7º ANO “B”;Fidel Yecid Irusta Bernal;Fidel.1438565@edutec.sed.ms.gov.br
+7º ANO “B”;Francisco Orlando Garcia Nogueira;Francisco.1424660@edutec.sed.ms.gov.br
+7º ANO “B”;Gilmar Henrique Mendonça Conceição;Gilmar.1427915@edutec.sed.ms.gov.br
+7º ANO “B”;Guilherme Alves De Almeida;Guilherme.1428399@edutec.sed.ms.gov.br
+7º ANO “B”;Isaias Junior Oliveira De Souza;Isaias.1430669@edutec.sed.ms.gov.br
+7º ANO “B”;Isaque Mendes Crispim;Isaque.1436347@edutec.sed.ms.gov.br
+7º ANO “B”;Jodenir Rossino Neto;Jodenir.1421777@edutec.sed.ms.gov.br
+7º ANO “B”;Josué Camilo De Aquino;Josue.1143651@edutec.sed.ms.gov.br
+7º ANO “B”;João Vitor Francelina Nonato;Joao.1427194@edutec.sed.ms.gov.br
+7º ANO “B”;Julia De Souza Pascoal;Julia.1431660@edutec.sed.ms.gov.br
+7º ANO “B”;Kauan Alexandre Dos Santos Goulart;Kauan.1473200@edutec.sed.ms.gov.br
+7º ANO “B”;Kauan Da Silva Corrêa;Kauan.1429335@edutec.sed.ms.gov.br
+7º ANO “B”;Kayan Júnior Custódio Amorim;Kayan.1423564@edutec.sed.ms.gov.br
+7º ANO “B”;Larissa Gabrielly Nascimento Dos Santos;Larissa.1441388@edutec.sed.ms.gov.br
+7º ANO “B”;Luana Jazmin Ovelar Villalba;Luana.1428006@edutec.sed.ms.gov.br
+7º ANO “B”;Lucas Daniel Guimarães Ferreira;Lucas.1429357@edutec.sed.ms.gov.br
+7º ANO “B”;Luiz Henrique Horácio De Oliveira;Luiz.1479310@edutec.sed.ms.gov.br
+7º ANO “B”;Marcos Paulo Roda Rossino;Marcos.1126123@edutec.sed.ms.gov.br
+7º ANO “B”;Maria Joaquina Chaves Coelho;Maria.1432227@edutec.sed.ms.gov.br
+7º ANO “B”;Marikelly Da Silva Souza;Marikelly.1429329@edutec.sed.ms.gov.br
+7º ANO “B”;Marya Eduarda Trindade Rodrigues;Marya.1430681@edutec.sed.ms.gov.br
+7º ANO “B”;Matheus Arruda Ferreira;Matheus.1426933@edutec.sed.ms.gov.br
+7º ANO “B”;Mauricio Malaquias Oliveira;Mauricio.1429487@edutec.sed.ms.gov.br
+7º ANO “B”;Miguel Moreira Meneguesso;Miguel.1430451@edutec.sed.ms.gov.br
+7º ANO “B”;Nathállya Batista Da Silva;Nathallya.1426039@edutec.sed.ms.gov.br
+7º ANO “B”;Raissa Gabriella Duarte Da Silva;Raissa.1474779@edutec.sed.ms.gov.br
+7º ANO “B”;Vinicius Rodrigues De Melo;Vinicius.1429417@edutec.sed.ms.gov.br
+7º ANO “B”;Vitor Gabriel De Oliveira Amorim;Vitor.1140821@edutec.sed.ms.gov.br
+7º ANO “B”;Vitor Gabriel Souza Pereira;Vitor.1429333@edutec.sed.ms.gov.br
+7º ANO “B”;Wesley Pereira Da Silva;Wesley.1429330@edutec.sed.ms.gov.br
+8º ANO A;Alisson Alves Ferreira;Alisson.1383963@edutec.sed.ms.gov.br
+8º ANO A;Ana Clara Da Silva Silva;Ana.1370919@edutec.sed.ms.gov.br
+8º ANO A;Anna Luisa Dias Valerio;Anna.1376157@edutec.sed.ms.gov.br
+8º ANO A;Artur Roda Dos Santos;Artur.1381904@edutec.sed.ms.gov.br
+8º ANO A;Carlos Eduardo Rodrigues De Paula;Carlos.1381422@edutec.sed.ms.gov.br
+8º ANO A;Carlos Fernando Da Conceição Santos;Carlos.1475685@edutec.sed.ms.gov.br
+8º ANO A;Emanuelly Silva De Lima;Emanuelly.1370872@edutec.sed.ms.gov.br
+8º ANO A;Ester Garcia Amorim;Ester.1381693@edutec.sed.ms.gov.br
+8º ANO A;Heitor Rezende França Mortari;Heitor.1381299@edutec.sed.ms.gov.br
+8º ANO A;Izabelly Dos Reis Moreira;Izabelly.1383737@edutec.sed.ms.gov.br
+8º ANO A;Izadora Zotelli Siravegna;Izadora.1380487@edutec.sed.ms.gov.br
+8º ANO A;Jhonathan Alex Palhares De Sá;Jhonathan.1381613@edutec.sed.ms.gov.br
+8º ANO A;João Lucas Paulo Da Silva;Joao.1386032@edutec.sed.ms.gov.br
+8º ANO A;João Pedro Rodrigues Da Silva;Joao.1446322@edutec.sed.ms.gov.br
+8º ANO A;João Pedro Silva Brandão;Joao.1377450@edutec.sed.ms.gov.br
+8º ANO A;João Vitor Silva Santos;Joao.1381069@edutec.sed.ms.gov.br
+8º ANO A;Juan De Oliveira Cezario;Juan.1377423@edutec.sed.ms.gov.br
+8º ANO A;Juan Guilherme Da Silva De Oliveira;Juan.1377482@edutec.sed.ms.gov.br
+8º ANO A;Karolayne Alves De Amorim;Karolayne.1335299@edutec.sed.ms.gov.br
+8º ANO A;Ketellen De Oliveira Santana;Ketellen.1381434@edutec.sed.ms.gov.br
+8º ANO A;Kleberson Souza Ferreira;Kleberson.1352420@edutec.sed.ms.gov.br
+8º ANO A;Lavínia Barbosa Furtado;Lavinia.1384864@edutec.sed.ms.gov.br
+8º ANO A;Maria Antonia Lopes Barbosa;Maria.1376235@edutec.sed.ms.gov.br
+8º ANO A;Matheus Henrique Martins Da Silva;Matheus.1371894@edutec.sed.ms.gov.br
+8º ANO A;Matheus Roda Dos Santos;Matheus.1381911@edutec.sed.ms.gov.br
+8º ANO A;Oton Brites Oliveira;Oton.1385118@edutec.sed.ms.gov.br
+8º ANO A;Paloma Rayssa Castro Santana;Paloma.1376801@edutec.sed.ms.gov.br
+8º ANO A;Pedro Vinicius Berquó Soares;Pedro.1382974@edutec.sed.ms.gov.br
+8º ANO A;Wesley Xisto Antonio;Wesley.989027@edutec.sed.ms.gov.br
+8º ANO A;Yuri Sudalidio Rodrigues Amorim;Yuri.1381321@edutec.sed.ms.gov.br
+8º ANO B;Adriana Lopes Dias;Adriana.1382744@edutec.sed.ms.gov.br
+8º ANO B;Alliny Nunes Alves;Alliny.1332666@edutec.sed.ms.gov.br
+8º ANO B;Amanda Lima França;Amanda.1376959@edutec.sed.ms.gov.br
+8º ANO B;Andreia Lopes Dias;Andreia.1384888@edutec.sed.ms.gov.br
+8º ANO B;Arthur Berquó Rocha;Arthur.1386589@edutec.sed.ms.gov.br
+8º ANO B;Arthur Ferreira De Moraes;Arthur.1381426@edutec.sed.ms.gov.br
+8º ANO B;Eduardo Rodrigues Da Silva;Eduardo.1377557@edutec.sed.ms.gov.br
+8º ANO B;Eloísa Rodrigues De Araujo;Eloisa.1376837@edutec.sed.ms.gov.br
+8º ANO B;Endrel Fabiano Dos Santos;Endrel.1381067@edutec.sed.ms.gov.br
+8º ANO B;Ester Garcia Amorim;Ester.1381693@edutec.sed.ms.gov.br
+8º ANO B;Gilnara Xisto Antonio;Gilnara.1020093@edutec.sed.ms.gov.br
+8º ANO B;Heloisa Santana Amorim;Heloisa.1380094@edutec.sed.ms.gov.br
+8º ANO B;Inácio De Souza Amorim;Inacio.1382177@edutec.sed.ms.gov.br
+8º ANO B;Isabela Souza Da Costa;Isabela.1384667@edutec.sed.ms.gov.br
+8º ANO B;Izabelly Dos Reis Moreira;Izabelly.1383737@edutec.sed.ms.gov.br
+8º ANO B;João Vitor Silva Santos;Joao.1381069@edutec.sed.ms.gov.br
+8º ANO B;Juan Guilherme Da Silva De Oliveira;Juan.1377482@edutec.sed.ms.gov.br
+8º ANO B;Kaique Junior Da Silva Lisiero;Kaique.1125290@edutec.sed.ms.gov.br
+8º ANO B;Kaique Rafael Vilela Soares;Kaique.1382161@edutec.sed.ms.gov.br
+8º ANO B;Kamilla Iracet De Souza;Kamilla.1385904@edutec.sed.ms.gov.br
+8º ANO B;Kauã Jesus Morilio Dos Santos;Kaua.1381331@edutec.sed.ms.gov.br
+8º ANO B;Leonardo Ferreira Amorim;Leonardo.1346671@edutec.sed.ms.gov.br
+8º ANO B;Lorraine Alexandra De Castro Silva;Lorraine.1376849@edutec.sed.ms.gov.br
+8º ANO B;Luan Vinícius Aragão Da Cruz;Luan.1478064@edutec.sed.ms.gov.br
+8º ANO B;Murilo Ferreira Lima;Murilo.1381309@edutec.sed.ms.gov.br
+8º ANO B;Nauany Do Carmo De Souza;Nauany.1379246@edutec.sed.ms.gov.br
+8º ANO B;Oriana Cristina Lopes Correia;Oriana.1376183@edutec.sed.ms.gov.br
+8º ANO B;Paulo Henrique Dos Santos Tavares;Paulo.1348269@edutec.sed.ms.gov.br
+8º ANO B;Rafael Barbosa;Rafael.1441896@edutec.sed.ms.gov.br
+8º ANO B;Raiany Nils Delmondes;Raiany.1435177@edutec.sed.ms.gov.br
+8º ANO B;Rhianni Rosalem Furtado;Rhianni.1385297@edutec.sed.ms.gov.br
+8º ANO B;Sabrina Da Silva De Oliveira;Sabrina.1381064@edutec.sed.ms.gov.br
+8º ANO B;Silvan Henrique Gomes De Amorim;Silvan.1381625@edutec.sed.ms.gov.br
+8º ANO B;Tallyson Mota Do Nascimento;Tallyson.1442116@edutec.sed.ms.gov.br
+8º ANO B;Thalya Queirós Dos Santos;Thalya.1382949@edutec.sed.ms.gov.br
+8º ANO B;Victor Hugo Miranda Dos Santos;Victor.1385151@edutec.sed.ms.gov.br
+8º ANO B;Widryan De Souza Pascoal;Widryan.1393385@edutec.sed.ms.gov.br
+8º ANO B;Yasmin Almeida Polizel;Yasmin.1475784@edutec.sed.ms.gov.br
+9º ANO A;Bruno Braga Souza;Bruno.1299911@edutec.sed.ms.gov.br
+9º ANO A;Christian Dos Santos Silva;Christian.1306688@edutec.sed.ms.gov.br
+9º ANO A;Fernanda Sousa Cândido;Fernanda.1328158@edutec.sed.ms.gov.br
+9º ANO A;Gabrielly Nunes De Souza;Gabrielly.1336652@edutec.sed.ms.gov.br
+9º ANO A;Izabela Bruschi Da Mata;Izabela.1335270@edutec.sed.ms.gov.br
+9º ANO A;Izabella Santos Brum;Izabella.1332670@edutec.sed.ms.gov.br
+9º ANO A;João Henrique Ferreira De Sales;Joao.1321577@edutec.sed.ms.gov.br
+9º ANO A;Lavínia Lucas Cruz;Lavinia.1336410@edutec.sed.ms.gov.br
+9º ANO A;Lucas Eduardo De Paula Vieira;Lucas.1097199@edutec.sed.ms.gov.br
+9º ANO A;Luiz Henrique Da Silva Russo;Luiz.1328618@edutec.sed.ms.gov.br
+9º ANO A;Maisa Menezes Consolaro;Maisa.1336617@edutec.sed.ms.gov.br
+9º ANO A;Manuela Alves De Souza;Manuela.1335967@edutec.sed.ms.gov.br
+9º ANO A;Maraisa Furtado De Oliveira;Maraisa.1336320@edutec.sed.ms.gov.br
+9º ANO A;Maria Izabel Da Silva Oliveira;Maria.1341846@edutec.sed.ms.gov.br
+9º ANO A;Maria Luiza Medeiros Fath;Maria.1328685@edutec.sed.ms.gov.br
+9º ANO A;Nicole Dos Santos Silva;Nicole.1328184@edutec.sed.ms.gov.br
+9º ANO A;Nicolly Arantes Gonçalves;Nicolly.1318185@edutec.sed.ms.gov.br
+9º ANO A;Pedro Jesus Ferreira De Sousa;Pedro.1334707@edutec.sed.ms.gov.br
+9º ANO A;Ranna Souza Alho;Ranna.1394798@edutec.sed.ms.gov.br
+9º ANO A;Vinícius Da Silva Amorim;Vinicius.1347101@edutec.sed.ms.gov.br
+9º ANO A;Wilian Saff Santos;Wilian.931711@edutec.sed.ms.gov.br
+9º ANO A;Yasmin Barreto De Souza;Yasmin.1329326@edutec.sed.ms.gov.br
+9º ANO A;Ítalo Batista Dos Santos;Italo.1087344@edutec.sed.ms.gov.br
+9º ANO C;Brenda Vitória Alves Rodrigues;Brenda.1439365@edutec.sed.ms.gov.br
+9º ANO C;Christian Dos Santos Silva;Christian.1306688@edutec.sed.ms.gov.br
+9º ANO C;Dafynne Sandim Fernandes;Dafynne.1329266@edutec.sed.ms.gov.br
+9º ANO C;Eduarda Pires Bruno Coutinho;Eduarda.1336590@edutec.sed.ms.gov.br
+9º ANO C;Emilly Vitória Texeira De Menezes;Emilly.1439636@edutec.sed.ms.gov.br
+9º ANO C;Gabriel Silva Garay;Gabriel.974309@edutec.sed.ms.gov.br
+9º ANO C;Gabrielly Aparecida Alves Da Silva;Gabrielly.1336775@edutec.sed.ms.gov.br
+9º ANO C;Gabriely Da Silva Tenorio;Gabriely.1295312@edutec.sed.ms.gov.br
+9º ANO C;Igor Ferreira Domingos;Igor.1335203@edutec.sed.ms.gov.br
+9º ANO C;João Victor Ferreira Dos Santos;Joao.1329372@edutec.sed.ms.gov.br
+9º ANO C;Lavínia Lucas Cruz;Lavinia.1336410@edutec.sed.ms.gov.br
+9º ANO C;Leoryely Oliveira Da Silva;Leoryely.1332671@edutec.sed.ms.gov.br
+9º ANO C;Letícia Sandim Negrão;Leticia.1335897@edutec.sed.ms.gov.br
+9º ANO C;Lorena Frangueli Rodrigues De Souza;Lorena.1339233@edutec.sed.ms.gov.br
+9º ANO C;Luiz Otávio Furtado De Souza;Luiz.1328604@edutec.sed.ms.gov.br
+9º ANO C;Maisa Menezes Consolaro;Maisa.1336617@edutec.sed.ms.gov.br
+9º ANO C;Maria Izabel Da Silva Oliveira;Maria.1341846@edutec.sed.ms.gov.br
+9º ANO C;Mikelly Rayssa Carvalho Oliveira;Mikelly.1393404@edutec.sed.ms.gov.br
+9º ANO C;Mistica Lujan Ovelar Villalba;Mistica.1335228@edutec.sed.ms.gov.br
+9º ANO C;Pedro Furtado Da Silva;Pedro.1436542@edutec.sed.ms.gov.br
+9º ANO C;Pietro Antonio Narciso Dos Santos;Pietro.1328669@edutec.sed.ms.gov.br
+9º ANO C;Raiane Oliveira Furquim;Raiane.1328180@edutec.sed.ms.gov.br
+9º ANO C;Raquel Oliveira Da Silva;Raquel.1476944@edutec.sed.ms.gov.br
+9º ANO C;Raquele Da Conceição Dos Santos;Raquele.1336854@edutec.sed.ms.gov.br
+9º ANO C;Rodrigo Silva Garay;Rodrigo.974297@edutec.sed.ms.gov.br
+9º ANO C;Ryan Gabriel Santos Dias Vilhalba;Ryan.881537@edutec.sed.ms.gov.br
+9º ANO C;Samara Lopes Correia;Samara.1022955@edutec.sed.ms.gov.br
+9º ANO C;Sara Isabelly Corrêa Brandão;Sara.1335245@edutec.sed.ms.gov.br
+9º ANO C;Vitor Gabriel Vitalino Da Silva;Vitor.857574@edutec.sed.ms.gov.br
+9º ANO C;Welida Pereira Da Silva;Welida.926430@edutec.sed.ms.gov.br
+9º ANO C;Wilian Saff Santos;Wilian.931711@edutec.sed.ms.gov.br
+9º ANO C;Ítalo Batista Dos Santos;Italo.1087344@edutec.sed.ms.gov.br
