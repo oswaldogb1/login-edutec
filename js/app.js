@@ -1,8 +1,8 @@
 let DB = {};
 
-// URL direta para a página de login que você printou
-function loginUrl() {
-  return "https://accounts.google.com/signin";
+// URL base para login do Google
+function loginUrl(email) {
+  return `https://accounts.google.com/signin/v2/identifier?hl=pt-BR&email=${encodeURIComponent(email)}`;
 }
 
 // Elementos da Interface
@@ -99,6 +99,33 @@ async function copiarParaAreaDeTransferencia(texto) {
   }
 }
 
+// Função para iniciar sessão no Google
+function iniciarSessaoGoogle(email) {
+  // Abre a página de login com o email pré-preenchido
+  const url = loginUrl(email);
+  
+  // Tenta abrir em uma nova aba
+  const novaJanela = window.open(url, '_blank');
+  
+  // Se o navegador bloquear pop-up, avisa o usuário
+  if (!novaJanela || novaJanela.closed || typeof novaJanela.closed == 'undefined') {
+    alert('O navegador bloqueou a abertura da página. Por favor, permita pop-ups para este site ou clique no link manualmente:\n\n' + url);
+    
+    // Opção alternativa: criar um link clicável
+    const linkManual = document.createElement('a');
+    linkManual.href = url;
+    linkManual.target = '_blank';
+    linkManual.rel = 'noopener';
+    linkManual.textContent = 'Clique aqui para fazer login';
+    linkManual.style.display = 'block';
+    linkManual.style.marginTop = '10px';
+    linkManual.style.color = '#1a73e8';
+    
+    // Mostra o link para o usuário
+    alert('Você pode acessar: ' + url);
+  }
+}
+
 // Renderizar lista
 function renderizarLista() {
   const turma = serieSelect.value;
@@ -144,12 +171,10 @@ function renderizarLista() {
     });
 
     // Botão: Iniciar sessão
-    const btnEntrar = document.createElement("a");
-    btnEntrar.href = loginUrl();
-    btnEntrar.target = "_blank";
-    btnEntrar.rel = "noopener";
-    btnEntrar.textContent = "Iniciar sessão"; // Texto atualizado!
+    const btnEntrar = document.createElement("button"); // Mudamos de <a> para <button>
+    btnEntrar.textContent = "Iniciar sessão";
     btnEntrar.className = "btn-primary";
+    btnEntrar.addEventListener("click", () => iniciarSessaoGoogle(st.email));
 
     actions.appendChild(btnCopiar);
     actions.appendChild(btnEntrar);
