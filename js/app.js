@@ -1,7 +1,9 @@
-// db
 let DB = {};
 
-// gerar url login google com email preenchido
+// URL infalível para a tela limpa de login do Google
+function loginUrl() {
+  return "https://accounts.google.com/ServiceLogin";
+}
 function loginUrl(email) {
   const base = "https://accounts.google.com/signin/v2/identifier";
   const params = new URLSearchParams({
