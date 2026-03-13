@@ -4,14 +4,8 @@ let DB = {};
 function loginUrl() {
   return "https://accounts.google.com/ServiceLogin";
 }
-function loginUrl(email) {
-  const base = "https://accounts.google.com/signin/v2/identifier";
-  const params = new URLSearchParams({
-    continue: "https://mail.google.com",
-    service: "mail",
-    Email: email
-  });
-  return `${base}?${params.toString()}`;
+function loginUrl() {
+  return "https://accounts.google.com/AccountChooser/signinchooser?prompt=select_account";
 }
 
 // elementos
