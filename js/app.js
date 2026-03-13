@@ -1,34 +1,22 @@
 let DB = {};
 
-// Função para construir a URL do Google
+// Função com a URL corrigida do Google (AccountChooser)
 function loginUrl(email) {
-  const base = "https://accounts.google.com/signin/v2/identifier";
-  const params = new URLSearchParams({
-    hl: "pt-BR",
-    flowEntry: "ServiceLogin",
-    flowName: "GlifWebSignIn",
-    Email: email,
-    identifier: email,
-    login_hint: email
-  });
-  return base + "?" + params.toString();
+  // O parâmetro 'continue' redireciona o aluno para a conta Google após o login.
+  return `https://accounts.google.com/AccountChooser/signinchooser?Email=${encodeURIComponent(email)}&continue=https://myaccount.google.com/`;
 }
 
 // Elementos da Interface
 const serieSelect = document.getElementById("serie");
 const countPill = document.getElementById("countPill");
-const goBtn = document.getElementById("goBtn");
 const studentsView = document.getElementById("studentsView");
 const studentsPlaceholder = document.getElementById("studentsPlaceholder");
-const backBtn = document.getElementById("backBtn");
-const openAllBtn = document.getElementById("openAllBtn");
 const seriePill = document.getElementById("seriePill");
 const shownPill = document.getElementById("shownPill");
-const warnBox = document.getElementById("warnBox");
 const searchInput = document.getElementById("search");
 const list = document.getElementById("list");
 
-// 1. Carregar os dados do arquivo TXT
+// Carregar os dados do arquivo TXT
 async function carregarBancoDeDados() {
   try {
     const response = await fetch('data/banco_dados.txt');
@@ -38,20 +26,18 @@ async function carregarBancoDeDados() {
     configurarSelectTurmas();
   } catch (erro) {
     console.error("Falha ao carregar:", erro);
-    alert("Erro ao carregar banco_dados.txt. Certifique-se de que o aplicativo está rodando em um servidor web (online) e não apenas abrindo o arquivo HTML localmente.");
+    alert("Erro ao carregar banco_dados.txt. Verifique se o projeto está online.");
   }
 }
 
-// 2. Processar o TXT para o formato do sistema
+// Processar o TXT para o formato do sistema
 function processarTexto(texto) {
   const linhas = texto.split('\n');
   
   for (let linha of linhas) {
     linha = linha.trim();
-    // Ignora linhas vazias ou o cabeçalho
     if (!linha || linha.toLowerCase().startsWith('turma')) continue;
     
-    // O separador configurado é o ponto e vírgula
     const colunas = linha.split(';');
     if (colunas.length >= 3) {
       const turma = colunas[0].trim();
@@ -66,9 +52,9 @@ function processarTexto(texto) {
   }
 }
 
-// 3. Preencher a caixa de seleção de turmas
+// Preencher a caixa de seleção de turmas com opção padrão
 function configurarSelectTurmas() {
-  serieSelect.innerHTML = "";
+  serieSelect.innerHTML = '<option value="">-- Selecione a Turma --</option>';
   const turmas = Object.keys(DB).sort((a, b) => a.localeCompare(b, "pt-BR"));
   
   for (const t of turmas) {
@@ -77,7 +63,6 @@ function configurarSelectTurmas() {
     opt.textContent = t;
     serieSelect.appendChild(opt);
   }
-  atualizarContagem();
 }
 
 function obterEstudantesAtuais() {
@@ -85,15 +70,19 @@ function obterEstudantesAtuais() {
   return (DB[turmaSelecionada] || []).slice();
 }
 
-function atualizarContagem() {
-  const qtd = obterEstudantesAtuais().length;
-  countPill.textContent = qtd + (qtd === 1 ? " estudante" : " estudantes");
-}
-
+// Mostra os estudantes automaticamente
 function mostrarEstudantes() {
-  if (!serieSelect.value) return;
+  if (!serieSelect.value) {
+    esconderEstudantes();
+    return;
+  }
+  
   studentsPlaceholder.classList.add("hidden");
   studentsView.classList.remove("hidden");
+  
+  const qtd = obterEstudantesAtuais().length;
+  countPill.textContent = qtd + (qtd === 1 ? " estudante" : " estudantes");
+  
   renderizarLista();
   searchInput.focus();
 }
@@ -101,6 +90,7 @@ function mostrarEstudantes() {
 function esconderEstudantes() {
   studentsView.classList.add("hidden");
   studentsPlaceholder.classList.remove("hidden");
+  countPill.textContent = "0 estudantes";
   searchInput.value = "";
   list.innerHTML = "";
 }
@@ -161,12 +151,12 @@ function renderizarLista() {
     btnEntrar.className = "btn-primary";
 
     const btnCopiar = document.createElement("button");
-    btnCopiar.textContent = "Copiar E-mail";
+    btnCopiar.textContent = "Copiar";
     btnCopiar.className = "btn-secondary";
     btnCopiar.addEventListener("click", async () => {
       await copiarParaAreaDeTransferencia(st.email);
       btnCopiar.textContent = "Copiado!";
-      setTimeout(() => btnCopiar.textContent = "Copiar E-mail", 1500);
+      setTimeout(() => btnCopiar.textContent = "Copiar", 1500);
     });
 
     actions.appendChild(btnCopiar);
@@ -176,34 +166,11 @@ function renderizarLista() {
     row.appendChild(actions);
     list.appendChild(row);
   }
-
-  openAllBtn.dataset.filtered = JSON.stringify(filtrados.map(st => st.email));
 }
 
-// Eventos
-goBtn.addEventListener("click", mostrarEstudantes);
-backBtn.addEventListener("click", esconderEstudantes);
-
-serieSelect.addEventListener("change", () => {
-  atualizarContagem();
-  if (!studentsView.classList.contains("hidden")) renderizarLista();
-});
-
+// Escuta a mudança no select e já aciona a lista
+serieSelect.addEventListener("change", mostrarEstudantes);
 searchInput.addEventListener("input", renderizarLista);
 
-openAllBtn.addEventListener("click", () => {
-  const emails = JSON.parse(openAllBtn.dataset.filtered || "[]");
-  if (!emails.length) return;
-  
-  const MAX_ABAS = 15;
-  const limitados = emails.slice(0, MAX_ABAS);
-  for (const em of limitados) {
-    window.open(loginUrl(em), "_blank", "noopener");
-  }
-  if (emails.length > MAX_ABAS) {
-    alert("Foram abertas " + MAX_ABAS + " abas. Para evitar bloqueio do seu navegador, limitei a abertura. Use a busca para abrir o restante.");
-  }
-});
-
-// Inicializa o sistema puxando os dados do arquivo txt
+// Inicializa o sistema
 carregarBancoDeDados();
