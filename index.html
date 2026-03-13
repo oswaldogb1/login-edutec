@@ -28,20 +28,14 @@
 
         <div class="row info-row">
           <div class="pill" id="countPill">0 estudantes</div>
-          <div class="spacer"></div>
-          <button id="goBtn" class="btn-primary" title="Ir para a lista de estudantes">Ver Estudantes →</button>
         </div>
-        
-        <p class="footer-note">
-          Dica: Segure <span class="kbd">Ctrl</span> e clique no botão para abrir em uma nova guia.
-        </p>
       </section>
 
       <section class="card">
         <h2>2. Lista de Estudantes</h2>
 
         <div id="studentsPlaceholder" class="placeholder-text">
-          <p>Selecione uma turma ao lado e clique em <b>Ver Estudantes</b>.</p>
+          <p>Selecione uma turma ao lado para carregar a lista automaticamente.</p>
         </div>
 
         <div id="studentsView" class="hidden">
@@ -50,17 +44,12 @@
               <label for="search">Buscar estudante</label>
               <input id="search" placeholder="Digite o nome ou e-mail..." />
             </div>
-            <button id="backBtn" class="btn-secondary">← Voltar</button>
           </div>
 
           <div class="row info-row">
             <div class="pill highlight" id="seriePill"></div>
             <div class="pill" id="shownPill"></div>
-            <div class="spacer"></div>
-            <button id="openAllBtn" class="btn-outline" title="Abre a página de login para todos os filtrados">Abrir Todos</button>
           </div>
-
-          <div id="warnBox" class="warn hidden"></div>
 
           <div class="list" id="list"></div>
         </div>
