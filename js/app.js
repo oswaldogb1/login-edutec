@@ -10,7 +10,7 @@ const shownPill = document.getElementById("shownPill");
 const searchInput = document.getElementById("search");
 const list = document.getElementById("list");
 
-// Carregar os dados
+// Carregar os dados do arquivo TXT
 async function carregarBancoDeDados() {
   try {
     const response = await fetch('data/banco_dados.txt');
@@ -41,7 +41,7 @@ function processarTexto(texto) {
   }
 }
 
-// Configurar select
+// Configurar a caixa de seleção de turmas
 function configurarSelectTurmas() {
   serieSelect.innerHTML = '<option value="">-- Selecione a Turma --</option>';
   const turmas = Object.keys(DB).sort((a, b) => a.localeCompare(b, "pt-BR"));
@@ -58,7 +58,7 @@ function obterEstudantesAtuais() {
   return (DB[turmaSelecionada] || []).slice();
 }
 
-// Mostrar estudantes
+// Mostrar a lista de estudantes
 function mostrarEstudantes() {
   if (!serieSelect.value) {
     esconderEstudantes();
@@ -80,7 +80,7 @@ function esconderEstudantes() {
   list.innerHTML = "";
 }
 
-// Copiar para a área de transferência
+// Função nativa para copiar texto
 async function copiarParaAreaDeTransferencia(texto) {
   try {
     await navigator.clipboard.writeText(texto);
@@ -94,7 +94,7 @@ async function copiarParaAreaDeTransferencia(texto) {
   }
 }
 
-// Renderizar lista (Apenas botão Copiar)
+// Renderizar a lista na tela apenas com o botão Copiar
 function renderizarLista() {
   const turma = serieSelect.value;
   const estudantes = obterEstudantesAtuais();
@@ -128,17 +128,17 @@ function renderizarLista() {
     const actions = document.createElement("div");
     actions.className = "actions";
 
-    // Botão Único: Copiar E-mail
+    // Criação do único botão (Copiar E-mail)
     const btnCopiar = document.createElement("button");
     btnCopiar.textContent = "Copiar E-mail";
-    btnCopiar.className = "btn-primary"; // Mudei para primary para dar mais destaque
+    btnCopiar.className = "btn-primary"; // Botão principal e destacado
     btnCopiar.addEventListener("click", async () => {
       await copiarParaAreaDeTransferencia(st.email);
-      btnCopiar.textContent = "Copiado!";
-      btnCopiar.style.backgroundColor = "#2c3e35"; // Escurece o botão ao copiar para dar feedback visual
+      btnCopiar.textContent = "Copiado com sucesso!";
+      btnCopiar.style.backgroundColor = "#2c3e35"; 
       setTimeout(() => {
         btnCopiar.textContent = "Copiar E-mail";
-        btnCopiar.style.backgroundColor = ""; // Retorna à cor original
+        btnCopiar.style.backgroundColor = ""; 
       }, 1500);
     });
 
@@ -149,6 +149,9 @@ function renderizarLista() {
   }
 }
 
+// Eventos de mudança e digitação
 serieSelect.addEventListener("change", mostrarEstudantes);
 searchInput.addEventListener("input", renderizarLista);
+
+// Inicializa chamando o TXT
 carregarBancoDeDados();
