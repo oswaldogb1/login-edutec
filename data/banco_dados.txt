@@ -56,6 +56,8 @@ Turma;Nome;Email
 1º ANO B;Vitor Hugo Silveira Da Silva;Vitor.960232@edutec.sed.ms.gov.br
 1º ANO B;Vitor Matheus Narciso;Vitor.1302326@edutec.sed.ms.gov.br
 1º ANO B;Yasmim Bercó Dos Santos;Yasmim.1060177@edutec.sed.ms.gov.br
+1º ANO B;João Lucas Rodrigues De Souza;Joao.1190533@edutec.sed.ms.gov.br
+1º ANO B;Tauane Dos Santos Silva;Tauane.1241948@edutec.sed.ms.gov.br
 2º ANO “A”;Abner Moura Souza;Abner.627761@edutec.sed.ms.gov.br
 2º ANO “A”;Adriely Pereira Bartmeyer;Adriely.1245447@edutec.sed.ms.gov.br
 2º ANO “A”;Alison Caldeira Da Silva Pereira;Alison.1258670@edutec.sed.ms.gov.br
@@ -87,6 +89,7 @@ Turma;Nome;Email
 2º ANO “A”;Pyetra Donega De Souza;Pyetra.1156404@edutec.sed.ms.gov.br
 2º ANO “A”;Samuel Santana Lopes De Freitas;Samuel.1258049@edutec.sed.ms.gov.br
 2º ANO “A”;Victória Silva;Victoria.1408624@edutec.sed.ms.gov.br
+2º ANO “A”;Muriel Enrique Francisco Alves;Muriel.1435055@edutec.sed.ms.gov.br
 3º ANO “A”;Airan Amorim Passarelli;Airan.1220182@edutec.sed.ms.gov.br
 3º ANO “A”;Carla Aparecida Silva Oliveira;Carla.1223724@edutec.sed.ms.gov.br
 3º ANO “A”;Claudiane Dos Santos Brum;Claudiane.1179919@edutec.sed.ms.gov.br
@@ -103,6 +106,9 @@ Turma;Nome;Email
 3º ANO “A”;Stefany Guimarães Ferreira;Stefany.1226170@edutec.sed.ms.gov.br
 3º ANO “A”;Suelen Aparecida Soares;Suelen.1229031@edutec.sed.ms.gov.br
 3º ANO “A”;Vitor Soares Rodrigues;Vitor.1229048@edutec.sed.ms.gov.br
+3º ANO “A”;Eduarda Batista Ferreira;Eduarda.1331741@edutec.sed.ms.gov.br
+3º ANO “A”;Kaique Sobreira Barros;Kaique.875792@edutec.sed.ms.gov.br
+3º ANO “A”;Paulo Henrique Da Silva De Oliveira;Paulo.1221686@edutec.sed.ms.gov.br
 1º2º3º NOTURNO;Ana Beatriz Ferreira Bruno;Ana.1306200@edutec.sed.ms.gov.br
 1º2º3º NOTURNO;Breno De Andrade Ferreira;Breno.1300909@edutec.sed.ms.gov.br
 1º2º3º NOTURNO;Claudiane Dos Santos Brum;Claudiane.1179919@edutec.sed.ms.gov.br
@@ -122,6 +128,10 @@ Turma;Nome;Email
 1º2º3º NOTURNO;Wendel Souza Vieira;Wendel.1123987@edutec.sed.ms.gov.br
 1º2º3º NOTURNO;Yan Carlos Rocha De Oliveira;Yan.1229288@edutec.sed.ms.gov.br
 1º2º3º NOTURNO;Yasmim Oliveira Soares;Yasmim.1225035@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Luan Almeida Rocha;Luan.790238@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Lourenço Nascimento Da Silva;Lourenco.1403049@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;José Guilherme Da Silva;Jose.1469277@edutec.sed.ms.gov.br
+1º2º3º NOTURNO;Alison Caldeira Da Silva Pereira;Alison.1258670@edutec.sed.ms.gov.br
 6º ANO “A”;Afonso Henrique Oliviera De Paula;Afonso.1477135@edutec.sed.ms.gov.br
 6º ANO “A”;Alice De Oliveira Costa;Alice.1473087@edutec.sed.ms.gov.br
 6º ANO “A”;Ana Cristina Zotelli Siravegna;Ana.1475870@edutec.sed.ms.gov.br
@@ -201,6 +211,10 @@ Turma;Nome;Email
 6º ANO “B”;Vitor Barreto De Souza;Vitor.1469972@edutec.sed.ms.gov.br
 6º ANO “B”;Vivian Barcelos De Oliveira;Vivian.1477982@edutec.sed.ms.gov.br
 6º ANO “B”;Wender Alves De Amorim;Wender.1470266@edutec.sed.ms.gov.br
+6º ANO “B”;José Augusto Castro Menezes;Jose.1474823@edutec.sed.ms.gov.br
+6º ANO “B”;Gabriel Henrique Garcia Pereira;Gabriel.1480108@edutec.sed.ms.gov.br
+6º ANO “B”;Isaque Camargo Da Silva;Isaque.1474016@edutec.sed.ms.gov.br
+6º ANO “B”;Gabriel Bernardo Jonas;Gabriel.1475112@edutec.sed.ms.gov.br
 7º ANO A;Alice Zotelli Pereira;Alice.1422819@edutec.sed.ms.gov.br
 7º ANO A;Asafe Emanuel Botelho Costa;Asafe.1430664@edutec.sed.ms.gov.br
 7º ANO A;Carla Vitória Fronio Moreira;Carla.1426145@edutec.sed.ms.gov.br
@@ -225,6 +239,7 @@ Turma;Nome;Email
 7º ANO A;Nathalia Furtado Oliveira;Nathalia.1430443@edutec.sed.ms.gov.br
 7º ANO A;Vitor Gabriel Dos Anjos Queiroz;Vitor.1429331@edutec.sed.ms.gov.br
 7º ANO A;Ícaro Torres Ferreira;Icaro.1427272@edutec.sed.ms.gov.br
+7º ANO A;Anielly Laura Lins Soares;Anielly.1479935@edutec.sed.ms.gov.br
 7º ANO “B”;Ana Clara Pereira Do Nascimento;Ana.1298244@edutec.sed.ms.gov.br
 7º ANO “B”;Any Isabelly Donega Ortiz;Any.1429474@edutec.sed.ms.gov.br
 7º ANO “B”;Arthur Ferreira De Amorim;Arthur.1423406@edutec.sed.ms.gov.br
@@ -263,6 +278,7 @@ Turma;Nome;Email
 7º ANO “B”;Vitor Gabriel De Oliveira Amorim;Vitor.1140821@edutec.sed.ms.gov.br
 7º ANO “B”;Vitor Gabriel Souza Pereira;Vitor.1429333@edutec.sed.ms.gov.br
 7º ANO “B”;Wesley Pereira Da Silva;Wesley.1429330@edutec.sed.ms.gov.br
+7º ANO “B”;David Henrique Souza Maidana;David.1431756@edutec.sed.ms.gov.br
 8º ANO A;Alisson Alves Ferreira;Alisson.1383963@edutec.sed.ms.gov.br
 8º ANO A;Ana Clara Da Silva Silva;Ana.1370919@edutec.sed.ms.gov.br
 8º ANO A;Anna Luisa Dias Valerio;Anna.1376157@edutec.sed.ms.gov.br
@@ -331,6 +347,7 @@ Turma;Nome;Email
 8º ANO B;Victor Hugo Miranda Dos Santos;Victor.1385151@edutec.sed.ms.gov.br
 8º ANO B;Widryan De Souza Pascoal;Widryan.1393385@edutec.sed.ms.gov.br
 8º ANO B;Yasmin Almeida Polizel;Yasmin.1475784@edutec.sed.ms.gov.br
+8º ANO B;Taina Dos Santos Silva;Taina.1153247@edutec.sed.ms.gov.br
 9º ANO A;Bruno Braga Souza;Bruno.1299911@edutec.sed.ms.gov.br
 9º ANO A;Christian Dos Santos Silva;Christian.1306688@edutec.sed.ms.gov.br
 9º ANO A;Fernanda Sousa Cândido;Fernanda.1328158@edutec.sed.ms.gov.br
