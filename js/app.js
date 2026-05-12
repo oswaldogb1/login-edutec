@@ -161,6 +161,12 @@ searchInput.addEventListener("input", renderizarLista);
 
 // --- Lógica do Link Temporário ---
 
+// Elementos do Modal
+const passwordModal = document.getElementById("passwordModal");
+const senhaInput = document.getElementById("senhaInput");
+const btnConfirmarSenha = document.getElementById("btnConfirmarSenha");
+const btnCancelarSenha = document.getElementById("btnCancelarSenha");
+
 // Carregar e verificar se há link válido no Firebase
 async function carregarLinkCompartilhado() {
   try {
@@ -173,11 +179,9 @@ async function carregarLinkCompartilhado() {
       const trintaMinutos = 30 * 60 * 1000;
 
       if (tempoDecorrido > trintaMinutos) {
-        // Link expirou (mais de 30 minutos) - deletar do banco
         await fetch(FIREBASE_URL, { method: 'DELETE' });
         linkDisplayBox.innerHTML = "";
       } else {
-        // Mostrar link
         linkDisplayBox.innerHTML = `<a href="${data.url}" target="_blank">${data.url}</a>`;
       }
     } else {
@@ -188,14 +192,40 @@ async function carregarLinkCompartilhado() {
   }
 }
 
-// Compartilhar novo link (solicitando senha)
-async function compartilharLink() {
-  const senha = prompt("Digite a senha do professor para compartilhar um link:");
+// Abrir e fechar modal
+function abrirModalSenha() {
+  senhaInput.value = "";
+  passwordModal.classList.remove("hidden");
+  senhaInput.focus();
+}
+
+function fecharModalSenha() {
+  passwordModal.classList.add("hidden");
+}
+
+btnCancelarSenha.addEventListener("click", fecharModalSenha);
+
+// Permitir apertar "Enter" para confirmar a senha
+senhaInput.addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    btnConfirmarSenha.click();
+  }
+});
+
+// Ação de confirmar a senha e pedir o link
+btnConfirmarSenha.addEventListener("click", async () => {
+  const senha = senhaInput.value;
   if (senha !== "arnaldotec") {
-    if (senha !== null) alert("Senha incorreta!");
+    alert("Senha incorreta!");
+    senhaInput.value = "";
+    senhaInput.focus();
     return;
   }
+  
+  fecharModalSenha();
 
+  // Se a senha estiver correta, pede o link (esta janela continua sendo a padrão, pois não precisa ocultar texto)
   const urlInput = prompt("Cole ou digite o link (URL) que deseja compartilhar com os estudantes:");
   if (!urlInput) return;
 
@@ -207,7 +237,6 @@ async function compartilharLink() {
   };
 
   try {
-    // Usando método PUT para substituir sempre o registro antigo
     await fetch(FIREBASE_URL, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -219,10 +248,10 @@ async function compartilharLink() {
     alert("Ocorreu um erro ao salvar o link.");
     console.error(e);
   }
-}
+});
 
 if (btnCompartilharLink) {
-  btnCompartilharLink.addEventListener("click", compartilharLink);
+  btnCompartilharLink.addEventListener("click", abrirModalSenha);
 }
 
 // --- Inicialização ---
