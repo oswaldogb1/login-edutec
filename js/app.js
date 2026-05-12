@@ -1,6 +1,6 @@
 let DB = {};
 
-// Elementos da Interface
+// Elementos da Interface Principal
 const serieSelect = document.getElementById("serie");
 const countPill = document.getElementById("countPill");
 const studentsView = document.getElementById("studentsView");
@@ -10,12 +10,17 @@ const shownPill = document.getElementById("shownPill");
 const searchInput = document.getElementById("search");
 const list = document.getElementById("list");
 
-// Novos Elementos para Link Temporário
+// Elementos para Link Temporário e Modal
 const btnCompartilharLink = document.getElementById("btnCompartilharLink");
 const linkDisplayBox = document.getElementById("linkDisplayBox");
+const passwordModal = document.getElementById("passwordModal");
+const senhaInput = document.getElementById("senhaInput");
+const btnConfirmarSenha = document.getElementById("btnConfirmarSenha");
+const btnCancelarSenha = document.getElementById("btnCancelarSenha");
 const FIREBASE_URL = "https://edutec-arnaldo-default-rtdb.firebaseio.com/link_temporario.json";
 
-// Carregar os dados do arquivo TXT
+// --- BANCO DE DADOS E LISTAGEM ---
+
 async function carregarBancoDeDados() {
   try {
     const response = await fetch('data/banco_dados.txt');
@@ -29,7 +34,6 @@ async function carregarBancoDeDados() {
   }
 }
 
-// Processar o TXT
 function processarTexto(texto) {
   const linhas = texto.split('\n');
   for (let linha of linhas) {
@@ -46,7 +50,6 @@ function processarTexto(texto) {
   }
 }
 
-// Configurar a caixa de seleção de turmas
 function configurarSelectTurmas() {
   serieSelect.innerHTML = '<option value="">-- Selecione a Turma --</option>';
   const turmas = Object.keys(DB).sort((a, b) => a.localeCompare(b, "pt-BR"));
@@ -63,7 +66,6 @@ function obterEstudantesAtuais() {
   return (DB[turmaSelecionada] || []).slice();
 }
 
-// Mostrar a lista de estudantes
 function mostrarEstudantes() {
   if (!serieSelect.value) {
     esconderEstudantes();
@@ -85,7 +87,6 @@ function esconderEstudantes() {
   list.innerHTML = "";
 }
 
-// Função nativa para copiar texto
 async function copiarParaAreaDeTransferencia(texto) {
   try {
     await navigator.clipboard.writeText(texto);
@@ -99,7 +100,6 @@ async function copiarParaAreaDeTransferencia(texto) {
   }
 }
 
-// Renderizar a lista na tela apenas com o botão Copiar
 function renderizarLista() {
   const turma = serieSelect.value;
   const estudantes = obterEstudantesAtuais();
@@ -133,10 +133,9 @@ function renderizarLista() {
     const actions = document.createElement("div");
     actions.className = "actions";
 
-    // Criação do único botão (Copiar E-mail)
     const btnCopiar = document.createElement("button");
     btnCopiar.textContent = "Copiar E-mail";
-    btnCopiar.className = "btn-primary"; // Botão principal e destacado
+    btnCopiar.className = "btn-primary";
     btnCopiar.addEventListener("click", async () => {
       await copiarParaAreaDeTransferencia(st.email);
       btnCopiar.textContent = "Copiado com sucesso!";
@@ -159,15 +158,8 @@ serieSelect.addEventListener("change", mostrarEstudantes);
 searchInput.addEventListener("input", renderizarLista);
 
 
-// --- Lógica do Link Temporário ---
+// --- LÓGICA DO LINK TEMPORÁRIO E MODAL ---
 
-// Elementos do Modal
-const passwordModal = document.getElementById("passwordModal");
-const senhaInput = document.getElementById("senhaInput");
-const btnConfirmarSenha = document.getElementById("btnConfirmarSenha");
-const btnCancelarSenha = document.getElementById("btnCancelarSenha");
-
-// Carregar e verificar se há link válido no Firebase
 async function carregarLinkCompartilhado() {
   try {
     const res = await fetch(FIREBASE_URL);
@@ -192,7 +184,6 @@ async function carregarLinkCompartilhado() {
   }
 }
 
-// Abrir e fechar modal
 function abrirModalSenha() {
   senhaInput.value = "";
   passwordModal.classList.remove("hidden");
@@ -205,7 +196,6 @@ function fecharModalSenha() {
 
 btnCancelarSenha.addEventListener("click", fecharModalSenha);
 
-// Permitir apertar "Enter" para confirmar a senha
 senhaInput.addEventListener("keypress", function(event) {
   if (event.key === "Enter") {
     event.preventDefault();
@@ -213,7 +203,6 @@ senhaInput.addEventListener("keypress", function(event) {
   }
 });
 
-// Ação de confirmar a senha e pedir o link
 btnConfirmarSenha.addEventListener("click", async () => {
   const senha = senhaInput.value;
   if (senha !== "arnaldotec") {
@@ -225,7 +214,6 @@ btnConfirmarSenha.addEventListener("click", async () => {
   
   fecharModalSenha();
 
-  // Se a senha estiver correta, pede o link (esta janela continua sendo a padrão, pois não precisa ocultar texto)
   const urlInput = prompt("Cole ou digite o link (URL) que deseja compartilhar com os estudantes:");
   if (!urlInput) return;
 
@@ -254,7 +242,7 @@ if (btnCompartilharLink) {
   btnCompartilharLink.addEventListener("click", abrirModalSenha);
 }
 
-// --- Inicialização ---
+// --- INICIALIZAÇÃO GERAL ---
 
 carregarBancoDeDados();
 carregarLinkCompartilhado();
