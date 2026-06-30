@@ -11,8 +11,7 @@
     <div class="header-container">
       <img src="assets/logoescola.jpg" alt="Logo EE Dr. Arnaldo" class="logo">
       <div class="header-text">
-        <h1>Login Google (EduTec)</h1>
-        <p>Acesso rápido aos e-mails institucionais dos estudantes da <b>EE Dr. Arnaldo Estevão de Figueiredo</b>.</p>
+        <h1>EE. DR ARNALDO ESTEVÃO DE FIGUEIREDO</h1>
       </div>
     </div>
   </header>
@@ -30,10 +29,10 @@
           <div class="pill" id="countPill">0 estudantes</div>
         </div>
 
-        <div class="link-display-box" id="linkDisplayBox">
-          </div>
-        <div style="text-align: center; margin-top: 15px;">
-          <button id="btnCompartilharLink" class="btn-share">COMPARTILHAR LINK</button>
+        <div class="action-buttons">
+          <button id="btnAbrirLink" class="btn-dashed">ABRIR LINK DO PROFESSOR</button>
+          <div class="dotted-sep"></div>
+          <button id="btnAbrirJogos" class="btn-dashed">ABRIR PASTA DE JOGOS</button>
         </div>
       </section>
 
@@ -74,10 +73,22 @@
     </div>
   </main>
 
+  <footer class="admin-bar">
+    <div class="admin-container">
+      <div class="admin-actions">
+        <h3>ADMINISTRATIVO</h3>
+        <div class="admin-buttons">
+          <button id="btnCompartilharLink" class="btn-dashed">COMPARTILHAR LINK</button>
+          <button id="btnAdicionarJogo" class="btn-dashed">ADICIONAR JOGO</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
   <div id="passwordModal" class="modal hidden">
     <div class="modal-content">
       <h3 style="margin-top: 0; color: var(--primary);">Autenticação</h3>
-      <p style="font-size: 14px; color: var(--text-muted);">Digite a senha do professor para compartilhar um link:</p>
+      <p id="modalMsg" style="font-size: 14px; color: var(--text-muted);">Digite a senha do professor:</p>
       <input type="password" id="senhaInput" placeholder="********" />
       <div class="modal-actions">
         <button id="btnCancelarSenha" class="btn-cancel">Cancelar</button>

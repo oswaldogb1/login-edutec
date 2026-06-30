@@ -32,8 +32,10 @@ header {
   max-width: 980px;
   margin: 0 auto;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 20px;
+  text-align: center;
+  gap: 14px;
 }
 
 .logo {
@@ -168,6 +170,111 @@ button {
 .btn-share:hover {
   background-color: #e6b800;
 }
+
+/* BOTÕES DE AÇÃO (ESTILO SÓLIDO) */
+.btn-dashed {
+  width: 100%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 15px 22px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(74, 124, 89, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.btn-dashed:hover {
+  filter: brightness(1.06);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(74, 124, 89, 0.35);
+}
+.btn-dashed:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(74, 124, 89, 0.25);
+}
+.btn-dashed.indisponivel {
+  background: #c3cdc6;
+  color: #f3f6f4;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.btn-dashed.indisponivel:hover {
+  filter: none;
+  transform: none;
+  box-shadow: none;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 20px;
+}
+.dotted-sep {
+  border-top: 3px dotted var(--border);
+  width: 60%;
+  margin: 0 auto;
+}
+
+/* BARRA ADMINISTRATIVA (RODAPÉ) */
+.admin-bar {
+  background: var(--card-bg);
+  border-top: 2px solid var(--primary);
+  margin-top: 24px;
+  padding: 24px 16px;
+}
+.admin-container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+.admin-actions { text-align: center; width: 100%; }
+.admin-actions h3 {
+  margin: 0 0 14px;
+  color: var(--text-main);
+  letter-spacing: 1px;
+}
+.admin-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.admin-buttons .btn-dashed { width: auto; min-width: 200px; }
+
+/* CARDS DE JOGOS */
+.jogos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.jogo-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fafafa;
+}
+.jogo-card:hover { border-color: var(--primary); }
+.jogo-nome { font-weight: 600; font-size: 16px; word-break: break-word; }
+.jogo-acoes { display: flex; gap: 8px; align-items: center; }
+.jogo-acoes .btn-primary { flex: 1; }
+.btn-remover {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+}
+.btn-remover:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
 
 /* MODAL DE SENHA */
 .modal {

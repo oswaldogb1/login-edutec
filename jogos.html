@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pasta de Jogos - EE Dr. Arnaldo</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <img src="assets/logoescola.jpg" alt="Logo EE Dr. Arnaldo" class="logo">
+      <div class="header-text">
+        <h1>Pasta de Jogos Educativos</h1>
+        <p>Jogos compartilhados pelo professor da <b>EE Dr. Arnaldo Estevão de Figueiredo</b>.</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div style="margin-bottom: 16px;">
+      <a href="index.html" class="btn-dashed" style="text-decoration: none; display: inline-block;">&larr; VOLTAR</a>
+    </div>
+
+    <section class="card">
+      <h2>Jogos disponíveis</h2>
+
+      <div id="jogosPlaceholder" class="placeholder-text">
+        <p>Carregando jogos...</p>
+      </div>
+
+      <div class="jogos-grid" id="jogosGrid"></div>
+    </section>
+  </main>
+
+  <div id="passwordModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 style="margin-top: 0; color: var(--primary);">Autenticação</h3>
+      <p id="modalMsg" style="font-size: 14px; color: var(--text-muted);">Digite a senha de administrador:</p>
+      <input type="password" id="senhaInput" placeholder="********" />
+      <div class="modal-actions">
+        <button id="btnCancelarSenha" class="btn-cancel">Cancelar</button>
+        <button id="btnConfirmarSenha" class="btn-primary">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/jogos.js"></script>
+</body>
+</html>

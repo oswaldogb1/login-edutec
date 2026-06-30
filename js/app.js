@@ -10,14 +10,23 @@ const shownPill = document.getElementById("shownPill");
 const searchInput = document.getElementById("search");
 const list = document.getElementById("list");
 
-// Elementos para Link Temporário e Modal
+// Botões de ação dos estudantes
+const btnAbrirLink = document.getElementById("btnAbrirLink");
+const btnAbrirJogos = document.getElementById("btnAbrirJogos");
+
+// Elementos para Link Temporário, Jogos e Modal
 const btnCompartilharLink = document.getElementById("btnCompartilharLink");
-const linkDisplayBox = document.getElementById("linkDisplayBox");
+const btnAdicionarJogo = document.getElementById("btnAdicionarJogo");
 const passwordModal = document.getElementById("passwordModal");
+const modalMsg = document.getElementById("modalMsg");
 const senhaInput = document.getElementById("senhaInput");
 const btnConfirmarSenha = document.getElementById("btnConfirmarSenha");
 const btnCancelarSenha = document.getElementById("btnCancelarSenha");
-const FIREBASE_URL = "https://edutec-arnaldo-default-rtdb.firebaseio.com/link_temporario.json";
+
+const SENHA_ADMIN = "arnaldotec";
+const FIREBASE_BASE = "https://edutec-arnaldo-default-rtdb.firebaseio.com";
+const FIREBASE_URL = FIREBASE_BASE + "/link_temporario.json";
+const JOGOS_URL = FIREBASE_BASE + "/jogos.json";
 
 // --- BANCO DE DADOS E LISTAGEM ---
 
@@ -158,13 +167,16 @@ serieSelect.addEventListener("change", mostrarEstudantes);
 searchInput.addEventListener("input", renderizarLista);
 
 
-// --- LÓGICA DO LINK TEMPORÁRIO E MODAL ---
+// --- LÓGICA DO LINK TEMPORÁRIO ---
+
+// Guarda a URL ativa compartilhada pelo professor (ou null se não houver).
+let linkAtivo = null;
 
 async function carregarLinkCompartilhado() {
   try {
     const res = await fetch(FIREBASE_URL);
     const data = await res.json();
-    
+
     if (data && data.url && data.timestamp) {
       const agora = new Date().getTime();
       const tempoDecorrido = agora - data.timestamp;
@@ -172,19 +184,44 @@ async function carregarLinkCompartilhado() {
 
       if (tempoDecorrido > trintaMinutos) {
         await fetch(FIREBASE_URL, { method: 'DELETE' });
-        linkDisplayBox.innerHTML = "";
+        linkAtivo = null;
       } else {
-        linkDisplayBox.innerHTML = `<a href="${data.url}" target="_blank">${data.url}</a>`;
+        linkAtivo = data.url;
       }
     } else {
-      linkDisplayBox.innerHTML = "";
+      linkAtivo = null;
     }
   } catch (e) {
     console.error("Erro ao carregar o link compartilhado.", e);
   }
+  atualizarBotaoLink();
 }
 
-function abrirModalSenha() {
+function atualizarBotaoLink() {
+  btnAbrirLink.classList.toggle("indisponivel", !linkAtivo);
+}
+
+btnAbrirLink.addEventListener("click", () => {
+  if (linkAtivo) {
+    window.open(linkAtivo, "_blank");
+  } else {
+    alert("Nenhum link foi compartilhado pelo professor no momento.");
+  }
+});
+
+btnAbrirJogos.addEventListener("click", () => {
+  window.location.href = "jogos.html";
+});
+
+
+// --- LÓGICA DO MODAL DE SENHA (ADMINISTRATIVO) ---
+
+// Ação pendente, executada após a senha correta ser confirmada.
+let acaoPendente = null;
+
+function abrirModalSenha(mensagem, acao) {
+  modalMsg.textContent = mensagem;
+  acaoPendente = acao;
   senhaInput.value = "";
   passwordModal.classList.remove("hidden");
   senhaInput.focus();
@@ -192,11 +229,12 @@ function abrirModalSenha() {
 
 function fecharModalSenha() {
   passwordModal.classList.add("hidden");
+  acaoPendente = null;
 }
 
 btnCancelarSenha.addEventListener("click", fecharModalSenha);
 
-senhaInput.addEventListener("keypress", function(event) {
+senhaInput.addEventListener("keypress", function (event) {
   if (event.key === "Enter") {
     event.preventDefault();
     btnConfirmarSenha.click();
@@ -204,30 +242,31 @@ senhaInput.addEventListener("keypress", function(event) {
 });
 
 btnConfirmarSenha.addEventListener("click", async () => {
-  const senha = senhaInput.value;
-  if (senha !== "arnaldotec") {
+  if (senhaInput.value !== SENHA_ADMIN) {
     alert("Senha incorreta!");
     senhaInput.value = "";
     senhaInput.focus();
     return;
   }
-  
+  const acao = acaoPendente;
   fecharModalSenha();
+  if (acao) await acao();
+});
 
+
+// --- AÇÕES ADMINISTRATIVAS ---
+
+async function compartilharLink() {
   const urlInput = prompt("Cole ou digite o link (URL) que deseja compartilhar com os estudantes:");
   if (!urlInput) return;
 
-  const urlValida = urlInput.startsWith('http') ? urlInput : 'https://' + urlInput;
-  
-  const linkData = {
-    url: urlValida,
-    timestamp: new Date().getTime()
-  };
+  const urlValida = urlInput.startsWith("http") ? urlInput : "https://" + urlInput;
+  const linkData = { url: urlValida, timestamp: new Date().getTime() };
 
   try {
     await fetch(FIREBASE_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(linkData)
     });
     alert("Link compartilhado! Ele ficará disponível por 30 minutos.");
@@ -236,11 +275,47 @@ btnConfirmarSenha.addEventListener("click", async () => {
     alert("Ocorreu um erro ao salvar o link.");
     console.error(e);
   }
-});
-
-if (btnCompartilharLink) {
-  btnCompartilharLink.addEventListener("click", abrirModalSenha);
 }
+
+async function adicionarJogo() {
+  const nome = prompt("Digite o NOME do jogo:");
+  if (!nome || !nome.trim()) return;
+
+  const urlInput = prompt(
+    "Cole o LINK do jogo:\n\n" +
+    "• Jogo dentro do site (recomendado): jogos/nome-do-jogo/index.html\n" +
+    "• Jogo externo (itch.io, etc.): cole o endereço completo começando com https://"
+  );
+  if (!urlInput || !urlInput.trim()) return;
+
+  const valor = urlInput.trim();
+  // Começa com http(s) -> link externo, usado como está.
+  // Caso contrário -> caminho relativo de um jogo hospedado dentro do próprio site.
+  const urlValida = /^https?:\/\//i.test(valor) ? valor : valor.replace(/^\/+/, "");
+  const jogoData = { nome: nome.trim(), url: urlValida, timestamp: new Date().getTime() };
+
+  try {
+    // POST gera uma chave automática no Firebase, preservando os jogos já existentes.
+    await fetch(JOGOS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(jogoData)
+    });
+    alert('Jogo "' + jogoData.nome + '" adicionado! Já está disponível na Pasta de Jogos.');
+  } catch (e) {
+    alert("Ocorreu um erro ao adicionar o jogo.");
+    console.error(e);
+  }
+}
+
+btnCompartilharLink.addEventListener("click", () =>
+  abrirModalSenha("Digite a senha de administrador para compartilhar um link:", compartilharLink)
+);
+
+btnAdicionarJogo.addEventListener("click", () =>
+  abrirModalSenha("Digite a senha de administrador para adicionar um jogo:", adicionarJogo)
+);
+
 
 // --- INICIALIZAÇÃO GERAL ---
 
