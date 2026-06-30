@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1026" />
+  <meta name="description" content="Ginástica Quiz Pro — jogo educativo sobre ginástica artística, rítmica, acrobática e de trampolim." />
+  <title>🏅 Ginástica Quiz Pro</title>
+  <link rel="preconnect" href="https://upload.wikimedia.org" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏅</text></svg>" />
+</head>
+<body>
+  <div class="cenario" aria-hidden="true"></div>
+  <main id="app" class="app">
+
+    <!-- ============== TELA: MENU ============== -->
+    <section id="tela-menu" class="tela tela--ativa" aria-label="Menu principal">
+      <header class="menu-hero">
+        <span class="hero-anel" aria-hidden="true">🥇</span>
+        <h1 class="titulo-jogo">Ginástica<br><span>Quiz Pro</span></h1>
+        <p class="subtitulo">Artística · Rítmica · Acrobática · Trampolim</p>
+      </header>
+
+      <div class="campo-nome">
+        <input id="input-nome" type="text" maxlength="16" placeholder="✏️ Seu nome (para o ranking)" autocomplete="off" />
+      </div>
+
+      <div class="modos" role="list">
+        <button class="cartao-modo m-treino" data-modo="treino" role="listitem">
+          <span class="cartao-icone">📚</span>
+          <span class="cartao-corpo">
+            <span class="cartao-titulo">Treino</span>
+            <span class="cartao-desc">20 perguntas · ajudas livres · aprende com explicações</span>
+          </span>
+          <span class="cartao-tag">Aprender</span>
+        </button>
+        <button class="cartao-modo m-campeonato" data-modo="campeonato" role="listitem">
+          <span class="cartao-icone">🔥</span>
+          <span class="cartao-corpo">
+            <span class="cartao-titulo">Campeonato</span>
+            <span class="cartao-desc">30 de 60 · Chama Olímpica · Aposta de Confiança · 3 ajudas</span>
+          </span>
+          <span class="cartao-tag">Principal</span>
+        </button>
+        <button class="cartao-modo m-mestre" data-modo="mestre" role="listitem">
+          <span class="cartao-icone">🏆</span>
+          <span class="cartao-corpo">
+            <span class="cartao-titulo">Desafio do Mestre</span>
+            <span class="cartao-desc">15 perguntas difíceis · sem ajudas · aposta sempre ativa</span>
+          </span>
+          <span class="cartao-tag">Difícil</span>
+        </button>
+      </div>
+
+      <div class="menu-opcoes">
+        <label class="opcao-toggle"><input type="checkbox" id="opt-vidas" checked /> Sistema de vidas (3 ❤️)</label>
+        <label class="opcao-toggle"><input type="checkbox" id="opt-som" checked /> Som e música</label>
+        <label class="opcao-toggle"><input type="checkbox" id="opt-daltonico" /> Modo daltônico (alto contraste)</label>
+      </div>
+
+      <div class="menu-rodape">
+        <button class="btn-secundario" id="btn-ranking-menu">🏆 Ranking</button>
+        <button class="btn-secundario" id="btn-medalhas">🎖️ Medalhas</button>
+        <button class="btn-secundario" id="btn-professor">👩‍🏫 Professor</button>
+      </div>
+      <p class="dica-teclado">⌨️ No jogo: teclas <b>1 2 3 4</b> escolhem · <b>Enter</b> confirma/avança</p>
+    </section>
+
+    <!-- ============== TELA: JOGO ============== -->
+    <section id="tela-jogo" class="tela" aria-label="Jogo" hidden>
+      <header class="hud">
+        <div class="hud-esq">
+          <span class="hud-pontos" id="hud-pontos">⭐ 0</span>
+          <span class="hud-vidas" id="hud-vidas">❤️❤️❤️</span>
+        </div>
+        <div class="hud-dir">
+          <span class="hud-prog" id="hud-progresso">0/0</span>
+        </div>
+      </header>
+
+      <!-- Chama Olímpica -->
+      <div class="chama" id="chama-wrap" aria-label="Chama Olímpica">
+        <span class="chama-tocha" id="chama-tocha">🔥</span>
+        <div class="chama-barra"><div class="chama-fill" id="chama-fill"></div></div>
+        <span class="chama-mult" id="chama-mult">x1</span>
+      </div>
+
+      <div class="painel-banner" id="painel-banner" hidden></div>
+
+      <article class="cartao-pergunta">
+        <figure class="pergunta-figura">
+          <img id="pergunta-img" alt="" decoding="async" />
+          <span class="pergunta-emoji" id="pergunta-emoji" hidden>🤸</span>
+          <span class="badge-categoria" id="badge-categoria">Aparelho</span>
+          <span class="badge-dificuldade" id="badge-dificuldade">★☆☆</span>
+        </figure>
+        <p class="pergunta-texto" id="pergunta-texto" aria-live="polite">Carregando…</p>
+      </article>
+
+      <div class="opcoes-grid" id="opcoes-grid" role="group" aria-label="Opções"></div>
+
+      <!-- Barra de aposta de confiança -->
+      <div class="aposta-bar" id="aposta-bar" hidden>
+        <p class="aposta-titulo">Qual a sua confiança?</p>
+        <div class="aposta-botoes">
+          <button class="btn-aposta seguro" id="btn-seguro">🤔 No Chute <small>(seguro · x1)</small></button>
+          <button class="btn-aposta alto" id="btn-alto">🔥 Tô Seguro! <small>(aposta · x2 ou perde)</small></button>
+        </div>
+      </div>
+
+      <!-- Ajudas -->
+      <div class="ajudas" id="ajudas" role="group" aria-label="Ajudas">
+        <button class="btn-ajuda" id="btn-5050" data-ajuda="cincoCinco">✂️ 50:50 <b id="qtd-5050"></b></button>
+        <button class="btn-ajuda" id="btn-dica" data-ajuda="dica">💡 Dica <b id="qtd-dica"></b></button>
+        <button class="btn-ajuda" id="btn-pular" data-ajuda="pular">⏭️ Pular <b id="qtd-pular"></b></button>
+      </div>
+      <p class="dica-texto" id="dica-texto" hidden></p>
+
+      <div class="feedback-area" id="feedback-area" aria-live="assertive" hidden></div>
+
+      <footer class="rodape-jogo">
+        <button class="btn-mini" id="btn-pausa">⏸️ Pausa</button>
+        <button class="btn-mini" id="btn-reiniciar">↺ Reiniciar</button>
+        <button class="btn-mini" id="btn-sair">🏠 Sair</button>
+      </footer>
+    </section>
+
+    <section id="tela-resultado" class="tela" aria-label="Resultado" hidden></section>
+    <section id="tela-ranking" class="tela" aria-label="Ranking" hidden></section>
+    <section id="tela-medalhas" class="tela" aria-label="Medalhas" hidden></section>
+    <section id="tela-professor" class="tela" aria-label="Modo professor" hidden></section>
+
+    <div id="overlay-pausa" class="overlay" hidden>
+      <div class="overlay-caixa">
+        <h2>⏸️ Pausado</h2>
+        <button class="btn-primario" id="btn-continuar">▶️ Continuar</button>
+        <button class="btn-secundario" id="btn-pausa-sair">🏠 Sair para o menu</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="perguntas.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
