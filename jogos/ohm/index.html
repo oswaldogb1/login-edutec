@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratório de Ohm</title>
+<style>
+/* ===========================================================
+   VARIÁVEIS DE TEMA — painel industrial / laboratório
+   =========================================================== */
+:root{
+  --bg:#070b14;
+  --bg-grid:#0a1120;
+  --panel:#0d1521;
+  --panel2:#101b2c;
+  --border:#1e2c44;
+  --text:#cfe3ff;
+  --text-dim:#7f93b3;
+  --neon-cyan:#00eaff;
+  --neon-pink:#ff2ec4;
+  --neon-green:#00ffa6;
+  --neon-amber:#ffd23f;
+  --neon-red:#ff3b3b;
+  --font-mono:'Consolas','Courier New',monospace;
+  --font-ui:'Segoe UI',system-ui,Arial,sans-serif;
+}
+
+*{ box-sizing:border-box; }
+
+html,body{
+  margin:0; padding:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-ui);
+  min-height:100vh;
+}
+
+body{
+  background-image:
+    linear-gradient(rgba(0,234,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,234,255,0.04) 1px, transparent 1px);
+  background-size:28px 28px;
+  background-attachment:fixed;
+  padding-bottom:60px;
+}
+
+/* ===========================================================
+   CABEÇALHO
+   =========================================================== */
+header{
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:14px;
+  padding:18px 28px;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border-bottom:2px solid var(--border);
+  box-shadow:0 4px 24px rgba(0,234,255,0.08);
+  position:sticky; top:0; z-index:50;
+}
+
+header h1{
+  margin:0;
+  font-size:1.4rem;
+  letter-spacing:2px;
+  color:var(--neon-pink);
+  text-shadow:0 0 8px rgba(255,46,196,0.6), 0 0 20px rgba(255,46,196,0.3);
+}
+
+.progress-dots{ display:flex; gap:10px; align-items:center; }
+.dot{
+  width:34px; height:34px; border-radius:50%;
+  border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-weight:bold;
+  color:var(--text-dim);
+  background:var(--panel);
+  transition:.3s;
+}
+.dot.active{ border-color:var(--neon-cyan); color:var(--neon-cyan); box-shadow:0 0 10px var(--neon-cyan); }
+.dot.done{ border-color:var(--neon-green); color:var(--neon-green); background:rgba(0,255,166,0.08); }
+
+#restart-btn{
+  background:none; border:1px solid var(--border); color:var(--text-dim);
+  font-family:var(--font-mono); padding:8px 14px; border-radius:6px; cursor:pointer;
+  transition:.2s;
+}
+#restart-btn:hover{ border-color:var(--neon-red); color:var(--neon-red); }
+
+/* ===========================================================
+   LAYOUT GERAL DAS FASES
+   =========================================================== */
+main{ max-width:1100px; margin:0 auto; padding:28px 20px; }
+
+.phase{
+  position:relative;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  margin-bottom:34px;
+  padding:24px;
+  transition:opacity .4s, filter .4s;
+  overflow:hidden;
+}
+
+.phase.locked{ opacity:.32; filter:grayscale(0.6); pointer-events:none; }
+.phase.locked .lock-overlay{ display:flex; }
+.phase:not(.locked) .lock-overlay{ display:none; }
+
+.lock-overlay{
+  position:absolute; inset:0; z-index:5;
+  align-items:center; justify-content:center;
+  background:rgba(5,8,14,0.55);
+  font-family:var(--font-mono); font-size:1.1rem; color:var(--text-dim);
+  letter-spacing:1px;
+}
+
+.phase.done .phase-header::after{
+  content:'✔ FASE CONCLUÍDA';
+  font-family:var(--font-mono); font-size:.75rem;
+  color:var(--neon-green);
+  border:1px solid var(--neon-green);
+  padding:4px 10px; border-radius:20px;
+  box-shadow:0 0 8px rgba(0,255,166,0.4);
+}
+
+.phase-header{
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:10px;
+  margin-bottom:18px;
+  border-bottom:1px dashed var(--border);
+  padding-bottom:14px;
+}
+
+.phase-header h2{
+  margin:0 0 4px; color:var(--neon-cyan);
+  text-shadow:0 0 6px rgba(0,234,255,0.5);
+  font-size:1.25rem;
+}
+.phase-sub{ margin:0; color:var(--text-dim); font-size:.9rem; }
+
+.lab-grid{
+  display:grid; grid-template-columns:1.1fr 1fr; gap:24px;
+}
+@media (max-width:760px){ .lab-grid{ grid-template-columns:1fr; } }
+
+.circuit-panel, .control-panel{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:18px;
+}
+
+/* ===========================================================
+   ELEMENTOS COMUNS — readouts, botões, sliders
+   =========================================================== */
+.readout-grid{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+.readout{
+  flex:1; min-width:90px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px;
+  text-align:center;
+  transition:.3s;
+}
+.readout.unknown{
+  border-color:var(--neon-amber);
+  box-shadow:0 0 12px rgba(255,210,63,0.35);
+  animation:pulse-unknown 1.4s infinite;
+}
+@keyframes pulse-unknown{
+  0%,100%{ box-shadow:0 0 8px rgba(255,210,63,0.25); }
+  50%{ box-shadow:0 0 18px rgba(255,210,63,0.55); }
+}
+.readout .label{ display:block; font-size:.7rem; color:var(--text-dim); letter-spacing:.5px; margin-bottom:4px; }
+.readout .value{ font-family:var(--font-mono); font-size:1.5rem; color:var(--neon-cyan); }
+.readout.unknown .value{ color:var(--neon-amber); }
+.readout .unit{ font-size:.75rem; color:var(--text-dim); margin-left:2px; }
+
+.answer-row{ display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+.answer-row label{ font-size:.85rem; color:var(--text-dim); }
+.answer-row input[type=number]{
+  background:var(--panel); border:1px solid var(--border); color:var(--text);
+  font-family:var(--font-mono); font-size:1.1rem; padding:10px; border-radius:6px;
+  outline:none; transition:.2s;
+}
+.answer-row input[type=number]:focus{ border-color:var(--neon-cyan); box-shadow:0 0 10px rgba(0,234,255,0.4); }
+.answer-row input.shake{ animation:shake .4s; border-color:var(--neon-red); }
+@keyframes shake{
+  0%,100%{ transform:translateX(0); }
+  25%{ transform:translateX(-6px); }
+  75%{ transform:translateX(6px); }
+}
+
+.btn{
+  font-family:var(--font-mono); font-size:.9rem; letter-spacing:1px;
+  padding:11px 16px; border-radius:6px; cursor:pointer;
+  background:transparent; transition:.2s; border:1px solid var(--border);
+  color:var(--text); width:100%; margin-top:6px;
+}
+.btn-primary{ border-color:var(--neon-cyan); color:var(--neon-cyan); }
+.btn-primary:hover{ background:rgba(0,234,255,0.12); box-shadow:0 0 14px rgba(0,234,255,0.4); }
+.btn-help{ border-color:var(--neon-pink); color:var(--neon-pink); }
+.btn-help:hover{ background:rgba(255,46,196,0.12); box-shadow:0 0 14px rgba(255,46,196,0.4); }
+.btn-secondary{ border-color:var(--text-dim); color:var(--text-dim); }
+.btn-secondary:hover{ border-color:var(--neon-amber); color:var(--neon-amber); }
+
+.slider-group{ margin-bottom:18px; }
+.slider-group label{
+  display:flex; justify-content:space-between; font-size:.85rem;
+  color:var(--text-dim); margin-bottom:6px;
+}
+.slider-group label span{ color:var(--neon-cyan); font-family:var(--font-mono); }
+
+input[type=range]{
+  -webkit-appearance:none; width:100%; height:6px;
+  background:var(--border); border-radius:4px; outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
+  background:var(--neon-cyan); cursor:pointer;
+  box-shadow:0 0 10px rgba(0,234,255,0.8);
+  border:2px solid #04222a;
+}
+input[type=range]::-moz-range-thumb{
+  width:20px; height:20px; border-radius:50%;
+  background:var(--neon-cyan); cursor:pointer; border:2px solid #04222a;
+  box-shadow:0 0 10px rgba(0,234,255,0.8);
+}
+
+/* ===========================================================
+   FASE 1 — circuito da lâmpada
+   =========================================================== */
+.circuit-svg{ width:100%; height:auto; }
+.bulb{ fill:#222; stroke:#666; stroke-width:2; transition:fill .3s, filter .3s; }
+.bulb.lit{ fill:#fff176; filter:drop-shadow(0 0 14px #fff176) drop-shadow(0 0 28px #ffea00); }
+.filament{ stroke:#777; stroke-width:2; transition:stroke .3s; }
+.bulb.lit ~ .filament{ stroke:#ff8f00; }
+.circuit-rect{ fill:none; stroke:#33486b; stroke-width:3; }
+.batt-line{ stroke:#9fb3d6; }
+
+.round-dots{ display:flex; gap:8px; justify-content:center; margin-top:14px; }
+.round-dot{ width:10px; height:10px; border-radius:50%; background:var(--border); }
+.round-dot.active{ background:var(--neon-amber); box-shadow:0 0 8px var(--neon-amber); }
+.round-dot.done{ background:var(--neon-green); }
+
+/* ===========================================================
+   FASE 2 — oficina do fio
+   =========================================================== */
+.target-box, .result-box{
+  text-align:center; margin-bottom:14px;
+}
+.target-box .label, .result-box .label{
+  display:block; font-size:.75rem; color:var(--text-dim); letter-spacing:1px;
+}
+.target-box .value{ font-family:var(--font-mono); font-size:1.8rem; color:var(--neon-pink); text-shadow:0 0 10px rgba(255,46,196,0.5); }
+.result-box .value{ font-family:var(--font-mono); font-size:1.5rem; color:var(--neon-cyan); }
+
+.wire-svg{ width:100%; height:auto; margin:10px 0; }
+.wire-lead{ stroke:#445; stroke-width:4; }
+
+.match-bar{ width:100%; height:10px; background:var(--border); border-radius:6px; overflow:hidden; margin-top:8px; }
+.match-fill{ height:100%; width:0%; background:var(--neon-red); transition:width .25s, background .25s; }
+
+/* ===========================================================
+   FASE 3 — sobrecarga / resistor
+   =========================================================== */
+.resistor-svg{ width:100%; height:auto; }
+.lead{ stroke:#445; stroke-width:4; }
+#p3-resistor-body{ stroke:#fff; stroke-width:2; transition:fill .4s, filter .4s; }
+.resistor-svg.heat-cool #p3-resistor-body{ fill:#2dd4ff; filter:drop-shadow(0 0 4px #2dd4ff); }
+.resistor-svg.heat-warm #p3-resistor-body{ fill:#ffd23f; filter:drop-shadow(0 0 10px #ffd23f); }
+.resistor-svg.heat-hot #p3-resistor-body{ fill:#ff6b35; filter:drop-shadow(0 0 18px #ff3b00); animation:pulse-hot .5s infinite alternate; }
+.resistor-svg.burnt #p3-resistor-body{ fill:#1a1a1a; stroke:#ff3b00; filter:none; animation:none; }
+@keyframes pulse-hot{ from{ filter:drop-shadow(0 0 10px #ff3b00); } to{ filter:drop-shadow(0 0 22px #ff3b00); } }
+
+#p3-crack{ opacity:0; stroke:#ff3b00; stroke-width:3; fill:none; }
+.resistor-svg.burnt #p3-crack{ opacity:1; }
+
+#p3-smoke{ opacity:0; }
+.resistor-svg.heat-hot #p3-smoke, .resistor-svg.burnt #p3-smoke{ opacity:.85; }
+.resistor-svg.heat-hot #p3-smoke circle, .resistor-svg.burnt #p3-smoke circle{ animation:smoke-rise 1.6s infinite; }
+@keyframes smoke-rise{
+  0%{ transform:translateY(0); opacity:.8; }
+  100%{ transform:translateY(-34px); opacity:0; }
+}
+
+.gauges{ display:flex; gap:12px; margin-bottom:10px; }
+.gauge{ flex:1; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:10px; text-align:center; }
+.gauge .label{ display:block; font-size:.7rem; color:var(--text-dim); }
+.gauge .value{ font-family:var(--font-mono); font-size:1.3rem; color:var(--neon-cyan); }
+
+.power-bar-wrap{ position:relative; width:100%; height:14px; background:var(--border); border-radius:8px; margin-bottom:18px; overflow:hidden; }
+.power-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--neon-green),var(--neon-amber),var(--neon-red)); transition:width .2s; }
+.power-marker{ position:absolute; top:-3px; left:calc(100%/1.2); width:2px; height:20px; background:#fff; box-shadow:0 0 6px #fff; }
+
+/* ===========================================================
+   MODAL DE AJUDA
+   =========================================================== */
+.modal{
+  position:fixed; inset:0; background:rgba(2,5,10,0.75);
+  display:flex; align-items:center; justify-content:center;
+  z-index:200; backdrop-filter:blur(3px);
+}
+.modal.hidden{ display:none; }
+.modal-content{
+  background:var(--panel2); border:1px solid var(--neon-pink);
+  box-shadow:0 0 30px rgba(255,46,196,0.3);
+  border-radius:12px; padding:26px; max-width:480px; width:90%;
+  max-height:85vh; overflow-y:auto; position:relative;
+}
+.modal-close{
+  position:absolute; top:12px; right:14px;
+  background:none; border:none; color:var(--text-dim);
+  font-size:1.2rem; cursor:pointer;
+}
+.modal-close:hover{ color:var(--neon-red); }
+.modal-content h3{ color:var(--neon-pink); margin-top:0; }
+.modal-content p{ color:var(--text); font-size:.92rem; line-height:1.5; }
+
+.ohm-triangle{ position:relative; width:200px; height:170px; margin:18px auto; }
+.tri-shape{
+  width:0; height:0;
+  border-left:100px solid transparent;
+  border-right:100px solid transparent;
+  border-bottom:170px solid var(--panel);
+  filter:drop-shadow(0 0 8px var(--neon-cyan));
+}
+.tri-divider-h{ position:absolute; left:32px; right:32px; top:62%; height:2px; background:var(--neon-cyan); }
+.tri-divider-v{ position:absolute; left:50%; top:62%; bottom:0; width:2px; background:var(--neon-cyan); }
+.tri-u{ position:absolute; top:18%; left:0; right:0; text-align:center; font-family:var(--font-mono); font-size:1.7rem; color:#fff; }
+.tri-r{ position:absolute; bottom:6%; left:14%; font-family:var(--font-mono); font-size:1.4rem; color:#fff; }
+.tri-i{ position:absolute; bottom:6%; right:14%; font-family:var(--font-mono); font-size:1.4rem; color:#fff; }
+
+.formulas{ display:flex; flex-direction:column; gap:8px; margin:16px 0; }
+.formula{
+  font-family:var(--font-mono); text-align:center; padding:8px;
+  border:1px solid var(--border); border-radius:6px; color:var(--text-dim);
+}
+.formula.highlight{ border-color:var(--neon-amber); color:var(--neon-amber); box-shadow:0 0 10px rgba(255,210,63,0.3); }
+
+.mat-table{ width:100%; border-collapse:collapse; margin:14px 0; font-size:.85rem; }
+.mat-table th, .mat-table td{ border:1px solid var(--border); padding:6px 8px; text-align:center; }
+.mat-table th{ color:var(--neon-cyan); }
+
+/* ===========================================================
+   TOAST DE FEEDBACK
+   =========================================================== */
+.toast{
+  position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--panel2); border:1px solid var(--border); border-radius:8px;
+  padding:14px 22px; font-family:var(--font-mono); font-size:.95rem;
+  opacity:0; pointer-events:none; transition:.3s; z-index:300; max-width:90%; text-align:center;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.success{ border-color:var(--neon-green); color:var(--neon-green); box-shadow:0 0 16px rgba(0,255,166,0.4); }
+.toast.error{ border-color:var(--neon-red); color:var(--neon-red); box-shadow:0 0 16px rgba(255,59,59,0.4); }
+.toast.warn{ border-color:var(--neon-amber); color:var(--neon-amber); box-shadow:0 0 16px rgba(255,210,63,0.4); }
+
+/* ===========================================================
+   TELA FINAL
+   =========================================================== */
+#end-screen{
+  text-align:center; padding:50px 24px;
+  border:1px solid var(--neon-green); border-radius:14px;
+  background:var(--panel); box-shadow:0 0 30px rgba(0,255,166,0.25);
+}
+#end-screen.hidden{ display:none; }
+#end-screen h2{ color:var(--neon-green); font-size:1.8rem; text-shadow:0 0 12px rgba(0,255,166,0.6); }
+#end-screen p{ color:var(--text-dim); max-width:480px; margin:14px auto 24px; }
+#end-screen button{ max-width:260px; margin:0 auto; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ LABORATÓRIO DE OHM</h1>
+  <div class="progress-dots" id="progress-dots">
+    <span class="dot active" data-phase="1">1</span>
+    <span class="dot" data-phase="2">2</span>
+    <span class="dot" data-phase="3">3</span>
+  </div>
+  <button id="restart-btn" title="Reiniciar o jogo do zero">↺ REINICIAR</button>
+</header>
+
+<main>
+
+  <!-- =========================================================
+       FASE 1 — O ENIGMA DO TRIÂNGULO (1ª Lei de Ohm)
+       ========================================================= -->
+  <section id="phase1" class="phase active">
+    <div class="phase-header">
+      <div>
+        <h2>Fase 1 · O Enigma do Triângulo</h2>
+        <p class="phase-sub">1ª Lei de Ohm (U = R · i) — descubra a variável que falta para a lâmpada acender.</p>
+      </div>
+    </div>
+    <div class="lab-grid">
+      <div class="circuit-panel">
+        <svg class="circuit-svg" viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg">
+          <rect class="circuit-rect" x="25" y="25" width="250" height="110" rx="8"/>
+          <line class="batt-line" x1="25" y1="62" x2="25" y2="98" stroke-width="4"/>
+          <line class="batt-line" x1="15" y1="68" x2="15" y2="92" stroke-width="2"/>
+          <circle id="p1-bulb" class="bulb" cx="150" cy="25" r="22"/>
+          <path class="filament" d="M138,17 L162,33 M138,33 L162,17"/>
+        </svg>
+        <div class="round-dots" id="p1-round-indicator"></div>
+      </div>
+      <div class="control-panel">
+        <div class="readout-grid">
+          <div class="readout" id="p1-box-U">
+            <span class="label">TENSÃO (U)</span>
+            <span class="value" id="p1-U">--</span><span class="unit">V</span>
+          </div>
+          <div class="readout" id="p1-box-R">
+            <span class="label">RESISTÊNCIA (R)</span>
+            <span class="value" id="p1-R">--</span><span class="unit">Ω</span>
+          </div>
+          <div class="readout" id="p1-box-i">
+            <span class="label">CORRENTE (i)</span>
+            <span class="value" id="p1-i">--</span><span class="unit">A</span>
+          </div>
+        </div>
+        <div class="answer-row">
+          <label for="p1-input">Calcule o valor que falta:</label>
+          <input type="number" id="p1-input" step="0.01" placeholder="0.00">
+        </div>
+        <button class="btn btn-primary" id="p1-check">VERIFICAR</button>
+        <button class="btn btn-help" id="p1-help">💡 AJUDA — Triângulo de Ohm</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       FASE 2 — A OFICINA DO FIO (2ª Lei de Ohm)
+       ========================================================= -->
+  <section id="phase2" class="phase locked">
+    <div class="lock-overlay"><span>🔒 Complete a Fase 1 para desbloquear</span></div>
+    <div class="phase-header">
+      <div>
+        <h2>Fase 2 · A Oficina do Fio</h2>
+        <p class="phase-sub">2ª Lei de Ohm (R = ρ · L / A) — fabrique um fio com a resistência exata.</p>
+      </div>
+    </div>
+    <div class="lab-grid">
+      <div class="circuit-panel">
+        <div class="target-box">
+          <span class="label">RESISTÊNCIA ALVO</span>
+          <span class="value" id="p2-target">-- Ω</span>
+        </div>
+        <svg class="wire-svg" viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg">
+          <line class="wire-lead" x1="10" y1="60" x2="290" y2="60"/>
+          <rect id="p2-wire-rect" x="100" y="50" width="100" height="20" rx="4" fill="#ff8c42"/>
+        </svg>
+        <div class="result-box">
+          <span class="label">RESISTÊNCIA ATUAL</span>
+          <span class="value" id="p2-current">-- Ω</span>
+          <div class="match-bar"><div class="match-fill" id="p2-match-fill"></div></div>
+        </div>
+      </div>
+      <div class="control-panel">
+        <div class="slider-group">
+          <label>Material <span id="p2-material-name">Cobre</span></label>
+          <input type="range" id="p2-material" min="0" max="2" step="1" value="0">
+        </div>
+        <div class="slider-group">
+          <label>Comprimento (L) <span id="p2-length-val">1.0 m</span></label>
+          <input type="range" id="p2-length" min="0.5" max="20" step="0.5" value="1">
+        </div>
+        <div class="slider-group">
+          <label>Área de secção (A) <span id="p2-area-val">1.0 mm²</span></label>
+          <input type="range" id="p2-area" min="0.5" max="10" step="0.1" value="1">
+        </div>
+        <button class="btn btn-primary" id="p2-check">CONFIRMAR FIO</button>
+        <button class="btn btn-help" id="p2-help">💡 AJUDA — 2ª Lei de Ohm</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       FASE 3 — SOBRECARGA! (Potência / Efeito Joule)
+       ========================================================= -->
+  <section id="phase3" class="phase locked">
+    <div class="lock-overlay"><span>🔒 Complete a Fase 2 para desbloquear</span></div>
+    <div class="phase-header">
+      <div>
+        <h2>Fase 3 · Sobrecarga!</h2>
+        <p class="phase-sub">Potência e Efeito Joule (P = U · i = R · i²) — atinja a corrente sem queimar o resistor.</p>
+      </div>
+    </div>
+    <div class="lab-grid">
+      <div class="circuit-panel">
+        <div class="target-box">
+          <span class="label">CORRENTE NECESSÁRIA</span>
+          <span class="value" id="p3-target-i">-- A</span>
+          <span class="label" style="margin-top:8px;">LIMITE DE POTÊNCIA</span>
+          <span class="value" id="p3-pmax" style="color:var(--neon-red);">-- W</span>
+        </div>
+        <svg class="resistor-svg heat-cool" id="p3-resistor-svg" viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg">
+          <line class="lead" x1="10" y1="70" x2="80" y2="70"/>
+          <line class="lead" x1="220" y1="70" x2="290" y2="70"/>
+          <rect id="p3-resistor-body" x="80" y="40" width="140" height="60" rx="10" fill="#2dd4ff"/>
+          <path id="p3-crack" d="M120,50 L140,70 L130,80 L160,100 L150,90"/>
+          <g id="p3-smoke">
+            <circle cx="150" cy="35" r="6" fill="#888"/>
+            <circle cx="168" cy="28" r="8" fill="#888"/>
+            <circle cx="132" cy="22" r="5" fill="#888"/>
+          </g>
+        </svg>
+      </div>
+      <div class="control-panel">
+        <div class="gauges">
+          <div class="gauge"><span class="label">CORRENTE (i)</span><span class="value" id="p3-i">-- A</span></div>
+          <div class="gauge"><span class="label">POTÊNCIA (P)</span><span class="value" id="p3-p">-- W</span></div>
+        </div>
+        <div class="power-bar-wrap"><div class="power-fill" id="p3-power-fill"></div><div class="power-marker"></div></div>
+        <div class="slider-group">
+          <label>Tensão (U) <span id="p3-u-val">5.0 V</span></label>
+          <input type="range" id="p3-u" min="0.5" max="24" step="0.1" value="5">
+        </div>
+        <div class="slider-group">
+          <label>Resistência (R) <span id="p3-r-val">10.0 Ω</span></label>
+          <input type="range" id="p3-r" min="1" max="100" step="0.5" value="10">
+        </div>
+        <button class="btn btn-primary" id="p3-check">TESTAR CIRCUITO</button>
+        <button class="btn btn-secondary" id="p3-reset">🔄 REINICIAR FIO (após queima)</button>
+        <button class="btn btn-help" id="p3-help">💡 AJUDA — Potência e Efeito Joule</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TELA FINAL -->
+  <section id="end-screen" class="hidden">
+    <h2>🏆 LABORATÓRIO CONCLUÍDO!</h2>
+    <p>Você dominou a 1ª e a 2ª Lei de Ohm e aprendeu a controlar a Potência sem queimar componentes. Excelente trabalho, engenheiro(a)!</p>
+    <button class="btn btn-primary" id="play-again-btn">JOGAR NOVAMENTE</button>
+  </section>
+
+</main>
+
+<!-- MODAL DE AJUDA -->
+<div class="modal hidden" id="help-modal">
+  <div class="modal-content">
+    <button class="modal-close" id="help-close">✕</button>
+    <h3 id="help-title">Ajuda</h3>
+    <div id="help-body"></div>
+  </div>
+</div>
+
+<!-- TOAST DE FEEDBACK -->
+<div class="toast" id="feedback-toast"></div>
+
+<script>
+/* =================================================================
+   LABORATÓRIO DE OHM — lógica do jogo (Vanilla JS, sem dependências)
+   ================================================================= */
+
+// -----------------------------------------------------------------
+// Estado global do jogo
+// -----------------------------------------------------------------
+const state = {
+  phase: 1,
+  p1: { round: 0, totalRounds: 3, current: null },
+  p2: { target: null },
+  p3: { challenge: null, burnt: false }
+};
+
+// Materiais disponíveis na Fase 2 — resistividade (ρ) em Ω·mm²/m
+const MATERIALS = [
+  { name: 'Cobre',     rho: 0.0172, color: '#ff8c42' },
+  { name: 'Alumínio',  rho: 0.0282, color: '#cfd8dc' },
+  { name: 'Ferro',     rho: 0.10,   color: '#5a6b73' }
+];
+
+// -----------------------------------------------------------------
+// Utilidades genéricas
+// -----------------------------------------------------------------
+function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+// Formata número removendo zeros decimais desnecessários
+function fmt(n){
+  if (Number.isInteger(n)) return n.toString();
+  return n.toFixed(2).replace(/0$/, '').replace(/\.$/, '');
+}
+
+function mapRange(v, inMin, inMax, outMin, outMax){
+  return outMin + (v - inMin) * (outMax - outMin) / (inMax - inMin);
+}
+
+function showToast(msg, type = 'success', duration = 2600){
+  const t = document.getElementById('feedback-toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function flashWrong(inputId){
+  const el = document.getElementById(inputId);
+  el.classList.remove('shake');
+  // força reflow para a animação poder repetir
+  void el.offsetWidth;
+  el.classList.add('shake');
+}
+
+// -----------------------------------------------------------------
+// Modal de ajuda — conteúdo contextual por fase
+// -----------------------------------------------------------------
+function ohmTriangleHTML(){
+  return `
+    <div class="ohm-triangle">
+      <div class="tri-shape"></div>
+      <div class="tri-divider-h"></div>
+      <div class="tri-divider-v"></div>
+      <span class="tri-u">U</span>
+      <span class="tri-r">R</span>
+      <span class="tri-i">i</span>
+    </div>`;
+}
+
+function helpBodyPhase1(){
+  const unknown = state.p1.current ? state.p1.current.unknown : null;
+  return `
+    ${ohmTriangleHTML()}
+    <div class="formulas">
+      <div class="formula ${unknown === 'i' ? 'highlight' : ''}">i = U ÷ R</div>
+      <div class="formula ${unknown === 'R' ? 'highlight' : ''}">R = U ÷ i</div>
+      <div class="formula ${unknown === 'U' ? 'highlight' : ''}">U = R × i</div>
+    </div>
+    <p>Cubra com o dedo a variável que você quer descobrir: as duas letras que restam indicam a operação.
+    Se ficarem lado a lado, multiplique. Se uma ficar acima da outra, divida (a de cima pela de baixo).</p>`;
+}
+
+function helpBodyPhase2(){
+  return `
+    <p>A 2ª Lei de Ohm relaciona a resistência de um fio com suas características físicas:</p>
+    <div class="formulas"><div class="formula highlight">R = ρ × L ÷ A</div></div>
+    <table class="mat-table">
+      <tr><th>Material</th><th>ρ (Ω·mm²/m)</th></tr>
+      <tr><td>Cobre</td><td>0,0172</td></tr>
+      <tr><td>Alumínio</td><td>0,0282</td></tr>
+      <tr><td>Ferro</td><td>0,10</td></tr>
+    </table>
+    <p>Quanto maior o comprimento (L), maior a resistência. Quanto maior a área (A, espessura do fio),
+    menor a resistência. Materiais com ρ maior resistem mais à passagem de corrente.</p>`;
+}
+
+function helpBodyPhase3(){
+  return `
+    <p>Toda resistência dissipa energia em forma de calor — o Efeito Joule:</p>
+    <div class="formulas">
+      <div class="formula highlight">P = U × i</div>
+      <div class="formula highlight">P = R × i²</div>
+    </div>
+    <p>Se a potência dissipada superar o limite suportado pelo resistor, ele queima. Repare que, para uma
+    mesma corrente i, reduzir R (e consequentemente U) também reduz a potência dissipada. Equilibre tensão
+    e resistência para atingir a corrente necessária com segurança.</p>`;
+}
+
+const HELP_CONTENT = {
+  1: { title: '💡 O Triângulo Mágico de Ohm', body: helpBodyPhase1 },
+  2: { title: '💡 2ª Lei de Ohm — Fabricando Fios', body: helpBodyPhase2 },
+  3: { title: '💡 Potência e Efeito Joule', body: helpBodyPhase3 }
+};
+
+function openHelp(phaseNum){
+  const content = HELP_CONTENT[phaseNum];
+  document.getElementById('help-title').textContent = content.title;
+  document.getElementById('help-body').innerHTML = content.body();
+  document.getElementById('help-modal').classList.remove('hidden');
+}
+
+function closeHelp(){
+  document.getElementById('help-modal').classList.add('hidden');
+}
+
+// -----------------------------------------------------------------
+// FASE 1 — O Enigma do Triângulo
+// -----------------------------------------------------------------
+const P1_SEQUENCE = ['i', 'R', 'U']; // ordem pedagógica: divisão, divisão, multiplicação
+
+function p1NewRound(){
+  const unknown = P1_SEQUENCE[state.p1.round % P1_SEQUENCE.length];
+  const Rpool = [2, 4, 5, 8, 10, 12, 15, 20];
+  const ipool = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5];
+  const R = pick(Rpool);
+  const i = pick(ipool);
+  const U = +(R * i).toFixed(2);
+
+  state.p1.current = { U, R, i, unknown };
+  renderP1();
+}
+
+function setReadout(elId, value){
+  const el = document.getElementById(elId);
+  const box = el.closest('.readout');
+  if (value === null){
+    el.textContent = '?';
+    box.classList.add('unknown');
+  } else {
+    el.textContent = fmt(value);
+    box.classList.remove('unknown');
+  }
+}
+
+function renderP1(){
+  const { U, R, i, unknown } = state.p1.current;
+  setReadout('p1-U', unknown === 'U' ? null : U);
+  setReadout('p1-R', unknown === 'R' ? null : R);
+  setReadout('p1-i', unknown === 'i' ? null : i);
+  document.getElementById('p1-input').value = '';
+  setBulb(false);
+  updateP1RoundDots();
+}
+
+function setBulb(on){
+  document.getElementById('p1-bulb').classList.toggle('lit', on);
+}
+
+function updateP1RoundDots(){
+  const container = document.getElementById('p1-round-indicator');
+  container.innerHTML = '';
+  for (let k = 0; k < state.p1.totalRounds; k++){
+    const dot = document.createElement('span');
+    dot.className = 'round-dot' +
+      (k < state.p1.round ? ' done' : k === state.p1.round ? ' active' : '');
+    container.appendChild(dot);
+  }
+}
+
+function p1Check(){
+  const { U, R, i, unknown } = state.p1.current;
+  const answerMap = { U, R, i };
+  const correct = answerMap[unknown];
+  const val = parseFloat(document.getElementById('p1-input').value);
+
+  if (isNaN(val)){
+    showToast('Digite um valor numérico.', 'warn');
+    return;
+  }
+
+  const tolerance = Math.max(0.05, correct * 0.03);
+  if (Math.abs(val - correct) <= tolerance){
+    setBulb(true);
+    showToast('✔ Sucesso! Lâmpada acesa!', 'success');
+    state.p1.round++;
+    if (state.p1.round >= state.p1.totalRounds){
+      setTimeout(() => completePhase(1), 1200);
+    } else {
+      setTimeout(p1NewRound, 1400);
+    }
+  } else {
+    showToast('✘ Valor incorreto. Reveja o triângulo de Ohm!', 'error');
+    flashWrong('p1-input');
+  }
+}
+
+// -----------------------------------------------------------------
+// FASE 2 — A Oficina do Fio
+// -----------------------------------------------------------------
+function p2NewChallenge(){
+  const mat = pick(MATERIALS);
+  const L = pick([1, 2, 3, 4, 5, 6, 8, 10, 12, 15]);
+  const A = pick([0.5, 1, 1.5, 2, 2.5, 3, 4, 5]);
+  const target = +(mat.rho * L / A).toFixed(2);
+
+  state.p2.target = target;
+  document.getElementById('p2-target').textContent = fmt(target) + ' Ω';
+
+  // sliders começam em valores diferentes da resposta
+  document.getElementById('p2-material').value = (MATERIALS.indexOf(mat) + 1) % 3;
+  document.getElementById('p2-length').value = 1;
+  document.getElementById('p2-area').value = 1;
+
+  p2Update();
+}
+
+function p2CurrentValues(){
+  const matIdx = +document.getElementById('p2-material').value;
+  const mat = MATERIALS[matIdx];
+  const L = +document.getElementById('p2-length').value;
+  const A = +document.getElementById('p2-area').value;
+  return { mat, L, A, R: mat.rho * L / A };
+}
+
+function p2Update(){
+  const { mat, L, A, R } = p2CurrentValues();
+
+  document.getElementById('p2-material-name').textContent = mat.name;
+  document.getElementById('p2-length-val').textContent = fmt(L) + ' m';
+  document.getElementById('p2-area-val').textContent = fmt(A) + ' mm²';
+  document.getElementById('p2-current').textContent = fmt(R) + ' Ω';
+
+  updateWireVisual(mat, L, A);
+
+  const diffPct = Math.abs(R - state.p2.target) / state.p2.target;
+  const fill = document.getElementById('p2-match-fill');
+  const closeness = Math.max(0, 1 - diffPct * 4);
+  fill.style.width = (closeness * 100) + '%';
+  fill.style.background = diffPct <= 0.05 ? 'var(--neon-green)'
+                         : diffPct <= 0.15 ? 'var(--neon-amber)'
+                         : 'var(--neon-red)';
+}
+
+function updateWireVisual(mat, L, A){
+  const rect = document.getElementById('p2-wire-rect');
+  const width = mapRange(L, 0.5, 20, 40, 260);
+  const height = mapRange(A, 0.5, 10, 6, 50);
+  rect.setAttribute('width', width);
+  rect.setAttribute('height', height);
+  rect.setAttribute('x', 150 - width / 2);
+  rect.setAttribute('y', 60 - height / 2);
+  rect.setAttribute('fill', mat.color);
+}
+
+function p2Check(){
+  const { R } = p2CurrentValues();
+  const diffPct = Math.abs(R - state.p2.target) / state.p2.target;
+
+  if (diffPct <= 0.05){
+    showToast('✔ Fio fabricado com precisão! Circuito restaurado.', 'success');
+    setTimeout(() => completePhase(2), 1400);
+  } else {
+    showToast('✘ Resistência fora da tolerância. Ajuste os controles.', 'error');
+  }
+}
+
+// -----------------------------------------------------------------
+// FASE 3 — Sobrecarga!
+// -----------------------------------------------------------------
+function p3NewChallenge(){
+  const iTarget = pick([0.5, 0.8, 1, 1.2, 1.5, 2, 2.5, 3]);
+  const Pmax = pick([5, 8, 10, 12, 15, 20]);
+
+  state.p3.challenge = { iTarget, Pmax };
+  state.p3.burnt = false;
+
+  document.getElementById('p3-target-i').textContent = fmt(iTarget) + ' A';
+  document.getElementById('p3-pmax').textContent = fmt(Pmax) + ' W';
+  document.getElementById('p3-u').value = 5;
+  document.getElementById('p3-r').value = 10;
+
+  resetResistorVisual();
+  p3Update();
+}
+
+function resetResistorVisual(){
+  const svg = document.getElementById('p3-resistor-svg');
+  svg.classList.remove('burnt', 'heat-cool', 'heat-warm', 'heat-hot');
+  svg.classList.add('heat-cool');
+}
+
+function p3Update(){
+  if (state.p3.burnt) return;
+
+  const U = +document.getElementById('p3-u').value;
+  const R = +document.getElementById('p3-r').value;
+  const i = U / R;
+  const P = U * i;
+  const { Pmax } = state.p3.challenge;
+
+  document.getElementById('p3-u-val').textContent = fmt(U) + ' V';
+  document.getElementById('p3-r-val').textContent = fmt(R) + ' Ω';
+  document.getElementById('p3-i').textContent = fmt(i) + ' A';
+  document.getElementById('p3-p').textContent = fmt(P) + ' W';
+
+  const ratio = P / Pmax;
+  document.getElementById('p3-power-fill').style.width = Math.min(ratio, 1.2) * (100 / 1.2) + '%';
+  updateResistorHeat(ratio);
+
+  if (ratio >= 1){
+    burnResistor();
+  }
+}
+
+function updateResistorHeat(ratio){
+  const svg = document.getElementById('p3-resistor-svg');
+  svg.classList.remove('heat-cool', 'heat-warm', 'heat-hot');
+  if (ratio < 0.5) svg.classList.add('heat-cool');
+  else if (ratio < 0.85) svg.classList.add('heat-warm');
+  else svg.classList.add('heat-hot');
+}
+
+function burnResistor(){
+  state.p3.burnt = true;
+  document.getElementById('p3-resistor-svg').classList.add('burnt');
+  showToast('🔥 Falha! Resistor queimado — potência excedida!', 'error');
+}
+
+function p3Check(){
+  if (state.p3.burnt){
+    showToast('O resistor já queimou. Clique em "Reiniciar Fio".', 'warn');
+    return;
+  }
+
+  const U = +document.getElementById('p3-u').value;
+  const R = +document.getElementById('p3-r').value;
+  const i = U / R;
+  const P = U * i;
+  const { iTarget, Pmax } = state.p3.challenge;
+
+  if (P > Pmax){
+    burnResistor();
+    return;
+  }
+
+  const iOk = Math.abs(i - iTarget) <= Math.max(0.05, iTarget * 0.05);
+  if (iOk){
+    showToast('✔ Sucesso! Corrente ideal sem sobrecarga.', 'success');
+    setTimeout(() => completePhase(3), 1400);
+  } else {
+    showToast('Corrente fora da faixa necessária. Ajuste U ou R.', 'warn');
+  }
+}
+
+function p3ResetWire(){
+  document.getElementById('p3-u').value = 5;
+  document.getElementById('p3-r').value = 10;
+  state.p3.burnt = false;
+  resetResistorVisual();
+  p3Update();
+}
+
+// -----------------------------------------------------------------
+// Navegação entre fases
+// -----------------------------------------------------------------
+function completePhase(n){
+  const section = document.getElementById('phase' + n);
+  section.classList.add('done');
+  document.querySelector(`.dot[data-phase="${n}"]`).classList.add('done');
+
+  if (n < 3){
+    state.phase = n + 1;
+    const nextSection = document.getElementById('phase' + (n + 1));
+    nextSection.classList.remove('locked');
+    document.querySelector(`.dot[data-phase="${n + 1}"]`).classList.add('active');
+    nextSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    if (n + 1 === 2) p2NewChallenge();
+    if (n + 1 === 3) p3NewChallenge();
+  } else {
+    document.getElementById('end-screen').classList.remove('hidden');
+    document.getElementById('end-screen').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+// -----------------------------------------------------------------
+// Inicialização e listeners
+// -----------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  // Fase 1
+  document.getElementById('p1-check').addEventListener('click', p1Check);
+  document.getElementById('p1-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') p1Check();
+  });
+  document.getElementById('p1-help').addEventListener('click', () => openHelp(1));
+  p1NewRound();
+
+  // Fase 2
+  document.getElementById('p2-material').addEventListener('input', p2Update);
+  document.getElementById('p2-length').addEventListener('input', p2Update);
+  document.getElementById('p2-area').addEventListener('input', p2Update);
+  document.getElementById('p2-check').addEventListener('click', p2Check);
+  document.getElementById('p2-help').addEventListener('click', () => openHelp(2));
+
+  // Fase 3
+  document.getElementById('p3-u').addEventListener('input', p3Update);
+  document.getElementById('p3-r').addEventListener('input', p3Update);
+  document.getElementById('p3-check').addEventListener('click', p3Check);
+  document.getElementById('p3-reset').addEventListener('click', p3ResetWire);
+  document.getElementById('p3-help').addEventListener('click', () => openHelp(3));
+
+  // Modal de ajuda
+  document.getElementById('help-close').addEventListener('click', closeHelp);
+  document.getElementById('help-modal').addEventListener('click', e => {
+    if (e.target.id === 'help-modal') closeHelp();
+  });
+
+  // Reiniciar jogo
+  document.getElementById('restart-btn').addEventListener('click', () => location.reload());
+  document.getElementById('play-again-btn').addEventListener('click', () => location.reload());
+
+});
+</script>
+</body>
+</html>
