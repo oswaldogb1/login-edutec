@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Comando Técnico: Desafio na Quadra 🏐</title>
+
+<!--
+  ============================================================================
+  COMANDO TÉCNICO: DESAFIO NA QUADRA
+  ----------------------------------------------------------------------------
+  Jogo web autônomo (HTML + CSS + JS num único arquivo).
+  O jogador é o TÉCNICO de um time de vôlei e precisa escolher a sequência
+  correta de fundamentos em cada jogada para manter a energia do time.
+
+  Blocos deste arquivo:
+    1. <style>  -> todo o visual, cores da quadra e animações CSS.
+    2. HTML     -> telas (apresentação, jogo, transição, fim) + ranking.
+    3. <script> -> estado do jogo, cenários (banco de perguntas), lógica,
+                   Web Audio API (sons), confetes e ranking Firebase (REST).
+
+  Banco de dados de ranking (Firebase Realtime Database via REST):
+    https://edutec-arnaldo-default-rtdb.firebaseio.com/
+  ============================================================================
+-->
+
+<style>
+/* ===========================================================================
+   VARIÁVEIS DE COR — paleta inspirada em quadras de vôlei
+   =========================================================================== */
+:root{
+  --azul:      #1e3a8a;   /* azul royal          */
+  --azul-claro:#2563eb;
+  --amarelo:   #fbbf24;   /* amarelo bola        */
+  --laranja:   #f97316;   /* laranja quadra      */
+  --branco:    #ffffff;
+  --verde:     #84cc16;   /* verde limão detalhe */
+  --verde-esc: #4d7c0f;
+  --vermelho:  #ef4444;
+  --escuro:    #0f172a;
+  --card-bg:   #0b2a6b;
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html,body{ height:100%; }
+
+body{
+  font-family:'Segoe UI', Tahoma, Verdana, sans-serif;
+  color:var(--branco);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:12px;
+  overflow-x:hidden;
+  /* Fundo: gradiente azul->laranja + linhas diagonais da "quadra" */
+  background:
+    repeating-linear-gradient(45deg,
+       rgba(255,255,255,0.05) 0px,
+       rgba(255,255,255,0.05) 2px,
+       transparent 2px,
+       transparent 46px),
+    linear-gradient(135deg, var(--azul) 0%, #14245e 40%, var(--laranja) 140%);
+  background-attachment:fixed;
+  animation:bgPulse 8s ease-in-out infinite;
+}
+/* Pulsação sutil do fundo */
+@keyframes bgPulse{
+  0%,100%{ filter:brightness(1);   }
+  50%    { filter:brightness(1.12);}
+}
+
+/* ===========================================================================
+   CARTÃO CENTRAL
+   =========================================================================== */
+.card{
+  width:100%;
+  max-width:560px;
+  background:linear-gradient(160deg, var(--card-bg), #071d4a 90%);
+  border-radius:26px;
+  padding:26px 22px 30px;
+  position:relative;
+  border:2px solid rgba(132,204,22,0.35);
+  box-shadow:
+     0 0 0 4px rgba(255,255,255,0.04),
+     0 0 28px rgba(37,99,235,0.55),
+     0 0 60px rgba(249,115,22,0.25),
+     0 18px 40px rgba(0,0,0,0.5);
+  animation:fadeIn .5s ease;
+}
+
+/* ===========================================================================
+   ANIMAÇÕES GERAIS
+   =========================================================================== */
+@keyframes fadeIn { from{opacity:0}          to{opacity:1} }
+@keyframes slideUp{ from{opacity:0; transform:translateY(24px)} to{opacity:1; transform:translateY(0)} }
+@keyframes pop    { 0%{transform:scale(.8)} 60%{transform:scale(1.08)} 100%{transform:scale(1)} }
+/* Tremor de tela no ERRO */
+@keyframes shake  {
+  0%,100%{transform:translateX(0)}
+  15%{transform:translateX(-11px) rotate(-1deg)}
+  30%{transform:translateX(10px)  rotate(1deg)}
+  45%{transform:translateX(-9px)}
+  60%{transform:translateX(8px)}
+  75%{transform:translateX(-5px)}
+}
+/* Pulso no ACERTO */
+@keyframes pulseHit{
+  0%{box-shadow:0 0 0 0 rgba(132,204,22,0.7)}
+  100%{box-shadow:0 0 0 34px rgba(132,204,22,0)}
+}
+/* Giro da bola (spinner de transição) */
+@keyframes spinBall{ to{ transform:rotate(360deg) } }
+/* Flutuar do avatar */
+@keyframes floaty{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+.shake  { animation:shake .5s ease; }
+.flashGood{ animation:pulseHit .6s ease; }
+
+.hidden{ display:none !important; }
+
+/* ===========================================================================
+   TELA DE APRESENTAÇÃO
+   =========================================================================== */
+.title{
+  text-align:center;
+  font-size:2rem;
+  font-weight:900;
+  line-height:1.1;
+  letter-spacing:.5px;
+  text-shadow:0 3px 0 rgba(0,0,0,0.35), 0 0 18px rgba(251,191,36,0.5);
+}
+.title .l1{ color:var(--amarelo); display:block; }
+.title .l2{ color:var(--verde);   display:block; font-size:1.35rem; }
+.subtitle{
+  text-align:center;
+  color:#cbd5e1;
+  margin:14px 0 22px;
+  font-size:1rem;
+  font-style:italic;
+}
+.hero-ball{
+  font-size:4.2rem;
+  text-align:center;
+  display:block;
+  margin:6px 0 4px;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.4));
+  animation:floaty 3s ease-in-out infinite;
+}
+.intro-box{
+  background:rgba(255,255,255,0.06);
+  border-left:4px solid var(--verde);
+  border-radius:12px;
+  padding:12px 14px;
+  font-size:.9rem;
+  color:#e2e8f0;
+  margin-bottom:20px;
+  line-height:1.5;
+}
+.intro-box b{ color:var(--amarelo); }
+
+/* ===========================================================================
+   BOTÕES
+   =========================================================================== */
+.btn{
+  display:block;
+  width:100%;
+  border:none;
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:800;
+  color:var(--escuro);
+  background:linear-gradient(180deg, var(--amarelo), var(--laranja));
+  padding:15px 18px;
+  border-radius:16px;
+  font-size:1.1rem;
+  letter-spacing:.5px;
+  box-shadow:0 6px 0 #b45309, 0 10px 18px rgba(0,0,0,.35);
+  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.btn:hover{ transform:translateY(-2px); filter:brightness(1.06); box-shadow:0 8px 0 #b45309, 0 14px 22px rgba(0,0,0,.4); }
+.btn:active{ transform:translateY(4px); box-shadow:0 2px 0 #b45309, 0 4px 10px rgba(0,0,0,.4); }
+.btn.secondary{ background:linear-gradient(180deg,#38bdf8,#2563eb); color:#fff; box-shadow:0 6px 0 #1e40af, 0 10px 18px rgba(0,0,0,.35); }
+.btn.secondary:active{ box-shadow:0 2px 0 #1e40af, 0 4px 10px rgba(0,0,0,.4); }
+
+/* ===========================================================================
+   HUD DO JOGO (energia + rodadas)
+   =========================================================================== */
+.hud{ margin-bottom:14px; }
+.hud-top{
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:.8rem; font-weight:700; color:#e2e8f0; margin-bottom:6px;
+}
+.energy-wrap{
+  position:relative;
+  height:26px;
+  background:rgba(0,0,0,0.35);
+  border-radius:20px;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,0.15);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.5);
+}
+.energy-fill{
+  height:100%;
+  width:100%;
+  border-radius:18px;
+  transition:width .6s cubic-bezier(.22,1,.36,1), background .6s ease;
+  background:linear-gradient(90deg,var(--verde),#22c55e);
+  background-size:200% 100%;
+  animation:energyFlow 2.5s linear infinite;
+}
+@keyframes energyFlow{ from{background-position:0 0} to{background-position:200% 0} }
+.energy-label{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.82rem; font-weight:900; text-shadow:0 1px 3px rgba(0,0,0,.8);
+  letter-spacing:.5px;
+}
+
+/* Bolinhas de rodada (set) */
+.rounds{ display:flex; gap:8px; justify-content:center; margin:14px 0 4px; }
+.dot{
+  width:26px; height:26px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.72rem; font-weight:800;
+  background:rgba(255,255,255,0.12);
+  border:2px solid rgba(255,255,255,0.25);
+  color:#cbd5e1; transition:.3s;
+}
+.dot.active{ background:var(--amarelo); color:var(--escuro); border-color:#fff; transform:scale(1.15); box-shadow:0 0 12px var(--amarelo); }
+.dot.done  { background:var(--verde);   color:var(--escuro); border-color:#fff; }
+.dot.fail  { background:var(--vermelho);color:#fff; border-color:#fff; }
+
+/* ===========================================================================
+   AVATAR DO TÉCNICO
+   =========================================================================== */
+.coach{
+  display:flex; align-items:center; gap:12px;
+  background:rgba(255,255,255,0.07);
+  border-radius:16px; padding:10px 12px; margin:8px 0 16px;
+  border:1px solid rgba(255,255,255,0.12);
+}
+.coach-avatar{
+  font-size:2.4rem; cursor:pointer; user-select:none;
+  animation:floaty 3s ease-in-out infinite;
+  transition:transform .1s ease;
+  flex-shrink:0;
+}
+.coach-avatar:active{ transform:scale(0.85) rotate(-8deg); }
+.coach-speech{ font-size:.9rem; line-height:1.35; color:#f1f5f9; }
+.coach-speech b{ color:var(--amarelo); }
+
+/* ===========================================================================
+   CENÁRIO + OPÇÕES
+   =========================================================================== */
+.scenario{ animation:slideUp .45s ease; }
+.scenario-tag{
+  display:inline-block; font-size:.7rem; font-weight:800; letter-spacing:1px;
+  text-transform:uppercase; color:var(--escuro);
+  background:var(--verde); padding:3px 10px; border-radius:20px; margin-bottom:8px;
+}
+.scenario-text{
+  font-size:1.02rem; line-height:1.5; color:#f8fafc;
+  background:rgba(0,0,0,0.2); padding:12px 14px; border-radius:12px;
+  border-left:4px solid var(--laranja); margin-bottom:16px;
+}
+.options{ display:flex; flex-direction:column; gap:10px; }
+.opt{
+  cursor:pointer; text-align:left; border:2px solid rgba(255,255,255,0.18);
+  background:linear-gradient(180deg,#173a86,#102a63);
+  color:#fff; padding:14px 14px; border-radius:14px;
+  font-size:.95rem; font-weight:600; font-family:inherit;
+  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  box-shadow:0 5px 0 rgba(0,0,0,0.35);
+}
+/* Efeito hover 3D */
+.opt:hover{ transform:translateY(-3px) scale(1.01); border-color:var(--amarelo); box-shadow:0 8px 14px rgba(0,0,0,.4); }
+.opt:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,0.35); }
+.opt.correct{ background:linear-gradient(180deg,#65a30d,#3f6212); border-color:var(--verde); }
+.opt.wrong  { background:linear-gradient(180deg,#dc2626,#7f1d1d); border-color:var(--vermelho); }
+.opt:disabled{ cursor:default; opacity:.9; }
+
+/* Caixa de explicação educativa (feedback pós-resposta) */
+.feedback{
+  margin-top:14px; padding:14px; border-radius:14px; animation:slideUp .4s ease;
+  font-size:.92rem; line-height:1.5;
+}
+.feedback.good{ background:rgba(132,204,22,0.18); border:1px solid var(--verde); }
+.feedback.bad { background:rgba(239,68,68,0.16);  border:1px solid var(--vermelho); }
+.feedback .fb-title{ font-weight:900; font-size:1.05rem; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.feedback .edu{ margin-top:8px; font-size:.86rem; color:#e2e8f0; background:rgba(0,0,0,0.22); padding:9px 11px; border-radius:10px; }
+.feedback .edu b{ color:var(--amarelo); }
+.energy-delta{ font-weight:900; }
+.energy-delta.up{ color:var(--verde); }
+.energy-delta.down{ color:#fca5a5; }
+
+/* ===========================================================================
+   TRANSIÇÃO (spinner de bola)
+   =========================================================================== */
+#transition{
+  position:fixed; inset:0; z-index:50;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:rgba(4,12,35,0.85); backdrop-filter:blur(3px);
+}
+.spin-ball{ font-size:4.5rem; animation:spinBall .8s linear infinite; }
+.spin-text{ margin-top:14px; font-weight:800; color:var(--amarelo); letter-spacing:1px; }
+
+/* ===========================================================================
+   TELA FINAL / VITÓRIA / GAME OVER
+   =========================================================================== */
+.end-emoji{ text-align:center; font-size:4rem; animation:pop .5s ease; }
+.end-title{ text-align:center; font-size:1.7rem; font-weight:900; margin:4px 0 4px; }
+.end-title.win { color:var(--amarelo); text-shadow:0 0 18px rgba(251,191,36,.6); }
+.end-title.lose{ color:var(--vermelho); }
+.stars{ text-align:center; font-size:2.4rem; margin:6px 0 10px; letter-spacing:6px; }
+.stats{
+  background:rgba(0,0,0,0.25); border-radius:14px; padding:14px 16px; margin:10px 0 16px;
+}
+.stat-row{ display:flex; justify-content:space-between; padding:6px 0; font-size:.95rem; border-bottom:1px dashed rgba(255,255,255,0.12); }
+.stat-row:last-child{ border-bottom:none; }
+.stat-row b{ color:var(--amarelo); }
+
+/* ===========================================================================
+   RANKING
+   =========================================================================== */
+.rank-section{ margin-top:18px; }
+.rank-head{ display:flex; align-items:center; gap:8px; font-weight:900; font-size:1.1rem; color:var(--verde); margin-bottom:10px; }
+.name-row{ display:flex; gap:8px; margin-bottom:12px; }
+.name-row input{
+  flex:1; border-radius:12px; border:2px solid rgba(255,255,255,0.2);
+  background:rgba(0,0,0,0.3); color:#fff; padding:12px 12px; font-size:1rem; font-family:inherit;
+}
+.name-row input:focus{ outline:none; border-color:var(--amarelo); }
+.name-row .btn{ width:auto; padding:12px 16px; font-size:.95rem; }
+.rank-list{ list-style:none; }
+.rank-list li{
+  display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:10px; margin-bottom:6px;
+  background:rgba(255,255,255,0.06); font-size:.9rem;
+}
+.rank-list li.me{ background:rgba(251,191,36,0.22); border:1px solid var(--amarelo); }
+.rank-pos{ font-weight:900; width:26px; text-align:center; }
+.rank-pos.gold{ color:#fcd34d; } .rank-pos.silver{ color:#e5e7eb; } .rank-pos.bronze{ color:#d97706; }
+.rank-name{ flex:1; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rank-score{ font-weight:900; color:var(--amarelo); }
+.rank-msg{ text-align:center; font-size:.85rem; color:#94a3b8; padding:8px; }
+
+/* Confetes */
+.confetti{ position:fixed; top:-10px; width:10px; height:14px; z-index:60; pointer-events:none; border-radius:2px; }
+
+/* Toast easter egg */
+#toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(120%);
+  background:var(--verde); color:var(--escuro); font-weight:800; padding:12px 20px;
+  border-radius:30px; z-index:80; box-shadow:0 8px 24px rgba(0,0,0,.4); transition:transform .4s ease;
+  font-size:.95rem; text-align:center;
+}
+#toast.show{ transform:translateX(-50%) translateY(0); }
+
+.credits{ text-align:center; font-size:.72rem; color:#64748b; margin-top:18px; }
+
+/* ===========================================================================
+   PRANCHETA (CLIPBOARD) + DIAGRAMA DE QUADRA
+   =========================================================================== */
+/* Espaço no topo do cartão para o clipe */
+.card{ padding-top:36px; }
+
+/* Clipe metálico no topo da prancheta */
+.clip{
+  position:absolute; top:-15px; left:50%; transform:translateX(-50%);
+  width:120px; height:30px; z-index:6;
+  background:linear-gradient(180deg,#e2e8f0,#94a3b8 55%,#64748b);
+  border-radius:8px; border:1px solid #475569;
+  box-shadow:0 5px 12px rgba(0,0,0,.55), inset 0 2px 2px rgba(255,255,255,.7);
+}
+.clip::after{ /* boca do clipe */
+  content:''; position:absolute; bottom:-8px; left:50%; transform:translateX(-50%);
+  width:66px; height:16px; background:linear-gradient(180deg,#475569,#1e293b);
+  border-radius:0 0 8px 8px; box-shadow:inset 0 -2px 3px rgba(0,0,0,.6);
+}
+
+/* Cabeçalho "prancheta do técnico" */
+.board-header{
+  text-align:center; font-weight:900; letter-spacing:2px; font-size:.82rem;
+  color:var(--verde); text-transform:uppercase; margin-bottom:12px;
+  text-shadow:0 1px 4px rgba(0,0,0,.5);
+}
+
+/* Barra superior do jogo (botão voltar + título centralizado) */
+.game-topbar{ position:relative; display:flex; align-items:center; justify-content:center; margin-bottom:4px; }
+.game-topbar .board-header{ margin-bottom:0; }
+.back-btn{
+  position:absolute; left:0; top:50%; transform:translateY(-50%);
+  background:rgba(255,255,255,.1); color:#e2e8f0; border:1px solid rgba(255,255,255,.28);
+  border-radius:20px; padding:7px 13px; font-size:.78rem; font-weight:800;
+  cursor:pointer; font-family:inherit; transition:background .15s, color .15s, transform .1s;
+}
+.back-btn:hover{ background:rgba(255,255,255,.2); color:#fff; }
+.back-btn:active{ transform:translateY(-50%) scale(.94); }
+
+/* Container do diagrama da quadra (a "folha" da prancheta) */
+.court{
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 14px, transparent 14px 28px),
+    linear-gradient(160deg,#0e7a5f,#0a5643);
+  border-radius:14px; padding:8px 8px 4px; margin-bottom:14px;
+  border:2px solid rgba(255,255,255,.28);
+  box-shadow:inset 0 0 22px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.35);
+  animation:fadeIn .5s ease;
+}
+.court-svg{ width:100%; height:auto; display:block; }
+.court-cap{ text-align:center; font-size:.7rem; color:#d1fae5; margin-top:4px; font-style:italic; }
+
+/* Opções renderizadas como JOGADAS DESENHADAS */
+.opt .opt-hint{
+  display:block; font-size:.66rem; color:#93c5fd; margin-bottom:7px;
+  letter-spacing:1.5px; text-transform:uppercase; font-weight:800;
+}
+.play-diagram{ display:flex; align-items:center; flex-wrap:wrap; gap:6px 5px; }
+.play-step{
+  display:inline-flex; align-items:center; gap:5px;
+  background:rgba(0,0,0,.30); border:1px solid rgba(255,255,255,.22);
+  border-radius:20px; padding:5px 11px 5px 5px; font-size:.82rem; font-weight:700;
+}
+.play-step i{
+  font-style:normal; width:19px; height:19px; border-radius:50%;
+  background:var(--amarelo); color:var(--escuro);
+  font-size:.68rem; font-weight:900; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.play-connect{ color:var(--amarelo); font-weight:900; font-size:1.05rem; }
+.opt.correct .play-step{ background:rgba(0,0,0,.25); border-color:rgba(255,255,255,.4); }
+
+/* ===========================================================================
+   FUNDO (cena de vôlei) + centralização compacta
+   =========================================================================== */
+#bg-scene{ position:fixed; inset:0; z-index:-2; }
+#bg-scene svg{ width:100%; height:100%; display:block; }
+#bg-overlay{
+  position:fixed; inset:0; z-index:-1;
+  background:radial-gradient(circle at 50% 38%, rgba(8,15,40,.30), rgba(6,11,33,.85));
+}
+
+/* Cartão centralizado, com rolagem interna apenas se necessário */
+.card{ max-height:96vh; overflow-y:auto; margin:auto; transition:max-width .3s ease; }
+.card.wide{ max-width:1180px; }   /* alarga durante o jogo (3 colunas) */
+.card::-webkit-scrollbar{ width:8px; }
+.card::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.25); border-radius:8px; }
+
+/* Layout em 3 colunas: prancheta (esq.) | cenário+opções (meio) | feedback (dir.) */
+.game-grid{ display:grid; grid-template-columns:1.05fr 1fr 0.95fr; gap:16px; align-items:stretch; }
+.col-left, .col-mid, .col-right{ min-width:0; }   /* evita estouro do grid */
+.col-right{ display:flex; flex-direction:column; }
+#feedback-area{ display:flex; flex-direction:column; flex:1 1 auto; }
+.continue-btn{ margin-top:auto; }   /* botão Continuar fixo no rodapé da coluna */
+
+/* Placeholder da coluna de feedback (antes de responder) */
+.fb-placeholder{
+  border:2px dashed rgba(255,255,255,.2); border-radius:14px;
+  padding:18px 14px; text-align:center; color:#94a3b8; font-size:.9rem;
+  font-weight:600; line-height:1.5; background:rgba(255,255,255,.03);
+}
+
+/* Colapsa para 2 colunas (tablet) e 1 coluna (celular) */
+@media(max-width:980px){
+  .game-grid{ grid-template-columns:1fr 1fr; }
+  .col-right{ grid-column:1 / -1; }      /* feedback ocupa a largura toda embaixo */
+  .continue-btn{ margin-top:14px; }
+}
+@media(max-width:640px){
+  .game-grid{ grid-template-columns:1fr; }
+  .col-right{ grid-column:auto; }
+}
+
+/* Entrada de nome na tela inicial */
+.name-entry{ margin-bottom:14px; text-align:center; }
+.name-entry label{ display:block; font-size:.85rem; color:#e2e8f0; margin-bottom:7px; font-weight:700; }
+.name-entry input{
+  width:100%; border-radius:14px; border:2px solid rgba(255,255,255,.25);
+  background:rgba(0,0,0,.3); color:#fff; padding:13px 14px; font-size:1.05rem;
+  font-family:inherit; text-align:center; font-weight:700;
+}
+.name-entry input:focus{ outline:none; border-color:var(--amarelo); box-shadow:0 0 14px rgba(251,191,36,.4); }
+
+/* Cenário centralizado e compacto */
+.scenario{ text-align:center; }
+.scenario-text{ text-align:center; font-size:.96rem; padding:9px 12px; margin-bottom:12px; }
+.play-diagram{ justify-content:center; }
+.court{ margin-bottom:10px; }
+.court-svg{ width:100%; height:auto; max-height:44vh; }   /* escala pela coluna, com teto */
+.options{ gap:8px; }
+.opt{ padding:11px 12px; }
+.hud{ margin-bottom:14px; }
+.rounds{ flex-wrap:wrap; }
+.coach{ margin:10px 0 0; }
+
+/* Card de REGRA (quiz) — visual de árbitro/regulamento */
+.rulecard{
+  background:linear-gradient(160deg,#fcd34d,#f97316);
+  color:#3a1d00; border-radius:14px; padding:12px; margin-bottom:12px;
+  border:2px solid rgba(255,255,255,.45);
+  box-shadow:0 4px 14px rgba(0,0,0,.35), inset 0 0 18px rgba(255,255,255,.22);
+  animation:pop .4s ease;
+}
+.rc-icon{ font-size:1.9rem; line-height:1; }
+.rc-title{ font-weight:900; font-size:1.15rem; letter-spacing:1px; }
+.rc-sub{ font-size:.8rem; font-weight:700; opacity:.85; }
+.opt-text{ font-size:.95rem; font-weight:700; }
+
+/* Responsivo */
+@media(max-width:420px){
+  .title{ font-size:1.6rem; } .title .l2{ font-size:1.1rem; }
+  .card{ padding:36px 14px 24px; }
+  .scenario-text{ font-size:.92rem; }
+  .play-step{ font-size:.76rem; padding:4px 9px 4px 4px; }
+  .court-svg{ height:min(20vh,150px); }
+}
+@media(min-height:800px){
+  .court-svg{ height:190px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ============================ FUNDO: CENA DE VÔLEI ============================ -->
+<!-- Ilustração da partida (SVG inline, sem imagem externa — sempre carrega) -->
+<div id="bg-scene" aria-hidden="true">
+<svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bgSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a53ad"/><stop offset="0.55" stop-color="#132a68"/><stop offset="1" stop-color="#0a1740"/>
+    </linearGradient>
+    <linearGradient id="bgFloor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fcd34d"/><stop offset="1" stop-color="#c2570a"/>
+    </linearGradient>
+    <pattern id="netMesh" width="15" height="15" patternUnits="userSpaceOnUse">
+      <path d="M15 0H0V15" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <!-- ginásio -->
+  <rect width="1200" height="800" fill="url(#bgSky)"/>
+  <circle cx="210" cy="120" r="150" fill="rgba(255,255,255,.06)"/>
+  <circle cx="1010" cy="90" r="120" fill="rgba(255,255,255,.05)"/>
+  <rect x="0" y="250" width="1200" height="110" fill="rgba(0,0,0,.14)"/>   <!-- arquibancada -->
+  <!-- chão em perspectiva -->
+  <polygon points="120,800 1080,800 800,430 400,430" fill="url(#bgFloor)"/>
+  <polygon points="120,800 1080,800 800,430 400,430" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="4"/>
+  <line x1="255" y1="615" x2="945" y2="615" stroke="rgba(255,255,255,.55)" stroke-width="3"/>
+  <line x1="600" y1="800" x2="600" y2="430" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+  <!-- rede -->
+  <rect x="405" y="300" width="390" height="66" fill="url(#netMesh)"/>
+  <rect x="405" y="296" width="390" height="8" fill="#fff"/>
+  <rect x="405" y="362" width="390" height="5" fill="#fff"/>
+  <rect x="402" y="286" width="7" height="150" fill="#e5e7eb"/>
+  <rect x="791" y="286" width="7" height="150" fill="#e5e7eb"/>
+  <!-- jogador bloqueador (braços para cima) -->
+  <g transform="translate(500,500) scale(1.5)" fill="#0a1740">
+    <circle cx="0" cy="-58" r="15"/>
+    <path d="M-13,-42 Q0,-49 13,-42 L11,8 Q0,14 -11,8 Z"/>
+    <rect x="-21" y="-94" width="9" height="54" rx="4"/>
+    <rect x="12" y="-94" width="9" height="54" rx="4"/>
+    <rect x="-12" y="6" width="9" height="42" rx="4" transform="rotate(9 -7 27)"/>
+    <rect x="3" y="6" width="9" height="42" rx="4" transform="rotate(-9 7 27)"/>
+  </g>
+  <!-- jogador atacante (braço armado para cortar) -->
+  <g transform="translate(730,500) scale(1.6)" fill="#0a1740">
+    <circle cx="2" cy="-58" r="15"/>
+    <path d="M-11,-42 Q2,-49 15,-42 L13,8 Q2,14 -9,8 Z"/>
+    <rect x="9" y="-98" width="9" height="52" rx="4" transform="rotate(14 13 -72)"/>
+    <rect x="-22" y="-40" width="9" height="36" rx="4" transform="rotate(45 -17 -22)"/>
+    <rect x="-15" y="6" width="9" height="42" rx="4" transform="rotate(24 -10 27)"/>
+    <rect x="6" y="6" width="9" height="42" rx="4" transform="rotate(-16 10 27)"/>
+  </g>
+  <!-- bola no alto -->
+  <g transform="translate(650,235)">
+    <circle r="26" fill="#fff" stroke="#e2e8f0" stroke-width="2"/>
+    <path d="M-26,-3 Q0,-15 26,-3" fill="none" stroke="#f59e0b" stroke-width="3"/>
+    <path d="M-20,17 Q-6,-6 8,-24" fill="none" stroke="#f59e0b" stroke-width="3"/>
+    <path d="M20,17 Q6,-6 -8,-24" fill="none" stroke="#f59e0b" stroke-width="3"/>
+  </g>
+</svg>
+</div>
+<div id="bg-overlay" aria-hidden="true"></div>
+
+<!-- ============================ CARTÃO / JOGO ============================ -->
+<div class="card" id="card">
+
+  <!-- Clipe metálico da prancheta -->
+  <div class="clip"></div>
+
+  <!-- ---------- TELA 1: APRESENTAÇÃO ---------- -->
+  <section id="start-screen">
+    <span class="hero-ball">🏐</span>
+    <h1 class="title">
+      <span class="l1">COMANDO TÉCNICO</span>
+      <span class="l2">Desafio na Quadra</span>
+    </h1>
+    <p class="subtitle">"Tome as decisões certas e lidere seu time à vitória"</p>
+
+    <div class="intro-box">
+      👔 Você é o <b>Técnico</b>. O set alterna entre <b>🏐 jogadas</b> (monte a sequência
+      certa de fundamentos na prancheta) e <b>📋 quiz de regras</b> do vôlei.
+      Acerto recupera energia; erro cansa o time. Vença <b>6 rodadas</b> sem zerar a energia! ⚡<br>
+      <span style="color:#94a3b8;font-size:.85rem">Dica: toque no técnico durante o jogo. 😉</span>
+    </div>
+
+    <div class="name-entry">
+      <label for="player-name">✍️ Digite seu nome para entrar no ranking:</label>
+      <input id="player-name" maxlength="16" placeholder="Seu nome ou apelido"
+             autocomplete="off" onkeydown="if(event.key==='Enter')Game.start()" />
+    </div>
+
+    <button class="btn" onclick="Game.start()">▶️ INICIAR PARTIDA</button>
+    <button class="btn secondary" style="margin-top:10px" onclick="Ranking.showMenu()">🏆 Ver Ranking Global</button>
+
+    <p class="credits">Jogo educativo de vôlei • Fundamentos: Recepção → Levantamento → Ataque</p>
+  </section>
+
+  <!-- ---------- TELA 2: JOGO ---------- -->
+  <section id="game-screen" class="hidden">
+    <div class="game-topbar">
+      <button class="back-btn" onclick="Game.backToStart()">⬅️ Início</button>
+      <div class="board-header">📋 Prancheta do Técnico</div>
+    </div>
+
+    <!-- HUD: barra de energia (largura total, sempre visível no topo) -->
+    <div class="hud">
+      <div class="hud-top">
+        <span>⚡ ENERGIA DO TIME</span>
+        <span id="round-counter">Rodada 1 / 10</span>
+      </div>
+      <div class="energy-wrap">
+        <div class="energy-fill" id="energy-fill"></div>
+        <div class="energy-label" id="energy-label">100 ⚡</div>
+      </div>
+      <!-- Bolinhas de rodada -->
+      <div class="rounds" id="rounds"></div>
+    </div>
+
+    <!-- Três colunas: PRANCHETA (esq.) | CENÁRIO+OPÇÕES (meio) | FEEDBACK (dir.) -->
+    <div class="game-grid">
+      <div class="col-left">
+        <!-- Diagrama da jogada / card de regra -->
+        <div id="stimulus-area"></div>
+        <!-- Avatar do técnico -->
+        <div class="coach">
+          <span class="coach-avatar" id="coach-avatar" onclick="Game.pokeCoach()">🧑‍🏫</span>
+          <div class="coach-speech" id="coach-speech">
+            <b>Técnico:</b> Vamos com tudo, time! Leia a jogada e decida rápido.
+          </div>
+        </div>
+      </div>
+      <div class="col-mid">
+        <!-- Texto do cenário + opções (preenchidos via JS) -->
+        <div id="scenario-area"></div>
+      </div>
+      <div class="col-right">
+        <!-- Feedback + botão Continuar (preenchidos via JS) -->
+        <div id="feedback-area"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- TELA 3: FIM (vitória / game over) ---------- -->
+  <section id="end-screen" class="hidden">
+    <!-- Bloco de resultado da partida (oculto no modo "ver ranking" pelo menu) -->
+    <div id="end-win-block">
+      <div class="end-emoji" id="end-emoji">🏆</div>
+      <h2 class="end-title" id="end-title">Vitória!</h2>
+      <div class="stars" id="end-stars">⭐⭐⭐</div>
+      <div class="stats" id="end-stats"></div>
+    </div>
+
+    <!-- Ranking (salvo automaticamente com o nome informado no início) -->
+    <div class="rank-section">
+      <div class="rank-head">🏆 Ranking Global</div>
+      <ul class="rank-list" id="rank-list"></ul>
+      <div class="rank-msg" id="rank-msg">Carregando ranking...</div>
+    </div>
+
+    <button class="btn secondary" id="end-btn" style="margin-top:16px" onclick="Game.start()">🔄 NOVA PARTIDA</button>
+  </section>
+
+</div>
+
+<!-- ============================ TRANSIÇÃO ============================ -->
+<div id="transition" class="hidden">
+  <div class="spin-ball">🏐</div>
+  <div class="spin-text" id="transition-text">Próxima jogada...</div>
+</div>
+
+<!-- ============================ TOAST ============================ -->
+<div id="toast"></div>
+
+<script>
+/* ===========================================================================
+   1. BANCO DE CENÁRIOS (perguntas)
+   ---------------------------------------------------------------------------
+   Cada cenário tem:
+     tag         -> etiqueta curta do tipo de jogada
+     tier        -> 1 fácil, 2 médio, 3 difícil/ambíguo (usado p/ ordenar)
+     texto       -> narração do cenário
+     dano        -> energia perdida no ERRO (15 a 25)
+     opcoes      -> 3 sequências; exatamente 1 tem correta:true
+     explica     -> texto EDUCATIVO exibido após responder (o "porquê")
+   A lógica segue o vôlei real: Defesa(Manchete/Toque/Bloqueio) -> Levantamento -> Ataque(Cortada/Largada).
+   =========================================================================== */
+const CENARIOS = [
+  { /* 1 – obrigatório */
+    tag:"Saque forte", tier:1, dano:20,
+    texto:"🏐 O sacador adversário manda uma <b>bomba no fundo da quadra</b>. A bola vem forte e baixa. Como o time deve armar a jogada?",
+    opcoes:[
+      { txt:"🛡️ Manchete → 🙌 Levantamento → 💥 Cortada", correta:true },
+      { txt:"✋ Toque → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"🙌 Levantamento → 🛡️ Manchete → 💥 Cortada", correta:false },
+    ],
+    explica:"Em saques <b>fortes e baixos</b>, a recepção deve ser de <b>manchete</b> (braços firmes), que controla melhor a bola potente. O toque com os dedos seria arriscado (condução/machucar os dedos). Só depois vem o levantamento e a cortada."
+  },
+  { /* 2 – obrigatório */
+    tag:"Ataque fraco", tier:1, dano:15,
+    texto:"🏐 O adversário devolve uma <b>bola fraca e sem direção</b>, sobrando fácil na sua quadra. É a chance de finalizar com inteligência.",
+    opcoes:[
+      { txt:"🛡️ Manchete → 🙌 Levantamento → 🪶 Largada", correta:true },
+      { txt:"🧱 Bloqueio → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"🛡️ Manchete → 💥 Cortada → 🙌 Levantamento", correta:false },
+    ],
+    explica:"Numa <b>bola fácil</b>, controle primeiro com manchete, levante e finalize. A <b>largada</b> (largadinha) surpreende a defesa parada. Bloqueio não se usa quando a bola já está no seu campo, e cortar antes de levantar quebra a ordem dos toques."
+  },
+  { /* 3 – obrigatório */
+    tag:"Sobra na rede", tier:2, dano:18,
+    texto:"🏐 O levantador adversário <b>errou e a bola sobrou por cima da rede</b>, vindo mole para o seu lado. Você está na rede!",
+    opcoes:[
+      { txt:"🧱 Bloqueio → 🙌 Levantamento → 💥 Cortada", correta:true },
+      { txt:"🛡️ Manchete → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"🧱 Bloqueio → 💥 Cortada → 🙌 Levantamento", correta:false },
+    ],
+    explica:"Com a bola sobrando na rede, o <b>toque no bloqueio conta como 1º toque</b> e já domina a jogada. Depois levanta e corta. Recuar para manchete perderia a vantagem da rede, e cortar antes de levantar inverte a sequência."
+  },
+  { /* 4 – obrigatório */
+    tag:"Saque curto", tier:2, dano:17,
+    texto:"🏐 O adversário aplica um <b>saque curto (largada de saque)</b> que cai pertinho da rede. A bola vem <b>suave e alta</b>, exigindo toque preciso.",
+    opcoes:[
+      { txt:"✋ Toque → 🙌 Levantamento → 💥 Cortada", correta:true },
+      { txt:"🧱 Bloqueio → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"🙌 Levantamento → ✋ Toque → 💥 Cortada", correta:false },
+    ],
+    explica:"Numa bola <b>suave e alta</b>, a defesa de <b>toque</b> (com os dedos) dá mais precisão que a manchete. Não se bloqueia um saque (a bola vem do fundo, não da rede). E o levantamento nunca vem antes do 1º toque de defesa."
+  },
+  { /* 5 – obrigatório */
+    tag:"Bola na rede", tier:2, dano:22,
+    texto:"🏐 O time adversário <b>jogou a bola na rede</b> e ela voltou para o seu campo. Atenção: você tem <b>apenas 2 toques</b> para armar o contra-ataque!",
+    opcoes:[
+      { txt:"🙌 Levantamento → 💥 Cortada  (2 toques)", correta:true },
+      { txt:"🛡️ Manchete → 🙌 Levantamento → 💥 Cortada  (3 toques)", correta:false },
+      { txt:"💥 Cortada → 🙌 Levantamento  (2 toques)", correta:false },
+    ],
+    explica:"Como o adversário tocou por último (na rede), a bola volta e você tem <b>2 toques</b>: levanta e corta. Usar 3 toques (manchete + levantamento + cortada) daria <b>4 contatos no total da jogada</b> e não é a leitura pedida. E não se corta antes de levantar."
+  },
+  { /* 6 – obrigatório */
+    tag:"Contra-ataque", tier:3, dano:25,
+    texto:"🏐 Jogada rápida! Seu <b>bloqueio amorteceu</b> a cortada adversária e a bola <b>voltou para o seu campo</b>. É hora do contra-ataque relâmpago.",
+    opcoes:[
+      { txt:"🧱 Bloqueio → 🙌 Levantamento → 💥 Cortada", correta:true },
+      { txt:"🛡️ Manchete → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"🧱 Bloqueio → 💥 Cortada → 🙌 Levantamento", correta:false },
+    ],
+    explica:"O <b>toque no bloqueio já foi o 1º toque</b> da jogada. Com a bola de volta, sobra <b>levantamento + cortada</b> para o contra-ataque. Chamar de manchete ignora que o bloqueio já contou; e cortar antes de levantar inverte a ordem."
+  },
+  { /* 7 – extra educativo */
+    tag:"Saque flutuante", tier:2, dano:19,
+    texto:"🏐 Vem um <b>saque flutuante (viagem)</b> que balança no ar e cai puxando o passador para o lado. Recepção difícil de controlar.",
+    opcoes:[
+      { txt:"🛡️ Manchete → 🙌 Levantamento → 💥 Cortada", correta:true },
+      { txt:"✋ Toque → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"🛡️ Manchete → 💥 Cortada → 🙌 Levantamento", correta:false },
+    ],
+    explica:"No saque <b>flutuante</b>, a bola muda de trajetória; a <b>manchete</b> oferece uma superfície estável para o passe. O toque é imprevisível numa bola que 'morre' no ar. E a ordem correta é sempre defesa → levantamento → ataque."
+  },
+  { /* 8 – extra educativo */
+    tag:"Ataque na diagonal", tier:3, dano:23,
+    texto:"🏐 O ponteiro adversário <b>crava uma cortada forte na diagonal</b>, longe do seu bloqueio. O líbero precisa salvar lá no fundo.",
+    opcoes:[
+      { txt:"🛡️ Manchete (defesa) → 🙌 Levantamento → 💥 Cortada", correta:true },
+      { txt:"🧱 Bloqueio → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"✋ Toque → 🙌 Levantamento → 💥 Cortada", correta:false },
+    ],
+    explica:"A cortada passou <b>longe do bloqueio</b>, então quem resolve é a <b>defesa de manchete</b> no fundo. Tentar bloquear uma bola que já passou não adianta, e toque numa bola muito forte tende a machucar/condução."
+  },
+  { /* 9 – extra educativo/tático */
+    tag:"Bloqueio duplo", tier:3, dano:21,
+    texto:"🏐 A bola sobra fácil, mas o adversário montou um <b>bloqueio duplo bem fechado</b> na sua frente. Cortar reto seria bloqueado na certa.",
+    opcoes:[
+      { txt:"🛡️ Manchete → 🙌 Levantamento → 🪶 Largada", correta:true },
+      { txt:"🛡️ Manchete → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"🧱 Bloqueio → 🙌 Levantamento → 💥 Cortada", correta:false },
+    ],
+    explica:"Contra um <b>bloqueio duplo fechado</b>, a jogada inteligente é a <b>largada</b> por cima ou na frente do bloqueio, explorando o espaço vazio. Cortar reto cairia no bloqueio. E não se bloqueia a própria bola sobrando."
+  },
+  { /* 10 – extra educativo */
+    tag:"Ataque de fundo (pipe)", tier:3, dano:24,
+    texto:"🏐 Recepção perfeita! O adversário <b>armou bloqueio na rede</b> esperando os pontas. Você tem um jogador rápido chegando do fundo (posição 6).",
+    opcoes:[
+      { txt:"🛡️ Manchete → 🙌 Levantamento → 💥 Cortada de fundo (pipe)", correta:true },
+      { txt:"🛡️ Manchete → 💥 Cortada de fundo → 🙌 Levantamento", correta:false },
+      { txt:"✋ Toque → 🧱 Bloqueio → 💥 Cortada", correta:false },
+    ],
+    explica:"O <b>pipe</b> é o ataque pelo meio do fundo (posição 6), ótimo para surpreender o bloqueio focado nas pontas. A sequência é defesa → levantamento → ataque de fundo. As outras invertem a ordem ou colocam um bloqueio sem sentido no meio da armação."
+  },
+  { /* 11 – extra educativo */
+    tag:"Recepção fora de rede", tier:2, dano:18,
+    texto:"🏐 A recepção saiu <b>ruim e afastou a bola da rede</b>, indo para o fundo. O levantador não alcança a rede a tempo.",
+    opcoes:[
+      { txt:"🛡️ Manchete → 🙌 Levantamento (de fundo) → 💥 Cortada", correta:true },
+      { txt:"🛡️ Manchete → 🪶 Largada → 💥 Cortada", correta:false },
+      { txt:"🙌 Levantamento → 🛡️ Manchete → 💥 Cortada", correta:false },
+    ],
+    explica:"Mesmo com a bola longe da rede, mantém-se a estrutura: defesa (manchete), <b>levantamento</b> (mesmo que mais afastado) e cortada. Não existe 'largada' no meio da armação como 2º toque, e o levantamento nunca vem antes da defesa."
+  },
+  { /* 12 – extra educativo */
+    tag:"Devolução de graça", tier:1, dano:16,
+    texto:"🏐 O adversário, pressionado, <b>devolve a bola 'de graça'</b> por cima com um toque alto e sem força. Sobra tempo para pensar.",
+    opcoes:[
+      { txt:"✋ Toque → 🙌 Levantamento → 💥 Cortada", correta:true },
+      { txt:"🧱 Bloqueio → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"💥 Cortada → 🙌 Levantamento → ✋ Toque", correta:false },
+    ],
+    explica:"Numa <b>bola de graça</b> alta e mansa, o <b>toque</b> dá mais controle para iniciar a jogada com calma. Não se bloqueia uma bola que cai no seu campo, e finalizar (cortada) tem que ser o ÚLTIMO toque, não o primeiro."
+  },
+  { /* 13 – extra educativo */
+    tag:"Saque por baixo", tier:1, dano:16,
+    texto:"🏐 O adversário faz um <b>saque por baixo</b>: a bola sobe bem alta e cai lenta na sua quadra. Tempo de sobra para receber com capricho.",
+    opcoes:[
+      { txt:"✋ Toque → 🙌 Levantamento → 💥 Cortada", correta:true },
+      { txt:"🧱 Bloqueio → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"🙌 Levantamento → ✋ Toque → 💥 Cortada", correta:false },
+    ],
+    explica:"Bola <b>alta e lenta</b> pede <b>toque</b>, que dá mais precisão para começar a jogada. Não se bloqueia um saque, e o levantamento nunca vem antes do 1º toque de defesa."
+  },
+  { /* 14 – extra educativo/tático */
+    tag:"Rápida de meio", tier:3, dano:23,
+    texto:"🏐 Recepção perfeita bem na frente do levantador! O <b>meio-de-rede está livre</b> e chega voando para uma bola rápida. Aproveite a velocidade.",
+    opcoes:[
+      { txt:"🛡️ Manchete → 🙌 Levantamento → 💥 Cortada (rápida de meio)", correta:true },
+      { txt:"🛡️ Manchete → 💥 Cortada → 🙌 Levantamento", correta:false },
+      { txt:"✋ Toque → 🧱 Bloqueio → 💥 Cortada", correta:false },
+    ],
+    explica:"A <b>bola rápida (de meio)</b> é armada com recepção, levantamento curto e veloz, e ataque do central — surpreende o bloqueio. As outras invertem a ordem ou colocam um bloqueio sem sentido na armação."
+  },
+  { /* 15 – extra educativo */
+    tag:"Largada adversária", tier:2, dano:19,
+    texto:"🏐 Em vez de cortar forte, o adversário <b>larga a bola</b> logo atrás do seu bloqueio. Ela cai mansa no meio da quadra — corra e salve!",
+    opcoes:[
+      { txt:"✋ Toque → 🙌 Levantamento → 💥 Cortada", correta:true },
+      { txt:"🧱 Bloqueio → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"🙌 Levantamento → ✋ Toque → 💥 Cortada", correta:false },
+    ],
+    explica:"Uma <b>largada</b> cai mansa: defende-se com <b>toque</b> (ou manchete) para controlar, depois levanta e ataca. Bloquear não resolve uma bola que já caiu no seu campo, e a ordem defesa → levantamento → ataque é obrigatória."
+  },
+  { /* 16 – extra educativo/tático */
+    tag:"Rebote do bloqueio", tier:3, dano:24,
+    texto:"🏐 Sua cortada bateu no <b>bloqueio duplo adversário</b> e a bola <b>voltou para o seu campo</b>! É a hora da cobertura para não perder o ponto.",
+    opcoes:[
+      { txt:"🛡️ Manchete → 🙌 Levantamento → 💥 Cortada", correta:true },
+      { txt:"🧱 Bloqueio → 🙌 Levantamento → 💥 Cortada", correta:false },
+      { txt:"🛡️ Manchete → 💥 Cortada → 🙌 Levantamento", correta:false },
+    ],
+    explica:"No <b>rebote do bloqueio</b>, a bola cai no seu campo e a equipe faz a <b>cobertura</b>: defende de manchete, levanta e ataca de novo. Não há bloqueio aqui (a bola já está do seu lado) e a cortada é sempre o último toque."
+  },
+];
+
+/* ===========================================================================
+   1b. DIAGRAMAS DE JOGADA (prancheta) — vista de cima da quadra
+   ---------------------------------------------------------------------------
+   PLAYS: para cada tipo de lance, define a trajetória da bola (ball -> to),
+   a curvatura, a cor e enfeites (bloqueios/impacto na rede).
+   Sistema de coordenadas do SVG: viewBox 300x210, rede na linha y=105,
+   metade de cima = adversário, metade de baixo = SEU time.
+   =========================================================================== */
+const PLAYS = {
+  saqueForte:    { ball:[235,30], to:[95,172],  curve:35,  color:'#f87171' },
+  ataqueFraco:   { ball:[150,92], to:[150,148], curve:20,  color:'#fbbf24' },
+  sobraRede:     { ball:[150,98], to:[168,134], curve:14,  color:'#a3e635', oppBlock:0 },
+  saqueCurto:    { ball:[68,28],  to:[150,126], curve:-30, color:'#fbbf24' },
+  bolaRede:      { ball:[150,104],to:[176,136], curve:10,  color:'#fbbf24', netHit:true },
+  contraAtaque:  { ball:[150,104],to:[112,150], curve:-16, color:'#a3e635', myBlock:true },
+  saqueFlutuante:{ ball:[225,30], to:[110,160], curve:55,  color:'#fbbf24' },
+  ataqueDiagonal:{ ball:[108,110],to:[250,182], curve:20,  color:'#f87171' },
+  bloqueioDuplo: { ball:[150,92], to:[150,144], curve:16,  color:'#fbbf24', oppBlock:2 },
+  pipe:          { ball:[150,180],to:[150,112], curve:0,   color:'#a3e635' },
+  recepForaRede: { ball:[220,30], to:[232,182], curve:25,  color:'#fbbf24' },
+  deGraca:       { ball:[150,92], to:[150,150], curve:40,  color:'#fbbf24' },
+  saquePorBaixo: { ball:[230,32], to:[150,130], curve:48,  color:'#fbbf24' },
+  rapidaMeio:    { ball:[150,152],to:[150,112], curve:0,   color:'#a3e635' },
+  largadaAdv:    { ball:[150,100],to:[178,132], curve:-14, color:'#fbbf24', oppBlock:1 },
+  rebote:        { ball:[150,104],to:[118,150], curve:14,  color:'#f87171', oppBlock:2 }
+};
+/* Mapeia a etiqueta do cenário -> tipo de jogada do diagrama */
+const TAG_PLAY = {
+  "Saque forte":"saqueForte", "Ataque fraco":"ataqueFraco", "Sobra na rede":"sobraRede",
+  "Saque curto":"saqueCurto", "Bola na rede":"bolaRede", "Contra-ataque":"contraAtaque",
+  "Saque flutuante":"saqueFlutuante", "Ataque na diagonal":"ataqueDiagonal",
+  "Bloqueio duplo":"bloqueioDuplo", "Ataque de fundo (pipe)":"pipe",
+  "Recepção fora de rede":"recepForaRede", "Devolução de graça":"deGraca",
+  "Saque por baixo":"saquePorBaixo", "Rápida de meio":"rapidaMeio",
+  "Largada adversária":"largadaAdv", "Rebote do bloqueio":"rebote"
+};
+
+/* Gera o SVG da quadra com a trajetória da bola animada */
+function drawCourt(playKey){
+  const p = PLAYS[playKey] || PLAYS.saqueForte;
+  const [x1,y1]=p.ball, [x2,y2]=p.to, curve=p.curve||0;
+  // ponto de controle da curva (perpendicular ao segmento)
+  const mx=(x1+x2)/2, my=(y1+y2)/2, dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||1;
+  const cx=(mx+(-dy/len)*curve).toFixed(1), cy=(my+(dx/len)*curve).toFixed(1);
+  const path=`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+
+  // Posições do SEU time (rodízio 1..6) — círculos verde-limão numerados
+  const you=[[75,124,4],[150,124,3],[225,124,2],[75,174,5],[150,174,6],[225,174,1]];
+  const dots=you.map(([x,y,n])=>
+    `<circle cx="${x}" cy="${y}" r="9" fill="rgba(163,230,53,.9)" stroke="#fff" stroke-width="1"/>`+
+    `<text x="${x}" y="${y+3.5}" text-anchor="middle" font-size="9" font-weight="bold" fill="#0f172a">${n}</text>`
+  ).join('');
+  // Adversário (marcadores discretos)
+  const odots=[[75,42],[150,42],[225,42]].map(([x,y])=>
+    `<circle cx="${x}" cy="${y}" r="7" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>`
+  ).join('');
+
+  // Bloqueios e impacto
+  let extra='';
+  if(p.oppBlock){ [135,165].slice(0,p.oppBlock).forEach(x=> extra+=`<text x="${x}" y="100" text-anchor="middle" font-size="15">✋</text>`); }
+  if(p.myBlock){ extra+=`<text x="150" y="118" text-anchor="middle" font-size="15">🙌</text>`; }
+  if(p.netHit){ extra+=`<text x="150" y="110" text-anchor="middle" font-size="13">💥</text>`; }
+
+  return `<svg viewBox="0 0 300 210" class="court-svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Diagrama da jogada na quadra">
+    <defs>
+      <marker id="ah-${playKey}" markerWidth="9" markerHeight="9" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="${p.color}"/>
+      </marker>
+    </defs>
+    <rect x="25" y="15"  width="250" height="90" fill="rgba(255,255,255,.04)"/>
+    <rect x="25" y="105" width="250" height="90" fill="rgba(255,255,255,.10)"/>
+    <rect x="25" y="15"  width="250" height="180" fill="none" stroke="#fff" stroke-width="2.5"/>
+    <line x1="25" y1="75"  x2="275" y2="75"  stroke="rgba(255,255,255,.5)" stroke-width="1.2" stroke-dasharray="5 5"/>
+    <line x1="25" y1="135" x2="275" y2="135" stroke="rgba(255,255,255,.5)" stroke-width="1.2" stroke-dasharray="5 5"/>
+    <line x1="16" y1="105" x2="284" y2="105" stroke="#fff" stroke-width="4" stroke-dasharray="3 3"/>
+    <circle cx="16" cy="105" r="3" fill="#fff"/><circle cx="284" cy="105" r="3" fill="#fff"/>
+    ${odots}${dots}
+    <text x="150" y="27"  text-anchor="middle" font-size="8" fill="rgba(255,255,255,.7)"  letter-spacing="1">ADVERSÁRIO</text>
+    <text x="150" y="191" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.9)"  letter-spacing="1">SEU TIME</text>
+    <path d="${path}" fill="none" stroke="${p.color}" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#ah-${playKey})" opacity=".92"/>
+    ${extra}
+    <text font-size="16" text-anchor="middle" dominant-baseline="middle">🏐<animateMotion dur="2.4s" repeatCount="indefinite" path="${path}" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines="0.4 0 0.6 1"/></text>
+  </svg>`;
+}
+
+/* Renderiza uma opção como "jogada desenhada": passos numerados ligados por setas */
+function renderPlay(txt){
+  const parts = txt.split('→').map(s=>s.trim()).filter(Boolean);
+  return '<div class="play-diagram">' + parts.map((s,i)=>{
+    const step = `<span class="play-step"><i>${i+1}</i>${s}</span>`;
+    return i < parts.length-1 ? step + '<span class="play-connect">➜</span>' : step;
+  }).join('') + '</div>';
+}
+
+/* ===========================================================================
+   1c. QUIZ DE REGRAS — perguntas de regulamento (intercaladas com as jogadas)
+   Mesma estrutura das jogadas: opcoes (1 correta), dano no erro, explica educativa.
+   =========================================================================== */
+const QUIZZES = [
+  { tag:"Toques", dano:15,
+    texto:"📋 Quantos toques, no máximo, cada equipe pode dar antes de mandar a bola para o outro lado?",
+    opcoes:[ {txt:"3 toques",correta:true},{txt:"2 toques",correta:false},{txt:"4 toques",correta:false} ],
+    explica:"Cada equipe tem até <b>3 toques</b> para devolver a bola — e nenhum jogador pode tocar duas vezes seguidas (exceto após o bloqueio)." },
+  { tag:"Bloqueio", dano:18,
+    texto:"📋 O contato da bola no bloqueio conta como um dos 3 toques da equipe?",
+    opcoes:[ {txt:"Não, o bloqueio não conta como toque",correta:true},{txt:"Sim, conta como o 1º toque",correta:false},{txt:"Sim, conta como o 3º toque",correta:false} ],
+    explica:"O toque no <b>bloqueio não conta</b>: depois de bloquear, a equipe ainda tem seus 3 toques para armar a jogada." },
+  { tag:"Pontuação", dano:15,
+    texto:"📋 Um set normal (não decisivo) é disputado até quantos pontos, sempre com 2 de vantagem?",
+    opcoes:[ {txt:"25 pontos",correta:true},{txt:"21 pontos",correta:false},{txt:"15 pontos",correta:false} ],
+    explica:"No <b>rally point</b>, o set vai até <b>25 pontos</b> (com diferença mínima de 2). Só o 5º set (tie-break) é até 15." },
+  { tag:"Jogadores", dano:15,
+    texto:"📋 Quantos jogadores de cada equipe ficam em quadra ao mesmo tempo?",
+    opcoes:[ {txt:"6 jogadores",correta:true},{txt:"5 jogadores",correta:false},{txt:"7 jogadores",correta:false} ],
+    explica:"São <b>6 jogadores</b> por equipe, distribuídos em duas linhas: 3 na frente (rede) e 3 no fundo." },
+  { tag:"Rodízio", dano:18,
+    texto:"📋 Ao reconquistar o direito de sacar, o que a equipe deve fazer?",
+    opcoes:[ {txt:"Girar o rodízio no sentido horário",correta:true},{txt:"Escolher qualquer sacador",correta:false},{txt:"Manter todos nas mesmas posições",correta:false} ],
+    explica:"Ao recuperar o saque, a equipe faz o <b>rodízio</b>: todos giram uma posição no <b>sentido horário</b>." },
+  { tag:"Condução", dano:17,
+    texto:"📋 Segurar ou acompanhar a bola por tempo demais em um toque é considerado o quê?",
+    opcoes:[ {txt:"Falta (condução)",correta:true},{txt:"Jogada válida",correta:false},{txt:"Ponto direto",correta:false} ],
+    explica:"A bola precisa ser <b>golpeada</b>, não segura. Acompanhá-la/segurá-la é <b>condução</b>, uma falta que dá ponto ao adversário." },
+  { tag:"Rede", dano:16,
+    texto:"📋 Encostar na rede durante a ação de jogar a bola é...",
+    opcoes:[ {txt:"Falta",correta:true},{txt:"Permitido sempre",correta:false},{txt:"Só é falta no saque",correta:false} ],
+    explica:"Tocar a <b>rede</b> na ação de jogo é falta. A bola até pode tocar a rede e seguir, mas o jogador não pode." },
+  { tag:"Líbero", dano:18,
+    texto:"📋 Qual destas ações o líbero NÃO pode realizar?",
+    opcoes:[ {txt:"Atacar a bola acima da borda da rede",correta:true},{txt:"Defender no fundo da quadra",correta:false},{txt:"Fazer a recepção do saque",correta:false} ],
+    explica:"O <b>líbero</b> é especialista em defesa: não pode atacar acima da rede nem bloquear, e usa uma camisa de cor diferente." },
+  { tag:"Contato", dano:15,
+    texto:"📋 É permitido tocar a bola com o pé ou a perna?",
+    opcoes:[ {txt:"Sim, com qualquer parte do corpo",correta:true},{txt:"Não, apenas com as mãos",correta:false},{txt:"Só com os braços",correta:false} ],
+    explica:"Desde 2000 a bola pode ser tocada com <b>qualquer parte do corpo</b>, inclusive pés e pernas." },
+  { tag:"Cartões", dano:17,
+    texto:"📋 No vôlei, o cartão vermelho mostrado a um jogador significa...",
+    opcoes:[ {txt:"Ponto e saque para o adversário",correta:true},{txt:"Apenas uma advertência",correta:false},{txt:"Expulsão imediata do time todo",correta:false} ],
+    explica:"<b>Amarelo</b> = advertência; <b>vermelho</b> = penalidade (ponto e saque ao adversário). Amarelo e vermelho juntos = expulsão do jogador." },
+  { tag:"Sets", dano:16,
+    texto:"📋 Uma partida oficial é vencida por quem ganhar quantos sets primeiro?",
+    opcoes:[ {txt:"3 sets (melhor de 5)",correta:true},{txt:"2 sets (melhor de 3)",correta:false},{txt:"4 sets",correta:false} ],
+    explica:"Vence a partida a equipe que ganhar <b>3 sets</b> primeiro, numa disputa de melhor de 5." },
+  { tag:"Tempo de saque", dano:18,
+    texto:"📋 Após o apito do árbitro, o sacador tem quantos segundos para executar o saque?",
+    opcoes:[ {txt:"8 segundos",correta:true},{txt:"3 segundos",correta:false},{txt:"15 segundos",correta:false} ],
+    explica:"O sacador tem <b>8 segundos</b> após o apito para sacar; passar disso é falta e a bola vai para o adversário." },
+  { tag:"Quadra", dano:16,
+    texto:"📋 Qual é a medida oficial de uma quadra de vôlei?",
+    opcoes:[ {txt:"18 m x 9 m",correta:true},{txt:"16 m x 8 m",correta:false},{txt:"20 m x 10 m",correta:false} ],
+    explica:"A quadra oficial mede <b>18 metros de comprimento por 9 de largura</b>, dividida ao meio pela rede em dois campos de 9x9." },
+  { tag:"Altura da rede", dano:17,
+    texto:"📋 Qual é a altura oficial da rede no vôlei masculino adulto?",
+    opcoes:[ {txt:"2,43 m",correta:true},{txt:"2,24 m",correta:false},{txt:"2,10 m",correta:false} ],
+    explica:"No masculino adulto a rede fica a <b>2,43 m</b>; no feminino adulto, a <b>2,24 m</b>." },
+  { tag:"Zona de saque", dano:16,
+    texto:"📋 De onde o jogador deve executar o saque?",
+    opcoes:[ {txt:"Atrás da linha de fundo",correta:true},{txt:"De dentro da quadra",correta:false},{txt:"Sobre a linha de ataque",correta:false} ],
+    explica:"O saque é feito <b>atrás da linha de fundo</b> (na zona de saque). Pisar na quadra ou na linha ao sacar é falta." },
+  { tag:"Início do set", dano:15,
+    texto:"📋 Como se decide qual equipe saca primeiro no início do 1º set?",
+    opcoes:[ {txt:"Por sorteio (cara ou coroa)",correta:true},{txt:"Quem marcar o 1º ponto",correta:false},{txt:"Sempre o time visitante",correta:false} ],
+    explica:"Antes do 1º set há um <b>sorteio</b> (cara ou coroa): o vencedor escolhe sacar/receber ou o lado da quadra." },
+];
+
+/* Frases do técnico (reações) */
+const FALAS_ACERTO = [
+  "Isso! Virada de bola perfeita! 🔥",
+  "Leitura de jogo impecável! O time confia em você! 💪",
+  "Boa! É assim que se arma um ataque! 🏐",
+  "Ponto nosso! Sequência limpa e certeira! ⭐",
+  "Perfeito! Recepção, levantamento e ataque afiados! ✅",
+];
+const FALAS_ERRO = [
+  "Não! A recepção falhou... o time sente o desgaste. 😣",
+  "Ih, jogada errada! Perdemos o ritmo. 😖",
+  "Erramos a sequência! Cuidado com o cansaço. ⚠️",
+  "Passou fácil pro adversário... foco, time! 😤",
+  "Essa doeu! Vamos ajustar a leitura. 🩹",
+];
+const FALAS_NEUTRA = [
+  "Analise a jogada e escolha a sequência certa!",
+  "Confia na sua leitura de jogo! 👀",
+  "Respira e decide, técnico. Qual é a jogada?",
+  "Atenção total na quadra agora!",
+];
+
+/* ===========================================================================
+   2. ÁUDIO (Web Audio API) — sons simples sem arquivos externos
+   =========================================================================== */
+const Audio = {
+  ctx:null,
+  init(){ if(!this.ctx){ try{ this.ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } },
+  // Toca um tom (frequência, duração, tipo, volume, e variação de frequência opcional)
+  tone(freq, dur, type='sine', vol=0.2, freqEnd=null){
+    if(!this.ctx) return;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = type;
+    const t = this.ctx.currentTime;
+    o.frequency.setValueAtTime(freq, t);
+    if(freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, t+dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    o.connect(g); g.connect(this.ctx.destination);
+    o.start(t); o.stop(t+dur);
+  },
+  success(){ this.init(); this.tone(660,0.09,'square',0.18); setTimeout(()=>this.tone(990,0.16,'square',0.18),90); },   // beep agudo duplo
+  error(){   this.init(); this.tone(300,0.4,'sawtooth',0.22,90); },                                                     // grave descendente
+  win(){     this.init(); [523,659,784,1046].forEach((f,i)=>setTimeout(()=>this.tone(f,0.2,'triangle',0.2),i*140)); },   // arpejo de vitória
+  lose(){    this.init(); [400,300,200,120].forEach((f,i)=>setTimeout(()=>this.tone(f,0.28,'sawtooth',0.2),i*160)); },   // descida triste
+  poke(){    this.init(); this.tone(880,0.08,'sine',0.15); }
+};
+
+/* ===========================================================================
+   3. ESTADO DO JOGO
+   =========================================================================== */
+const Game = {
+  energy:100,
+  round:0,          // índice da rodada atual
+  totalRounds:10,   // 5 jogadas + 5 regras (intercaladas)
+  hits:0,
+  errors:0,
+  order:[],         // rodadas sorteadas para esta partida
+  results:[],       // 'done' | 'fail' por rodada (p/ bolinhas)
+  answered:false,
+  avatarClicks:0,
+  won:false,
+  lastScore:0,
+  playerName:'',    // nome informado na tela inicial (usado no ranking)
+  _lastPlays:new Set(),    // tags das jogadas da partida anterior (evita repetir)
+  _lastQuizzes:new Set(),  // tags das regras da partida anterior (evita repetir)
+
+  /* Inicia / reinicia a partida */
+  start(){
+    // Exige o nome na primeira vez (depois fica salvo para o "Nova Partida")
+    const nameEl=document.getElementById('player-name');
+    const typed=(nameEl && nameEl.value || '').trim();
+    if(typed) this.playerName = typed.slice(0,16);
+    if(!this.playerName){
+      toast('✍️ Digite seu nome para começar!');
+      if(nameEl){ nameEl.focus(); nameEl.classList.add('shake'); setTimeout(()=>nameEl.classList.remove('shake'),500); }
+      return;
+    }
+    Audio.init();
+    this.energy=100; this.round=0; this.hits=0; this.errors=0;
+    this.results=[]; this.answered=false; this.avatarClicks=0; this.won=false;
+    this.order = this.pickScenarios();
+    show('game-screen');
+    this.renderRounds();
+    this.updateEnergy(0);
+    this.coach(rand(FALAS_NEUTRA), 'neutra');
+    this.renderScenario();
+  },
+
+  /* Monta o set intercalando JOGADAS (ordenadas por dificuldade) e REGRAS.
+     Sorteia itens diferentes dos da partida anterior. Resultado: jogada, regra, ... */
+  pickScenarios(){
+    const n = this.totalRounds/2;   // quantidade de cada tipo
+    const plays = pickUnique(CENARIOS, n, this._lastPlays, s=>s.tag)
+      .sort((a,b)=>a.tier-b.tier)
+      .map(s=>({ kind:'jogada', ...s, play:(s.play||TAG_PLAY[s.tag]) }));
+    const quizzes = pickUnique(QUIZZES, n, this._lastQuizzes, q=>q.tag)
+      .map(q=>({ kind:'regra', ...q }));
+    // registra o que foi usado para não repetir na próxima partida
+    this._lastPlays   = new Set(plays.map(p=>p.tag));
+    this._lastQuizzes = new Set(quizzes.map(q=>q.tag));
+    const order=[];
+    for(let i=0;i<n;i++){ order.push(plays[i]); order.push(quizzes[i]); }
+    return order;
+  },
+
+  /* Desenha as bolinhas de rodada */
+  renderRounds(){
+    const el = document.getElementById('rounds');
+    el.innerHTML='';
+    for(let i=0;i<this.totalRounds;i++){
+      const d=document.createElement('div');
+      d.className='dot';
+      if(this.results[i]==='done') d.classList.add('done');
+      else if(this.results[i]==='fail') d.classList.add('fail');
+      else if(i===this.round) d.classList.add('active');
+      d.textContent = this.results[i]==='done' ? '✓' : (this.results[i]==='fail' ? '✕' : (i+1));
+      el.appendChild(d);
+    }
+  },
+
+  /* Atualiza a barra de energia (delta é a variação, só para animação) */
+  updateEnergy(){
+    this.energy = clamp(this.energy,0,100);
+    const fill=document.getElementById('energy-fill');
+    const label=document.getElementById('energy-label');
+    fill.style.width=this.energy+'%';
+    label.textContent=Math.round(this.energy)+' ⚡';
+    // cor conforme nível: verde > amarelo > laranja > vermelho
+    let g;
+    if(this.energy>60)      g='linear-gradient(90deg,#84cc16,#22c55e)';
+    else if(this.energy>35) g='linear-gradient(90deg,#fbbf24,#facc15)';
+    else if(this.energy>15) g='linear-gradient(90deg,#f97316,#fb923c)';
+    else                    g='linear-gradient(90deg,#ef4444,#dc2626)';
+    fill.style.background=g;
+    fill.style.backgroundSize='200% 100%';
+  },
+
+  /* Fala do técnico (tipo: acerto/erro/neutra) */
+  coach(msg,tipo){
+    const el=document.getElementById('coach-speech');
+    el.innerHTML='<b>Técnico:</b> '+msg;
+    const av=document.getElementById('coach-avatar');
+    av.textContent = tipo==='acerto' ? '😎' : tipo==='erro' ? '😫' : '🧑‍🏫';
+  },
+
+  /* Renderiza a rodada atual — pode ser uma JOGADA (diagrama) ou uma REGRA (quiz) */
+  renderScenario(){
+    this.answered=false;
+    const c=this.order[this.round];
+    const isPlay = c.kind!=='regra';
+    this.renderRounds();
+    document.getElementById('round-counter').textContent =
+      `${isPlay?'🏐 Jogada':'📋 Regra'} • ${this.round+1}/${this.totalRounds}`;
+
+    // embaralha as opções para não decorar posição
+    const opts = shuffle(c.opcoes.map((o,i)=>({...o,i})));
+
+    // "estímulo" no topo: quadra desenhada (jogada) ou card de regra (quiz)
+    let stimulus;
+    if(isPlay){
+      const playKey = c.play || TAG_PLAY[c.tag] || 'saqueForte';
+      stimulus =
+        `<div class="court">${drawCourt(playKey)}
+          <div class="court-cap">🏐 Trajetória da bola — escolha a sequência de fundamentos</div>
+        </div>`;
+    }else{
+      stimulus =
+        `<div class="rulecard">
+          <div class="rc-icon">📋🏐</div>
+          <div class="rc-title">Quiz de Regras</div>
+          <div class="rc-sub">Prove que você manda no regulamento!</div>
+        </div>`;
+    }
+
+    // Coluna esquerda: a prancheta (diagrama da jogada ou card de regra)
+    document.getElementById('stimulus-area').innerHTML = stimulus;
+
+    // Coluna do meio: etiqueta + texto + opções
+    let html=`<div class="scenario">
+      <span class="scenario-tag">${isPlay?'🏐 Jogada':'📋 Regra'} ${this.round+1} • ${c.tag}</span>
+      <div class="scenario-text">${c.texto}</div>
+      <div class="options" id="options">`;
+    opts.forEach((o)=>{
+      const inner = isPlay ? renderPlay(o.txt) : `<span class="opt-text">${o.txt}</span>`;
+      const hint  = isPlay ? '🏐 Escolher esta jogada' : '✅ Marcar resposta';
+      html+=`<button class="opt" data-correct="${o.correta?1:0}" onclick="Game.answer(${o.correta?1:0}, this)">
+        <span class="opt-hint">${hint}</span>
+        ${inner}
+      </button>`;
+    });
+    html+=`</div></div>`;
+    document.getElementById('scenario-area').innerHTML=html;
+
+    // Coluna direita: placeholder até o jogador responder
+    document.getElementById('feedback-area').innerHTML =
+      `<div class="fb-placeholder">👈 Escolha uma sequência ao lado.<br>O resultado e a explicação aparecem aqui.</div>`;
+  },
+
+  /* Jogador respondeu */
+  answer(correta, btn){
+    if(this.answered) return;
+    this.answered=true;
+    const c=this.order[this.round];
+    const opts=document.querySelectorAll('#options .opt');
+    opts.forEach(o=>o.disabled=true);
+
+    let fb;
+    const isPlay = c.kind!=='regra';
+    if(correta){
+      // ---- ACERTO ----
+      this.hits++; this.energy+=5; this.results[this.round]='done';
+      btn.classList.add('correct');
+      Audio.success();
+      this.coach(rand(FALAS_ACERTO),'acerto');
+      document.getElementById('card').classList.add('flashGood');
+      setTimeout(()=>document.getElementById('card').classList.remove('flashGood'),600);
+      confetti();
+      fb=`<div class="feedback good">
+        <div class="fb-title">✅ Acertou! <span class="energy-delta up">+5 ⚡</span></div>
+        <div>${isPlay?'Sequência correta! O time ganha ritmo e energia.':'Resposta certa! Você domina as regras do jogo. 👏'}</div>
+        <div class="edu">📚 <b>${isPlay?'Por quê:':'Regra:'}</b> ${c.explica}</div>
+      </div>`;
+    }else{
+      // ---- ERRO ----
+      this.errors++; this.energy-=c.dano; this.results[this.round]='fail';
+      btn.classList.add('wrong');
+      // destaca a opção correta (marcada com data-correct="1")
+      const corr=document.querySelector('#options .opt[data-correct="1"]');
+      if(corr) corr.classList.add('correct');
+      Audio.error();
+      this.coach(rand(FALAS_ERRO),'erro');
+      const card=document.getElementById('card');
+      card.classList.add('shake');
+      setTimeout(()=>card.classList.remove('shake'),500);
+      fb=`<div class="feedback bad">
+        <div class="fb-title">❌ Errou! <span class="energy-delta down">-${c.dano} ⚡</span></div>
+        <div>${isPlay?'A sequência não seguiu a lógica da jogada. O time se desgastou.':'Resposta errada! O time vacilou no regulamento.'}</div>
+        <div class="edu">📚 <b>O certo:</b> ${c.explica}</div>
+      </div>`;
+    }
+    this.updateEnergy();
+    document.getElementById('feedback-area').innerHTML = fb +
+      `<button class="btn continue-btn" onclick="Game.next()">Continuar ▶️</button>`;
+    this.renderRounds();
+  },
+
+  /* Avança para a próxima rodada / fim de jogo */
+  next(){
+    // Game over por energia zerada
+    if(this.energy<=0){ this.end(false); return; }
+    this.round++;
+    // Venceu o set
+    if(this.round>=this.totalRounds){ this.end(true); return; }
+    // Transição com spinner
+    const t=document.getElementById('transition');
+    document.getElementById('transition-text').textContent = rand([
+      "Próxima jogada...","Bola em jogo...","Prepara o time...","Set point chegando..."]);
+    t.classList.remove('hidden');
+    setTimeout(()=>{
+      t.classList.add('hidden');
+      this.updateEnergy();
+      this.renderScenario();
+      this.coach(rand(FALAS_NEUTRA),'neutra');
+    }, 1200);
+  },
+
+  /* Fim de jogo */
+  end(won){
+    this.won=won;
+    const stars = this.energy>70?3 : this.energy>40?2 : this.energy>0?1:0;
+    // pontuação para o ranking
+    this.lastScore = Math.max(0, Math.round(this.energy*4 + this.hits*20 - this.errors*8 + (won?60:0)));
+
+    show('end-screen');
+    document.getElementById('end-emoji').textContent = won ? '🏆' : '💥';
+    const title=document.getElementById('end-title');
+    title.textContent = won ? 'VITÓRIA! O time venceu o set!' : 'GAME OVER — desgaste total!';
+    title.className = 'end-title '+(won?'win':'lose');
+
+    document.getElementById('end-stars').textContent =
+      won ? ('⭐'.repeat(stars)+'☆'.repeat(3-stars)) : '☆☆☆';
+
+    document.getElementById('end-stats').innerHTML=`
+      <div class="stat-row"><span>⚡ Energia final</span><b>${Math.max(0,Math.round(this.energy))} / 100</b></div>
+      <div class="stat-row"><span>✅ Acertos</span><b>${this.hits}</b></div>
+      <div class="stat-row"><span>❌ Erros</span><b>${this.errors}</b></div>
+      <div class="stat-row"><span>⭐ Estrelas</span><b>${won?stars:0} / 3</b></div>
+      <div class="stat-row"><span>🎯 Pontuação</span><b>${this.lastScore}</b></div>
+      <div class="stat-row"><span>🏅 Classificação</span><b>${classif(stars,won)}</b></div>`;
+
+    if(won){ Audio.win(); confetti(); confetti(); } else { Audio.lose(); }
+
+    // garante layout de "fim de partida" (caso o jogador tenha aberto o ranking pelo menu antes)
+    document.getElementById('end-win-block').style.display='';
+    const btn=document.getElementById('end-btn');
+    btn.textContent='🔄 NOVA PARTIDA';
+    btn.setAttribute('onclick','Game.start()');
+
+    // salva o placar automaticamente no ranking (nome informado no início)
+    Ranking.savedKey=null;
+    Ranking.save();
+  },
+
+  /* Volta para a tela inicial (abandona a partida atual) */
+  backToStart(){
+    show('start-screen');
+    const nameEl=document.getElementById('player-name');
+    if(nameEl && this.playerName) nameEl.value=this.playerName;   // mantém o nome preenchido
+  },
+
+  /* Easter egg: 5 cliques no técnico dão energia */
+  pokeCoach(){
+    Audio.poke();
+    const av=document.getElementById('coach-avatar');
+    av.style.transform='scale(1.25) rotate(10deg)';
+    setTimeout(()=>av.style.transform='',150);
+    this.avatarClicks++;
+    if(this.avatarClicks>=5){
+      this.avatarClicks=0;
+      if(document.getElementById('game-screen').classList.contains('hidden')) return;
+      this.energy=clamp(this.energy+8,0,100);
+      this.updateEnergy();
+      toast("🎉 Injeção de ânimo da torcida! +8 ⚡");
+      confetti();
+      Audio.success();
+    }
+  }
+};
+
+/* Classificação textual */
+function classif(stars,won){
+  if(!won) return 'Time exausto 😵';
+  return stars===3?'Técnico Lendário 🐐' : stars===2?'Ótimo Comando 🔥' : 'Vitória Suada 😅';
+}
+
+/* ===========================================================================
+   4. RANKING GLOBAL (Firebase Realtime Database via REST)
+   ---------------------------------------------------------------------------
+   Usa fetch direto no endpoint REST (.json) — não precisa de SDK/CDN.
+   GET  /rankings.json         -> lê todos os placares
+   POST /rankings.json         -> adiciona um placar
+   =========================================================================== */
+const DB_URL = "https://edutec-arnaldo-default-rtdb.firebaseio.com/rankings.json";
+const Ranking = {
+  savedKey:null,     // id gerado ao salvar (para destacar "você")
+  cached:[],
+
+  /* Abre a tela de ranking a partir do MENU inicial (modo somente-leitura) */
+  showMenu(){
+    show('end-screen');
+    document.getElementById('end-win-block').style.display='none';   // esconde stats de partida
+    const btn=document.getElementById('end-btn');
+    btn.textContent='⬅️ Voltar ao Início';
+    btn.setAttribute('onclick',"show('start-screen')");
+    this.show(null);
+  },
+
+  /* Carrega e exibe o ranking (lista). justSavedKey destaca a linha do jogador */
+  async show(justSavedKey){
+    const list=document.getElementById('rank-list');
+    const msg=document.getElementById('rank-msg');
+    list.innerHTML=''; msg.textContent='Carregando ranking global... 🌐';
+
+    try{
+      const res=await fetch(DB_URL,{cache:'no-store'});
+      const data=await res.json();
+      let arr=[];
+      if(data){ for(const k in data){ arr.push({key:k,...data[k]}); } }
+      arr.sort((a,b)=>(b.score||0)-(a.score||0));
+      this.cached=arr;
+      this.render(arr, justSavedKey||this.savedKey);
+    }catch(e){
+      msg.textContent='⚠️ Não foi possível carregar o ranking online. Verifique a conexão.';
+    }
+  },
+
+  render(arr,highlight){
+    const list=document.getElementById('rank-list');
+    const msg=document.getElementById('rank-msg');
+    list.innerHTML='';
+    if(!arr.length){ msg.textContent='Nenhum placar ainda. Seja o primeiro! 🥇'; return; }
+    const medal=['gold','silver','bronze'];
+    arr.slice(0,10).forEach((r,i)=>{
+      const li=document.createElement('li');
+      if(highlight && r.key===highlight) li.classList.add('me');
+      const posClass = i<3?medal[i]:'';
+      const icon = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+      li.innerHTML=`<span class="rank-pos ${posClass}">${icon}</span>
+        <span class="rank-name">${escapeHtml(r.name||'Anônimo')} ${'⭐'.repeat(r.stars||0)}</span>
+        <span class="rank-score">${r.score||0}</span>`;
+      list.appendChild(li);
+    });
+    msg.textContent = `${arr.length} técnico(s) no ranking global. 🌍`;
+  },
+
+  /* Salva o placar da última partida automaticamente (usa Game.playerName) */
+  async save(){
+    const name=(Game.playerName||'Anônimo').slice(0,16);
+    const msg=document.getElementById('rank-msg');
+    const payload={
+      name, score:Game.lastScore, energy:Math.max(0,Math.round(Game.energy)),
+      hits:Game.hits, errors:Game.errors,
+      stars: Game.won ? (Game.energy>70?3:Game.energy>40?2:1) : 0,
+      won:Game.won, ts:Date.now()
+    };
+    msg.textContent='Salvando seu placar no ranking... 💾';
+    try{
+      const res=await fetch(DB_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      });
+      const out=await res.json();          // {name:"-Nxxxx"} chave gerada
+      this.savedKey = out && out.name ? out.name : null;
+      toast('✅ Placar salvo no ranking global!');
+      this.show(this.savedKey);
+    }catch(e){
+      msg.textContent='⚠️ Não foi possível salvar online (verifique conexão/regras do Firebase).';
+    }
+  }
+};
+
+/* ===========================================================================
+   5. UTILITÁRIOS + EFEITOS
+   =========================================================================== */
+function show(id){
+  ['start-screen','game-screen','end-screen'].forEach(s=>{
+    document.getElementById(s).classList.toggle('hidden', s!==id);
+  });
+  // alarga o cartão só durante o jogo (2 colunas)
+  document.getElementById('card').classList.toggle('wide', id==='game-screen');
+  window.scrollTo(0,0);
+}
+function rand(a){ return a[Math.floor(Math.random()*a.length)]; }
+function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+/* Embaralha um array no lugar (Fisher–Yates) e o retorna */
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* Sorteia n itens de "pool" priorizando os que NÃO foram usados na partida anterior
+   (recent = Set de chaves). Só reaproveita itens antigos se faltarem opções novas. */
+function pickUnique(pool, n, recent, keyFn){
+  const fresh = shuffle(pool.filter(x=>!recent.has(keyFn(x))));
+  const used  = shuffle(pool.filter(x=> recent.has(keyFn(x))));
+  return fresh.concat(used).slice(0,n);   // novos primeiro; antigos só como reserva
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* Toast de mensagem rápida */
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* Confetes simples com partículas */
+function confetti(){
+  const cores=['#fbbf24','#84cc16','#2563eb','#f97316','#ffffff','#22c55e'];
+  for(let i=0;i<26;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=cores[Math.floor(Math.random()*cores.length)];
+    c.style.transform=`rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(c);
+    const dur=1400+Math.random()*1200;
+    const drift=(Math.random()-0.5)*160;
+    c.animate([
+      {transform:`translate(0,0) rotate(0deg)`, opacity:1},
+      {transform:`translate(${drift}px, ${window.innerHeight+40}px) rotate(${720+Math.random()*360}deg)`, opacity:0.9}
+    ],{duration:dur, easing:'cubic-bezier(.3,.6,.6,1)'});
+    setTimeout(()=>c.remove(),dur);
+  }
+}
+
+/* Destrava o áudio no primeiro toque (política de autoplay dos navegadores) */
+document.addEventListener('click', ()=>Audio.init(), {once:true});
+</script>
+</body>
+</html>
