@@ -1,0 +1,9 @@
+# Normaliza as quebras de linha: o repositório guarda tudo em LF.
+* text=auto eol=lf
+
+# Arquivos de texto do projeto
+*.html  text eol=lf
+*.css   text eol=lf
+*.js    text eol=lf
+*.json  text eol=lf
+*.md    text eol=lf

@@ -176,8 +176,7 @@
           highlighted = true;
         }
         tr.innerHTML =
-          `<td>${idx + 1}</td><td>${escapeHtml(r.nome)}</td>` +
-          `<td>${r.pontuacao}</td><td>${r.data || "—"}</td>`;
+          `<td>${idx + 1}</td><td>${escapeHtml(r.nome)}</td><td>${r.pontuacao}</td>`;
         body.appendChild(tr);
       });
       statusEl.textContent = "";
@@ -213,9 +212,8 @@
 
   $("btn-back-home").addEventListener("click", () => showScreen("screen-welcome"));
 
-  $("btn-see-ranking").addEventListener("click", () => {
-    showScreen("screen-result");
-    $("result-summary").textContent = "Confira as melhores pontuações:";
-    renderRanking(null, null);
-  });
+  $("btn-refresh-ranking").addEventListener("click", () => renderRanking(null, null));
+
+  // Ranking fixo: carrega assim que a página abre.
+  renderRanking(null, null);
 })();
