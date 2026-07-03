@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jogo do Handebol — Tabuleiro Tático & Quiz</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ===================== TELA DE BOAS-VINDAS ===================== -->
+    <section id="screen-welcome" class="screen active">
+      <div class="card welcome-card">
+        <h1><span class="ball">🤾</span> Desafio do Handebol</h1>
+        <p class="subtitle">Aprenda as regras jogando! Alterne entre o <strong>Tabuleiro Tático</strong> e o <strong>Quiz</strong> ao longo de 10 rodadas.</p>
+        <form id="form-start" autocomplete="off">
+          <label for="input-name">Digite seu nome:</label>
+          <input id="input-name" type="text" maxlength="24" placeholder="Ex.: Ana, João..." required />
+          <button type="submit" class="btn btn-primary">Começar a jogar ▶</button>
+        </form>
+        <button id="btn-see-ranking" class="btn btn-ghost">🏆 Ver ranking</button>
+      </div>
+    </section>
+
+    <!-- ===================== TELA DO JOGO ===================== -->
+    <section id="screen-game" class="screen">
+      <header class="game-header">
+        <div class="hud-item"><span class="hud-label">Jogador</span><span id="hud-name" class="hud-value">—</span></div>
+        <div class="hud-item"><span class="hud-label">Pontuação</span><span id="hud-score" class="hud-value">0</span></div>
+        <div class="hud-item"><span class="hud-label">Rodada</span><span id="hud-round" class="hud-value">1/10</span></div>
+        <div class="hud-item"><span class="hud-label">Modo</span><span id="hud-mode" class="hud-value">—</span></div>
+      </header>
+
+      <div class="progress-bar"><div id="progress-fill"></div></div>
+
+      <main class="game-main">
+        <!-- MODO TABULEIRO -->
+        <div id="mode-board" class="mode-panel">
+          <p id="board-situation" class="prompt-text"></p>
+          <div id="court-wrap" class="court-wrap"><!-- SVG injetado por board.js --></div>
+        </div>
+
+        <!-- MODO QUIZ -->
+        <div id="mode-quiz" class="mode-panel" hidden>
+          <p id="quiz-question" class="prompt-text"></p>
+          <div id="quiz-options" class="quiz-options"></div>
+        </div>
+
+        <div id="feedback" class="feedback" hidden>
+          <span id="feedback-icon"></span>
+          <p id="feedback-text"></p>
+        </div>
+      </main>
+
+      <footer class="game-footer">
+        <button id="btn-restart" class="btn btn-ghost">↺ Reiniciar</button>
+        <button id="btn-next" class="btn btn-primary" disabled>Próximo →</button>
+      </footer>
+    </section>
+
+    <!-- ===================== TELA FINAL / RANKING ===================== -->
+    <section id="screen-result" class="screen">
+      <div class="card result-card">
+        <h2 id="result-title">Fim de jogo!</h2>
+        <p id="result-summary" class="result-summary"></p>
+
+        <div class="ranking-block">
+          <h3>🏆 Ranking</h3>
+          <div id="ranking-status" class="ranking-status">Carregando...</div>
+          <table id="ranking-table" class="ranking-table" hidden>
+            <thead>
+              <tr><th>#</th><th>Nome</th><th>Pontos</th><th>Data</th></tr>
+            </thead>
+            <tbody id="ranking-body"></tbody>
+          </table>
+        </div>
+
+        <div class="result-actions">
+          <button id="btn-play-again" class="btn btn-primary">Jogar de novo 🔁</button>
+          <button id="btn-back-home" class="btn btn-ghost">🏠 Início</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
