@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($p=\"D:\\\\code\\\\jogo1neu\\\\index.html\"; $c=Get-Content $p -Raw -Encoding UTF8; \"Chars: $\\($c.Length\\)\"; \"Open braces: $\\(\\(\\($c.ToCharArray\\(\\)|?{$_ -eq '{'}\\).Count\\)\\)\"; \"Close braces: $\\(\\(\\($c.ToCharArray\\(\\)|?{$_ -eq '}'}\\).Count\\)\\)\"; \"script tags open: $\\(\\([regex]::Matches\\($c,'<script'\\)\\).Count\\)\"; \"script tags close: $\\(\\([regex]::Matches\\($c,'</script>'\\)\\).Count\\)\")"
+    ]
+  }
+}

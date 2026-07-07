@@ -1,0 +1,730 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jogo de Rotação por Estações</title>
+<style>
+  :root{
+    --bg:#f4f7fb; --card:#ffffff; --ink:#243b53; --muted:#627d98;
+    --line:#e2e8f0; --brand:#4361ee; --brand-dark:#3a56d4;
+    --ok:#2ecc71; --ok-dark:#27ae60; --warn:#f39c12; --danger:#e74c3c;
+    --radius:16px; --shadow:0 8px 24px rgba(36,59,83,.10);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:linear-gradient(160deg,#eef3fb,#f7f9fc); color:var(--ink);
+    min-height:100vh;
+  }
+  h1,h2,h3{margin:0 0 .4em}
+  button{font-family:inherit; cursor:pointer; border:none; border-radius:12px; font-size:1rem; padding:.7em 1.2em; transition:transform .08s, box-shadow .15s, background .15s}
+  button:active{transform:translateY(1px)}
+  .btn-primary{background:var(--brand); color:#fff; box-shadow:0 4px 12px rgba(67,97,238,.35)}
+  .btn-primary:hover{background:var(--brand-dark)}
+  .btn-ok{background:var(--ok); color:#fff}
+  .btn-ok:hover{background:var(--ok-dark)}
+  .btn-ghost{background:#fff; color:var(--ink); border:1px solid var(--line)}
+  .btn-danger{background:var(--danger); color:#fff}
+  .btn-warn{background:var(--warn); color:#fff}
+  button:disabled{opacity:.5; cursor:not-allowed; box-shadow:none}
+  input,select,textarea{
+    font-family:inherit; font-size:1rem; padding:.55em .7em; border:1px solid var(--line);
+    border-radius:10px; width:100%; background:#fff; color:var(--ink);
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid rgba(67,97,238,.4); border-color:var(--brand)}
+  .wrap{max-width:1180px; margin:0 auto; padding:24px}
+  .topbar{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px}
+  .topbar h1{font-size:1.5rem}
+  .pill{background:#fff; border:1px solid var(--line); border-radius:999px; padding:.4em 1em; font-size:.85rem; color:var(--muted)}
+  .card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; border:1px solid var(--line)}
+  .hidden{display:none !important}
+
+  /* ---- Config ---- */
+  .config-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:18px; margin-top:18px}
+  .station-cfg h3{display:flex; align-items:center; gap:10px}
+  .badge-num{display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; color:#fff; font-weight:700}
+  .field{margin:10px 0}
+  .field label{display:block; font-size:.8rem; color:var(--muted); margin-bottom:4px; font-weight:600; text-transform:uppercase; letter-spacing:.03em}
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .hint{font-size:.8rem; color:var(--muted); margin-top:4px}
+  .actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:22px; justify-content:center}
+
+  /* ---- Game grid ---- */
+  .game-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:8px}
+  @media(max-width:900px){.game-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:600px){.game-grid{grid-template-columns:1fr}}
+  .station{position:relative; overflow:hidden; display:flex; flex-direction:column; min-height:240px}
+  .station-head{display:flex; align-items:center; justify-content:space-between; margin:-20px -20px 14px; padding:12px 18px; color:#fff}
+  .station-head .st-title{font-weight:700; font-size:1.05rem}
+  .station-head .st-team{font-size:.85rem; opacity:.95}
+  .st-type{font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; font-weight:700}
+  .st-body{flex:1}
+  .done-overlay{position:absolute; inset:0; background:rgba(46,204,113,.94); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; font-size:1.2rem; font-weight:700; text-align:center; padding:16px; animation:pop .3s ease}
+  .done-overlay .check{font-size:3rem}
+  @keyframes pop{from{transform:scale(.85); opacity:0}to{transform:scale(1); opacity:1}}
+
+  /* quiz */
+  .opt{display:block; width:100%; text-align:left; margin:6px 0; background:#f8fafc; border:1px solid var(--line); color:var(--ink)}
+  .opt:hover{border-color:var(--brand); background:#eef2ff}
+  .opt.wrong{background:#fdecea; border-color:var(--danger); animation:shake .3s}
+  @keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+  /* memory */
+  .mem-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:6px}
+  .mem-card{aspect-ratio:1; border-radius:10px; background:var(--brand); color:transparent; font-size:1.6rem; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; transition:transform .2s, background .2s}
+  .mem-card.flip{background:#fff; color:var(--ink); border:1px solid var(--line)}
+  .mem-card.matched{background:#d5f5e3; color:var(--ink); border:1px solid var(--ok); cursor:default}
+
+  /* ordering */
+  .ord-items{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px}
+  .ord-item{background:#eef2ff; border:1px solid var(--brand); border-radius:999px; padding:.4em .9em; cursor:pointer}
+  .ord-item.selected{background:var(--brand); color:#fff}
+  .ord-item.placed{opacity:.45; pointer-events:none}
+  .ord-cats{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .ord-cat{border:2px dashed var(--line); border-radius:12px; padding:8px; min-height:70px}
+  .ord-cat h4{margin:0 0 6px; font-size:.85rem; color:var(--muted)}
+  .ord-cat .chip{display:inline-block; background:#d5f5e3; border:1px solid var(--ok); border-radius:999px; padding:.25em .7em; margin:2px; font-size:.85rem}
+  .ord-cat.hot{border-color:var(--brand); background:#f5f8ff}
+
+  .inline-form{display:flex; gap:8px; margin-top:10px}
+  .inline-form input{flex:1}
+  .feedback{margin-top:8px; font-size:.9rem; min-height:1.2em}
+  .feedback.err{color:var(--danger)}
+  .feedback.ok{color:var(--ok-dark)}
+
+  .scramble-word{font-size:1.8rem; font-weight:800; letter-spacing:.35em; text-align:center; margin:14px 0; color:var(--brand)}
+  .math-q{font-size:2rem; font-weight:800; text-align:center; margin:14px 0}
+  .riddle-q{font-size:1.05rem; text-align:center; margin:8px 0; font-style:italic}
+
+  /* scores / end */
+  .score-table{width:100%; border-collapse:collapse; margin-top:12px}
+  .score-table th,.score-table td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--line)}
+  .score-table th{color:var(--muted); font-size:.8rem; text-transform:uppercase}
+  .team-dot{display:inline-block; width:14px; height:14px; border-radius:50%; margin-right:8px; vertical-align:middle}
+  .end-hero{text-align:center; padding:30px 10px}
+  .end-hero .trophy{font-size:4rem}
+  .banner{background:#eef2ff; border:1px solid #c7d2fe; color:var(--brand-dark); border-radius:12px; padding:10px 14px; text-align:center; font-weight:600; margin-top:14px}
+  .banner.ready{background:#d5f5e3; border-color:var(--ok); color:var(--ok-dark)}
+  #toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#243b53; color:#fff; padding:12px 20px; border-radius:12px; box-shadow:var(--shadow); opacity:0; transition:opacity .3s, transform .3s; pointer-events:none; z-index:50}
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(-6px)}
+  #loading{position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; z-index:60}
+  .spinner{width:44px; height:44px; border:5px solid var(--line); border-top-color:var(--brand); border-radius:50%; animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div><div>Conectando ao servidor…</div></div>
+
+<div class="wrap">
+  <div class="topbar">
+    <h1>🎲 Jogo de Rotação por Estações</h1>
+    <div id="statusPills" class="pill">Carregando…</div>
+  </div>
+
+  <!-- CONFIG SCREEN -->
+  <div id="screen-config" class="hidden">
+    <div class="card">
+      <h2>👩‍🏫 Modo Professora — Configuração</h2>
+      <p class="hint">Escolha um tipo de jogo para cada estação e personalize o conteúdo. Depois clique em <b>Iniciar Jogo</b>.</p>
+    </div>
+    <div id="configGrid" class="config-grid"></div>
+    <div class="actions">
+      <button id="btnSave" class="btn-ghost">💾 Salvar Configuração</button>
+      <button id="btnStart" class="btn-primary">▶️ Iniciar Jogo</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="screen-game" class="hidden">
+    <div class="actions" style="justify-content:space-between; margin-top:0">
+      <div id="roundInfo" class="pill">Rodada 1</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap">
+        <button id="btnNext" class="btn-ok">⏭️ Próxima Rodada</button>
+        <button id="btnForce" class="btn-warn">⚠️ Forçar avanço</button>
+        <button id="btnReset" class="btn-danger">🔄 Reiniciar</button>
+      </div>
+    </div>
+    <div id="gameBanner" class="banner">Aguardando as equipes…</div>
+    <div id="gameGrid" class="game-grid"></div>
+  </div>
+
+  <!-- END SCREEN -->
+  <div id="screen-end" class="hidden">
+    <div class="card end-hero">
+      <div class="trophy">🏆</div>
+      <h2>Fim de Jogo!</h2>
+      <p class="hint">Todas as equipes passaram por todas as estações.</p>
+      <table class="score-table" id="scoreTable"></table>
+      <div class="actions">
+        <button id="btnResetEnd" class="btn-primary">🔄 Reiniciar Jogo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Firebase v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+/* ======================================================================
+   CONFIGURAÇÃO DO FIREBASE
+   Para o Realtime Database com regras abertas, apenas a databaseURL basta.
+====================================================================== */
+const firebaseConfig = {
+  databaseURL: "https://edutec-arnaldo-default-rtdb.firebaseio.com/"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const rootRef = db.ref("/");
+
+/* ======================================================================
+   CONSTANTES
+====================================================================== */
+const NUM_STATIONS = 6;
+const NUM_TEAMS = 6;
+const GAME_TYPES = {
+  quiz:     "Quiz",
+  scramble: "Palavra Embaralhada",
+  memory:   "Jogo da Memória",
+  ordering: "Ordenação",
+  riddle:   "Charada / Adivinha",
+  math:     "Matemática Rápida"
+};
+const TEAM_COLORS = ["#e74c3c","#3498db","#2ecc71","#f39c12","#9b59b6","#1abc9c"];
+const teamId = i => "team" + (i + 1);          // 0-index -> "team1"
+const teamLabel = i => "Equipe " + (i + 1);
+
+/* ---- Conteúdo padrão por tipo de jogo ---- */
+function defaultContent(type){
+  switch(type){
+    case "quiz": return {
+      question:"Qual é a capital do Brasil?",
+      options:["São Paulo","Rio de Janeiro","Brasília","Salvador"],
+      correctIndex:2
+    };
+    case "scramble": return { word:"ESCOLA" };
+    case "memory":   return { emojis:["🍎","🚀","🐶","🐱","🍌","🌟","🎈","🍕"] };
+    case "ordering": return {
+      items:[
+        {item:"maçã",    category:"Fruta"},
+        {item:"banana",  category:"Fruta"},
+        {item:"cenoura", category:"Legume"},
+        {item:"alface",  category:"Legume"}
+      ]
+    };
+    case "riddle": return {
+      question:"O que é, o que é? Tem dentes mas não morde.",
+      answer:"pente"
+    };
+    case "math": return { a:12, op:"+", b:8 };
+  }
+}
+/* Configuração padrão: um tipo diferente em cada estação */
+function defaultConfig(){
+  const order = ["quiz","scramble","memory","ordering","riddle","math"];
+  const stations = {};
+  order.forEach((t,i)=> stations[i] = { gameType:t, content:defaultContent(t) });
+  return { stations };
+}
+function mathAnswer(c){
+  if(c.op === "+") return c.a + c.b;
+  if(c.op === "-") return c.a - c.b;
+  return c.a * c.b; // ×
+}
+
+/* ======================================================================
+   ESTADO GLOBAL
+====================================================================== */
+let latest = null;          // último snapshot do banco
+let currentScreen = null;   // 'config' | 'game' | 'end'
+let lastGameSignature = ""; // controla quando re-renderizar as estações
+let configBuilt = false;
+
+const $ = sel => document.querySelector(sel);
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("show"),2200);
+}
+function showScreen(name){
+  ["config","game","end"].forEach(s=>{
+    $("#screen-"+s).classList.toggle("hidden", s!==name);
+  });
+  currentScreen = name;
+}
+
+/* ======================================================================
+   LISTENER PRINCIPAL — sincronização em tempo real
+====================================================================== */
+rootRef.on("value", snap=>{
+  latest = snap.val() || {};
+  $("#loading").classList.add("hidden");
+  render();
+}, err=>{
+  $("#loading").innerHTML = "<div style='text-align:center'>⚠️ Erro de conexão com o Firebase.<br>"+err.message+"</div>";
+});
+
+function render(){
+  const gs = latest.gameState || {};
+  // decide a tela alvo
+  if(gs.finished){
+    if(currentScreen!=="end"){ showScreen("end"); }
+    renderEndScreen();
+    return;
+  }
+  if(gs.started){
+    checkFinish();                 // pode marcar finished no banco
+    if(currentScreen!=="game") showScreen("game");
+    renderGameScreen();
+    return;
+  }
+  // não iniciado -> configuração
+  if(currentScreen!=="config") showScreen("config");
+  buildConfigScreen();
+  updateStatusPill();
+}
+function updateStatusPill(){
+  const gs = latest.gameState || {};
+  let txt = "Modo Configuração";
+  if(gs.started && !gs.finished) txt = "Jogo em andamento — Rodada "+((gs.currentRound||0)+1);
+  if(gs.finished) txt = "Jogo finalizado";
+  $("#statusPills").textContent = txt;
+}
+
+/* ======================================================================
+   TELA DE CONFIGURAÇÃO
+====================================================================== */
+function buildConfigScreen(){
+  if(configBuilt) return;         // não reconstruir enquanto a professora digita
+  configBuilt = true;
+  const cfg = (latest.config && latest.config.stations) ? latest.config : defaultConfig();
+  const grid = $("#configGrid");
+  grid.innerHTML = "";
+  for(let i=0;i<NUM_STATIONS;i++){
+    const st = cfg.stations[i] || { gameType:"quiz", content:defaultContent("quiz") };
+    const card = document.createElement("div");
+    card.className = "card station-cfg";
+    card.dataset.index = i;
+    card.innerHTML = `
+      <h3><span class="badge-num" style="background:${TEAM_COLORS[i]}">${i+1}</span> Estação ${i+1}</h3>
+      <div class="field">
+        <label>Tipo de jogo</label>
+        <select class="cfg-type">
+          ${Object.entries(GAME_TYPES).map(([v,l])=>
+            `<option value="${v}" ${v===st.gameType?"selected":""}>${l}</option>`).join("")}
+        </select>
+      </div>
+      <div class="cfg-content"></div>`;
+    grid.appendChild(card);
+    const sel = card.querySelector(".cfg-type");
+    const renderContent = ()=> buildContentForm(card.querySelector(".cfg-content"), sel.value,
+        sel.value===st.gameType ? st.content : defaultContent(sel.value));
+    sel.addEventListener("change", renderContent);
+    renderContent();
+  }
+}
+
+/* formulário dinâmico de conteúdo por tipo */
+function buildContentForm(box, type, c){
+  let html = "";
+  if(type==="quiz"){
+    html = `
+      <div class="field"><label>Pergunta</label><input class="f-question" value="${esc(c.question)}"></div>
+      ${[0,1,2,3].map(k=>`
+        <div class="field"><label>Opção ${String.fromCharCode(65+k)} ${c.correctIndex===k?"(correta)":""}</label>
+          <input class="f-opt" value="${esc(c.options[k]||"")}"></div>`).join("")}
+      <div class="field"><label>Índice da correta (0=A,1=B,2=C,3=D)</label>
+        <input type="number" min="0" max="3" class="f-correct" value="${c.correctIndex}"></div>`;
+  } else if(type==="scramble"){
+    html = `<div class="field"><label>Palavra (será embaralhada)</label>
+      <input class="f-word" value="${esc(c.word)}" style="text-transform:uppercase"></div>`;
+  } else if(type==="memory"){
+    html = `<div class="field"><label>8 emojis (separados por espaço)</label>
+      <input class="f-emojis" value="${esc(c.emojis.join(' '))}"></div>
+      <p class="hint">Formam 8 pares (grade 4×4).</p>`;
+  } else if(type==="ordering"){
+    html = `<div class="field"><label>Itens e categorias — um por linha, formato <b>item = categoria</b></label>
+      <textarea class="f-items" rows="5">${esc(c.items.map(it=>it.item+" = "+it.category).join("\n"))}</textarea></div>`;
+  } else if(type==="riddle"){
+    html = `<div class="field"><label>Charada</label><textarea class="f-question" rows="2">${esc(c.question)}</textarea></div>
+      <div class="field"><label>Resposta</label><input class="f-answer" value="${esc(c.answer)}"></div>`;
+  } else if(type==="math"){
+    html = `<div class="row-2">
+        <div class="field"><label>Número A</label><input type="number" class="f-a" value="${c.a}"></div>
+        <div class="field"><label>Número B</label><input type="number" class="f-b" value="${c.b}"></div>
+      </div>
+      <div class="field"><label>Operação</label>
+        <select class="f-op">
+          ${["+","-","×"].map(o=>`<option ${o===c.op?"selected":""}>${o}</option>`).join("")}
+        </select></div>`;
+  }
+  box.innerHTML = html;
+}
+function esc(s){ return String(s).replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+
+/* lê a configuração dos formulários */
+function readConfigFromForm(){
+  const stations = {};
+  document.querySelectorAll(".station-cfg").forEach(card=>{
+    const i = +card.dataset.index;
+    const type = card.querySelector(".cfg-type").value;
+    let content = {};
+    if(type==="quiz"){
+      content = {
+        question: card.querySelector(".f-question").value.trim(),
+        options: [...card.querySelectorAll(".f-opt")].map(x=>x.value.trim()),
+        correctIndex: Math.max(0,Math.min(3,+card.querySelector(".f-correct").value||0))
+      };
+    } else if(type==="scramble"){
+      content = { word: card.querySelector(".f-word").value.trim().toUpperCase() || "ESCOLA" };
+    } else if(type==="memory"){
+      let em = card.querySelector(".f-emojis").value.trim().split(/\s+/).filter(Boolean);
+      if(em.length<8) em = defaultContent("memory").emojis;
+      content = { emojis: em.slice(0,8) };
+    } else if(type==="ordering"){
+      const items = card.querySelector(".f-items").value.split("\n")
+        .map(l=>l.split("=")).filter(p=>p.length===2 && p[0].trim() && p[1].trim())
+        .map(p=>({item:p[0].trim(), category:p[1].trim()}));
+      content = { items: items.length ? items : defaultContent("ordering").items };
+    } else if(type==="riddle"){
+      content = {
+        question: card.querySelector(".f-question").value.trim(),
+        answer: card.querySelector(".f-answer").value.trim()
+      };
+    } else if(type==="math"){
+      content = {
+        a: +card.querySelector(".f-a").value||0,
+        b: +card.querySelector(".f-b").value||0,
+        op: card.querySelector(".f-op").value
+      };
+    }
+    stations[i] = { gameType:type, content };
+  });
+  return { stations };
+}
+
+$("#btnSave").addEventListener("click", ()=>{
+  db.ref("config").set(readConfigFromForm()).then(()=>toast("Configuração salva ✔"));
+});
+$("#btnStart").addEventListener("click", ()=>{
+  const config = readConfigFromForm();
+  const progress = {};
+  for(let i=0;i<NUM_TEAMS;i++){
+    progress[teamId(i)] = { currentStation:i, completed:[] };
+  }
+  const updates = {
+    config,
+    progress,
+    scores: Object.fromEntries(Array.from({length:NUM_TEAMS},(_,i)=>[teamId(i),0])),
+    gameState:{ started:true, currentRound:0, finished:false }
+  };
+  rootRef.update(updates).then(()=>toast("Jogo iniciado! 🎉"));
+});
+
+/* ======================================================================
+   TELA DE JOGO
+====================================================================== */
+function teamAtStation(stationIndex){
+  const prog = latest.progress || {};
+  for(let i=0;i<NUM_TEAMS;i++){
+    if((prog[teamId(i)]||{}).currentStation === stationIndex) return i;
+  }
+  return -1;
+}
+function completedArr(teamIdx){
+  const p = (latest.progress||{})[teamId(teamIdx)] || {};
+  // RTDB pode devolver array ou objeto
+  const c = p.completed;
+  if(Array.isArray(c)) return c.filter(x=>x!==null);
+  if(c && typeof c==="object") return Object.values(c);
+  return [];
+}
+
+function renderGameScreen(){
+  updateStatusPill();
+  const gs = latest.gameState || {};
+  const round = gs.currentRound || 0;
+  $("#roundInfo").textContent = "Rodada " + (round+1) + " de " + NUM_STATIONS;
+
+  // assinatura: só re-renderiza os jogos quando a rodada muda
+  const sig = "r"+round;
+  if(sig !== lastGameSignature){
+    lastGameSignature = sig;
+    buildStations();
+  }
+  updateBadges();
+}
+
+function buildStations(){
+  const grid = $("#gameGrid");
+  grid.innerHTML = "";
+  const cfg = latest.config && latest.config.stations;
+  if(!cfg) return;
+  for(let s=0;s<NUM_STATIONS;s++){
+    const station = cfg[s];
+    const t = teamAtStation(s);
+    const card = document.createElement("div");
+    card.className = "card station";
+    card.dataset.station = s;
+    card.innerHTML = `
+      <div class="station-head" style="background:${TEAM_COLORS[t] || '#627d98'}">
+        <span class="st-title">Estação ${s+1}</span>
+        <span class="st-team">${t>=0?teamLabel(t):"—"}</span>
+      </div>
+      <div class="st-type">${GAME_TYPES[station.gameType]}</div>
+      <div class="st-body"></div>`;
+    grid.appendChild(card);
+
+    const body = card.querySelector(".st-body");
+    const already = t>=0 && completedArr(t).includes(s);
+    if(already){
+      showDone(card, "Equipe já concluiu");
+    } else if(t>=0){
+      renderGame(body, station, ()=>onComplete(s, t));
+    }
+  }
+}
+
+function onComplete(stationIndex, teamIdx){
+  const done = completedArr(teamIdx);
+  if(!done.includes(stationIndex)) done.push(stationIndex);
+  const updates = {};
+  updates["progress/"+teamId(teamIdx)+"/completed"] = done;
+  updates["scores/"+teamId(teamIdx)] = done.length;
+  rootRef.update(updates);
+  const card = document.querySelector('.station[data-station="'+stationIndex+'"]');
+  if(card) showDone(card, teamLabel(teamIdx)+" concluiu!");
+  toast(teamLabel(teamIdx)+" concluiu a Estação "+(stationIndex+1)+" 🎉");
+}
+function showDone(card, msg){
+  if(card.querySelector(".done-overlay")) return;
+  const ov = document.createElement("div");
+  ov.className = "done-overlay";
+  ov.innerHTML = `<div class="check">✅</div><div>${msg}</div>`;
+  card.appendChild(ov);
+}
+
+/* atualiza o banner e o estado dos botões conforme o progresso */
+function updateBadges(){
+  let allDone = true;
+  for(let s=0;s<NUM_STATIONS;s++){
+    const t = teamAtStation(s);
+    if(t<0) continue;
+    const done = completedArr(t).includes(s);
+    if(!done) allDone = false;
+    const card = document.querySelector('.station[data-station="'+s+'"]');
+    if(done && card) showDone(card, teamLabel(t)+" concluiu!");
+  }
+  const banner = $("#gameBanner");
+  banner.classList.toggle("ready", allDone);
+  banner.textContent = allDone
+    ? "✅ Todas as equipes concluíram! Clique em «Próxima Rodada»."
+    : "⏳ Aguardando as equipes concluírem suas estações…";
+  $("#btnNext").disabled = !allDone;
+}
+
+/* ---- Rotação ---- */
+function rotate(){
+  const prog = latest.progress || {};
+  const gs = latest.gameState || {};
+  const updates = {};
+  for(let i=0;i<NUM_TEAMS;i++){
+    const cur = (prog[teamId(i)]||{}).currentStation ?? i;
+    updates["progress/"+teamId(i)+"/currentStation"] = (cur+1) % NUM_STATIONS;
+  }
+  updates["gameState/currentRound"] = (gs.currentRound||0) + 1;
+  rootRef.update(updates).then(()=>toast("Rotação concluída ➡️"));
+}
+$("#btnNext").addEventListener("click", rotate);
+$("#btnForce").addEventListener("click", ()=>{
+  if(confirm("Forçar avanço mesmo com equipes que não concluíram?")) rotate();
+});
+$("#btnReset").addEventListener("click", ()=>{
+  if(confirm("Reiniciar o jogo? Todo o progresso será apagado.")) rootRef.remove().then(()=>{ configBuilt=false; lastGameSignature=""; });
+});
+$("#btnResetEnd").addEventListener("click", ()=>{
+  rootRef.remove().then(()=>{ configBuilt=false; lastGameSignature=""; });
+});
+
+/* verifica se o jogo terminou (todas as equipes concluíram as 6 estações) */
+function checkFinish(){
+  const gs = latest.gameState || {};
+  if(!gs.started || gs.finished) return;
+  for(let i=0;i<NUM_TEAMS;i++){
+    if(completedArr(i).length < NUM_STATIONS) return;
+  }
+  db.ref("gameState/finished").set(true);
+}
+
+/* ======================================================================
+   RENDERIZADORES DOS JOGOS
+   Cada função monta o jogo em `body` e chama done() ao concluir.
+====================================================================== */
+function renderGame(body, station, done){
+  const c = station.content || {};
+  switch(station.gameType){
+    case "quiz":     return renderQuiz(body, c, done);
+    case "scramble": return renderScramble(body, c, done);
+    case "memory":   return renderMemory(body, c, done);
+    case "ordering": return renderOrdering(body, c, done);
+    case "riddle":   return renderRiddle(body, c, done);
+    case "math":     return renderMath(body, c, done);
+  }
+}
+
+function renderQuiz(body, c, done){
+  body.innerHTML = `<p>${esc(c.question)}</p><div class="opts"></div><div class="feedback"></div>`;
+  const fb = body.querySelector(".feedback");
+  (c.options||[]).forEach((opt,k)=>{
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = String.fromCharCode(65+k)+") "+opt;
+    b.addEventListener("click", ()=>{
+      if(k===c.correctIndex){ done(); }
+      else { b.classList.add("wrong"); fb.className="feedback err"; fb.textContent="Tente novamente!"; setTimeout(()=>b.classList.remove("wrong"),400); }
+    });
+    body.querySelector(".opts").appendChild(b);
+  });
+}
+
+function renderScramble(body, c, done){
+  const word = (c.word||"").toUpperCase();
+  const scrambled = shuffleWord(word);
+  body.innerHTML = `
+    <div class="scramble-word">${scrambled}</div>
+    <div class="inline-form"><input class="sc-in" placeholder="Digite a palavra" style="text-transform:uppercase"><button class="btn-primary">OK</button></div>
+    <div class="feedback"></div>`;
+  const inp = body.querySelector(".sc-in"), fb = body.querySelector(".feedback");
+  const check = ()=>{
+    if(inp.value.trim().toUpperCase()===word){ done(); }
+    else { fb.className="feedback err"; fb.textContent="Não é essa. Tente de novo!"; }
+  };
+  body.querySelector("button").addEventListener("click", check);
+  inp.addEventListener("keydown", e=>{ if(e.key==="Enter") check(); });
+}
+function shuffleWord(w){
+  const a = w.split("");
+  for(let tries=0;tries<10;tries++){
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    if(a.join("")!==w || w.length<2) break;
+  }
+  return a.join("");
+}
+
+function renderMemory(body, c, done){
+  const emojis = (c.emojis||[]).slice(0,8);
+  let deck = [...emojis,...emojis];
+  for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+  body.innerHTML = `<div class="mem-grid"></div>`;
+  const grid = body.querySelector(".mem-grid");
+  let first=null, lock=false, matched=0;
+  deck.forEach(em=>{
+    const card = document.createElement("div");
+    card.className="mem-card"; card.textContent=em; card.dataset.em=em;
+    card.addEventListener("click", ()=>{
+      if(lock || card.classList.contains("flip") || card.classList.contains("matched")) return;
+      card.classList.add("flip");
+      if(!first){ first=card; return; }
+      if(first.dataset.em===card.dataset.em){
+        first.classList.add("matched"); card.classList.add("matched");
+        first=null; matched++;
+        if(matched===emojis.length) done();
+      } else {
+        lock=true;
+        setTimeout(()=>{ first.classList.remove("flip"); card.classList.remove("flip"); first=null; lock=false; },800);
+      }
+    });
+    grid.appendChild(card);
+  });
+}
+
+function renderOrdering(body, c, done){
+  const items = c.items||[];
+  const cats = [...new Set(items.map(it=>it.category))];
+  body.innerHTML = `
+    <div class="ord-items">${items.map((it,i)=>`<span class="ord-item" data-i="${i}" data-cat="${esc(it.category)}">${esc(it.item)}</span>`).join("")}</div>
+    <div class="ord-cats">${cats.map(cat=>`<div class="ord-cat" data-cat="${esc(cat)}"><h4>${esc(cat)}</h4><div class="drop"></div></div>`).join("")}</div>
+    <div class="feedback"></div>`;
+  const fb = body.querySelector(".feedback");
+  let selected=null, placed=0;
+  body.querySelectorAll(".ord-item").forEach(it=>{
+    it.addEventListener("click", ()=>{
+      if(it.classList.contains("placed")) return;
+      body.querySelectorAll(".ord-item").forEach(x=>x.classList.remove("selected"));
+      selected = it; it.classList.add("selected");
+    });
+  });
+  body.querySelectorAll(".ord-cat").forEach(cat=>{
+    cat.addEventListener("click", ()=>{
+      if(!selected) return;
+      if(selected.dataset.cat===cat.dataset.cat){
+        const chip=document.createElement("span"); chip.className="chip"; chip.textContent=selected.textContent;
+        cat.querySelector(".drop").appendChild(chip);
+        selected.classList.add("placed"); selected.classList.remove("selected");
+        selected=null; placed++;
+        fb.className="feedback ok"; fb.textContent="Correto!";
+        if(placed===items.length) done();
+      } else {
+        fb.className="feedback err"; fb.textContent="Categoria errada, tente outra.";
+        cat.classList.add("hot"); setTimeout(()=>cat.classList.remove("hot"),400);
+      }
+    });
+  });
+}
+
+function renderRiddle(body, c, done){
+  body.innerHTML = `
+    <div class="riddle-q">"${esc(c.question)}"</div>
+    <div class="inline-form"><input class="rd-in" placeholder="Sua resposta"><button class="btn-primary">OK</button></div>
+    <div class="feedback"></div>`;
+  const inp=body.querySelector(".rd-in"), fb=body.querySelector(".feedback");
+  const check=()=>{
+    if(norm(inp.value)===norm(c.answer)){ done(); }
+    else { fb.className="feedback err"; fb.textContent="Não é isso. Pense mais um pouco!"; }
+  };
+  body.querySelector("button").addEventListener("click", check);
+  inp.addEventListener("keydown", e=>{ if(e.key==="Enter") check(); });
+}
+function norm(s){ return String(s).trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
+
+function renderMath(body, c, done){
+  const ans = mathAnswer(c);
+  body.innerHTML = `
+    <div class="math-q">${c.a} ${c.op} ${c.b} = ?</div>
+    <div class="inline-form"><input type="number" class="mt-in" placeholder="Resultado"><button class="btn-primary">OK</button></div>
+    <div class="feedback"></div>`;
+  const inp=body.querySelector(".mt-in"), fb=body.querySelector(".feedback");
+  const check=()=>{
+    if(Number(inp.value)===ans){ done(); }
+    else { fb.className="feedback err"; fb.textContent="Resultado incorreto!"; }
+  };
+  body.querySelector("button").addEventListener("click", check);
+  inp.addEventListener("keydown", e=>{ if(e.key==="Enter") check(); });
+}
+
+/* ======================================================================
+   TELA FINAL — placar
+====================================================================== */
+function renderEndScreen(){
+  updateStatusPill();
+  const rows = [];
+  for(let i=0;i<NUM_TEAMS;i++){
+    rows.push({ i, score: completedArr(i).length });
+  }
+  rows.sort((a,b)=>b.score-a.score);
+  const medal = ["🥇","🥈","🥉"];
+  $("#scoreTable").innerHTML = `
+    <tr><th>Pos.</th><th>Equipe</th><th>Estações concluídas</th></tr>
+    ${rows.map((r,idx)=>`
+      <tr>
+        <td>${medal[idx]||(idx+1)}</td>
+        <td><span class="team-dot" style="background:${TEAM_COLORS[r.i]}"></span>${teamLabel(r.i)}</td>
+        <td>${r.score} / ${NUM_STATIONS}</td>
+      </tr>`).join("")}`;
+}
+</script>
+</body>
+</html>
