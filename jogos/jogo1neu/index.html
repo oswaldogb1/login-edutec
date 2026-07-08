@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
@@ -26,9 +26,8 @@
   .btn-ghost{background:#fff; color:var(--ink); border:1px solid var(--line)}
   .btn-danger{background:var(--danger); color:#fff}
   button:disabled{opacity:.5; cursor:not-allowed; box-shadow:none}
-  select{font-family:inherit; font-size:1rem; padding:.6em .7em; border:1px solid var(--line); border-radius:10px; width:100%; background:#fff; color:var(--ink)}
   input{font-family:inherit; font-size:1rem; padding:.55em .7em; border:1px solid var(--line); border-radius:10px; width:100%; background:#fff; color:var(--ink)}
-  select:focus,input:focus{outline:2px solid rgba(67,97,238,.4); border-color:var(--brand)}
+  input:focus{outline:2px solid rgba(67,97,238,.4); border-color:var(--brand)}
   .wrap{max-width:1180px; margin:0 auto; padding:24px}
   .topbar{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px}
   .topbar h1{font-size:1.5rem}
@@ -38,22 +37,18 @@
   .hint{font-size:.85rem; color:var(--muted)}
   .actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:22px; justify-content:center}
 
-  /* ---- Config ---- */
+  /* ---- Menu (seleção do jogo) ---- */
   .config-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:18px}
-  .station-cfg h3{display:flex; align-items:center; gap:10px; margin-bottom:12px}
-  .badge-num{display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; color:#fff; font-weight:700}
+  .game-btn{display:flex; flex-direction:column; align-items:center; gap:8px; padding:22px 14px; background:#fff; border:2px solid var(--line); border-radius:16px; color:var(--ink); font-weight:700; box-shadow:var(--shadow); transition:border-color .15s, transform .08s}
+  .game-btn:hover{border-color:var(--brand); transform:translateY(-2px)}
+  .game-btn .gi{font-size:2.4rem}
 
-  /* ---- Game grid ---- */
-  .game-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:8px}
-  @media(max-width:900px){.game-grid{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:600px){.game-grid{grid-template-columns:1fr}}
-  .station{position:relative; overflow:hidden; display:flex; flex-direction:column; min-height:260px; padding:0}
-  .station-head{display:flex; align-items:center; justify-content:space-between; padding:12px 16px; color:#fff}
-  .station-head .st-left .st-title{font-weight:700; font-size:1.05rem; display:block}
-  .station-head .st-left .st-team{font-size:.82rem; opacity:.95}
+  /* ---- Estação / jogo ---- */
+  .station{position:relative; overflow:hidden; display:flex; flex-direction:column; min-height:300px; padding:0; max-width:560px; margin:0 auto}
+  .station-head{display:flex; align-items:center; justify-content:space-between; padding:12px 16px; color:#fff; background:var(--brand)}
+  .station-head .st-title{font-weight:700; font-size:1.05rem}
   .st-score{background:rgba(255,255,255,.25); border-radius:999px; padding:.25em .7em; font-weight:700; font-size:.9rem}
   .st-inner{padding:14px 16px 16px; flex:1; display:flex; flex-direction:column}
-  .st-type{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; font-weight:700}
   .st-body{flex:1}
   .counter{font-size:.78rem; color:var(--muted); margin-top:10px}
   .flash{position:absolute; inset:0; background:rgba(46,204,113,.92); color:#fff; display:flex; align-items:center; justify-content:center; font-size:3rem; opacity:0; pointer-events:none; transition:opacity .15s}
@@ -95,100 +90,50 @@
   .math-q{font-size:1.6rem; font-weight:800; text-align:center; margin:14px 0}
   .riddle-q{font-size:1rem; text-align:center; margin:8px 0; font-style:italic}
 
-  /* seleção do jogo da mesa */
-  .game-btn{display:flex; flex-direction:column; align-items:center; gap:8px; padding:22px 14px; background:#fff; border:2px solid var(--line); border-radius:16px; color:var(--ink); font-weight:700; box-shadow:var(--shadow); transition:border-color .15s, transform .08s}
-  .game-btn:hover:not(:disabled){border-color:var(--brand); transform:translateY(-2px)}
-  .game-btn .gi{font-size:2.4rem}
-  .game-btn .tag{font-size:.72rem; color:var(--warn); font-weight:600}
-  .game-btn.taken{opacity:.55}
-  .station-solo{max-width:560px; margin:0 auto; min-height:300px}
-  .leaderboard{display:flex; flex-wrap:wrap; gap:10px 18px; justify-content:center; margin-top:16px; font-size:.85rem; color:var(--muted)}
-  .leaderboard .lb{white-space:nowrap}
-
-  /* scores / end / timer */
-  .banner{background:#eef2ff; border:1px solid #c7d2fe; color:var(--brand-dark); border-radius:12px; padding:10px 14px; text-align:center; font-weight:600; margin:14px 0}
-  .banner.time-up{background:#fff4e0; border-color:var(--warn); color:#b9770e}
-  .timer{font-variant-numeric:tabular-nums; font-weight:800}
-  .score-table{width:100%; border-collapse:collapse; margin-top:12px}
-  .score-table th,.score-table td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--line)}
-  .score-table th{color:var(--muted); font-size:.8rem; text-transform:uppercase}
-  .team-dot{display:inline-block; width:14px; height:14px; border-radius:50%; margin-right:8px; vertical-align:middle}
-  .end-hero{text-align:center; padding:30px 10px}
-  .end-hero .trophy{font-size:4rem}
   #toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#243b53; color:#fff; padding:12px 20px; border-radius:12px; box-shadow:var(--shadow); opacity:0; transition:opacity .3s, transform .3s; pointer-events:none; z-index:50}
   #toast.show{opacity:1; transform:translateX(-50%) translateY(-6px)}
-  #loading{position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; z-index:60}
-  .spinner{width:44px; height:44px; border:5px solid var(--line); border-top-color:var(--brand); border-radius:50%; animation:spin 1s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 
-<div id="loading"><div class="spinner"></div><div>Conectando ao servidor…</div></div>
-
 <div class="wrap">
   <div class="topbar">
     <h1>🎲 Jogo de Rotação por Estações</h1>
-    <div id="statusPills" class="pill">Carregando…</div>
+    <div id="statusPills" class="pill">Escolha o jogo desta mesa</div>
   </div>
 
-  <!-- SELEÇÃO DO JOGO DA MESA -->
+  <!-- MENU INICIAL: escolha do jogo desta mesa -->
   <div id="screen-config" class="hidden">
     <div class="card">
       <h2>👩‍🏫 Qual jogo roda nesta mesa?</h2>
-      <p class="hint">Abra esta página em <b>cada mesa</b> e escolha <b>um</b> jogo — cada mesa fica com um jogo só (nunca todos). Escolha um jogo diferente em cada mesa; os que já estiverem em uso em outra mesa aparecem indisponíveis. As <b>equipes</b> é que giram de mesa em mesa. O conteúdo é gerado automaticamente, no nível do <b>1º ano do Ensino Médio</b>.</p>
+      <p class="hint">Abra esta página em <b>cada computador</b> e escolha <b>um</b> jogo diferente para cada mesa. Os estudantes jogam livremente e podem recomeçar quando quiserem com o botão <b>Reiniciar Jogo</b>. Conteúdo no nível do <b>1º ano do Ensino Médio</b>.</p>
     </div>
     <div id="selectGrid" class="config-grid"></div>
+    <div class="card" style="margin-top:16px">
+      <h3>🧹 Manutenção</h3>
+      <p class="hint">Apaga o jogo escolhido que ficou gravado neste computador. Nada é enviado ou gravado em servidor — tudo funciona somente neste navegador.</p>
+      <div class="actions" style="margin-top:12px">
+        <button id="btnClearData" class="btn-danger">🗑️ Limpar dados gravados</button>
+      </div>
+    </div>
   </div>
 
-  <!-- GAME SCREEN (uma única mesa/jogo) -->
+  <!-- TELA DO JOGO -->
   <div id="screen-game" class="hidden">
-    <div class="actions" style="justify-content:space-between; margin-top:0">
-      <div id="roundInfo" class="pill">Rodada 1</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap">
-        <button id="btnNext" class="btn-ok">⏭️ Próxima Rodada</button>
-        <button id="btnReset" class="btn-danger">🔄 Reiniciar</button>
-      </div>
+    <div class="actions" style="justify-content:space-between; margin-top:0; margin-bottom:16px">
+      <button id="btnMenu" class="btn-ghost">🏠 Menu Inicial</button>
+      <button id="btnRestart" class="btn-ok">🔄 Reiniciar Jogo</button>
     </div>
-    <div id="gameBanner" class="banner">Tempo da rodada: <span class="timer">--:--</span></div>
     <div id="stationHost"></div>
-    <div id="leaderboard" class="leaderboard"></div>
-  </div>
-
-  <!-- END SCREEN -->
-  <div id="screen-end" class="hidden">
-    <div class="card end-hero">
-      <div class="trophy">🏆</div>
-      <h2>Fim de Jogo!</h2>
-      <p class="hint">Todas as equipes passaram pelas 6 estações.</p>
-      <table class="score-table" id="scoreTable"></table>
-      <div class="actions">
-        <button id="btnResetEnd" class="btn-primary">🔄 Novo Jogo</button>
-      </div>
-    </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
-<!-- Firebase v8 -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <script>
-/* ======================================================================
-   FIREBASE
-====================================================================== */
-const firebaseConfig = { databaseURL: "https://edutec-arnaldo-default-rtdb.firebaseio.com/" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const rootRef = db.ref("/");
-
 /* ======================================================================
    CONSTANTES
 ====================================================================== */
-const NUM_STATIONS = 6;
-const NUM_TEAMS = 6;
-const ROUND_SECONDS = 360;          // 6 min por rodada × 6 rodadas ≈ 40 min
 const GAME_TYPES = {
   quiz:     "Quiz",
   scramble: "Palavra Embaralhada",
@@ -198,16 +143,10 @@ const GAME_TYPES = {
   math:     "Matemática Rápida"
 };
 const POINTS = { quiz:10, scramble:10, riddle:10, math:10, memory:20, ordering:20 };
-const TEAM_COLORS = ["#e74c3c","#3498db","#2ecc71","#f39c12","#9b59b6","#1abc9c"];
-const teamId = i => "team" + (i + 1);
-const teamLabel = i => "Equipe " + (i + 1);
-/* Ordem canônica dos jogos: o jogo escolhido define a estação da mesa (0..5),
-   garantindo que todas as mesas compartilhem a mesma numeração para a rotação. */
-const GAME_ORDER = Object.keys(GAME_TYPES);
 const GAME_ICONS = { quiz:"❓", scramble:"🔤", memory:"🧠", ordering:"🗂️", riddle:"🧩", math:"➗" };
 
 /* ======================================================================
-   BANCO DE CONTEÚDO — 1º ano do Ensino Médio (automático)
+   BANCO DE CONTEÚDO — 1º ano do Ensino Médio
 ====================================================================== */
 const BANK = {
   quiz: [
@@ -288,11 +227,8 @@ const BANK = {
 /* ======================================================================
    ESTADO / HELPERS
 ====================================================================== */
-let latest = null;
-let currentScreen = null;
-let lastGameSignature = "";
-let timerInterval = null;
-let myGame = localStorage.getItem("mesaGame") || null;   // jogo desta mesa (dispositivo)
+let myGame = localStorage.getItem("mesaGame") || null;   // jogo desta mesa (só neste navegador)
+let score = 0;
 
 const $ = s => document.querySelector(s);
 function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2200); }
@@ -300,102 +236,64 @@ function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").rep
 function norm(s){ return String(s).trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
-function showScreen(name){ ["config","game","end"].forEach(s=>$("#screen-"+s).classList.toggle("hidden",s!==name)); currentScreen=name; }
-
-/* ======================================================================
-   LISTENER PRINCIPAL
-====================================================================== */
-rootRef.on("value", snap=>{ latest = snap.val() || {}; $("#loading").classList.add("hidden"); render(); },
-  err=>{ $("#loading").innerHTML = "<div style='text-align:center'>⚠️ Erro de conexão com o Firebase.<br>"+err.message+"</div>"; });
+function showScreen(name){ ["config","game"].forEach(s=>$("#screen-"+s).classList.toggle("hidden",s!==name)); }
 
 function render(){
-  const gs = latest.gameState || {};
-  if(gs.finished){ if(currentScreen!=="end") showScreen("end"); renderEnd(); updatePill(); return; }
-  if(!myGame){ if(currentScreen!=="config") showScreen("config"); buildSelect(); updatePill(); return; }
-  if(currentScreen!=="game") showScreen("game");
-  if(!(latest.claims && latest.claims[myGame])) claimedGame = null;   // reivindica de novo se foi zerado
-  claimGame(myGame);
-  renderGameScreen(); startTimerLoop(); updatePill();
-}
-function updatePill(){
-  const gs = latest.gameState || {};
-  let t = myGame ? (GAME_ICONS[myGame]+" "+GAME_TYPES[myGame]) : "Escolha o jogo da mesa";
-  if(gs.started && !gs.finished) t = "Rodada "+((gs.currentRound||0)+1)+"/"+NUM_STATIONS+" · "+(myGame?GAME_TYPES[myGame]:"");
-  if(gs.finished) t = "Jogo finalizado";
-  $("#statusPills").textContent = t;
+  if(!myGame){ showScreen("config"); buildSelect(); $("#statusPills").textContent = "Escolha o jogo desta mesa"; return; }
+  showScreen("game");
+  $("#statusPills").textContent = GAME_ICONS[myGame]+" "+GAME_TYPES[myGame];
+  buildStation();
 }
 
 /* ======================================================================
-   SELEÇÃO DO JOGO DA MESA — cada dispositivo abre UM jogo
+   MENU INICIAL
 ====================================================================== */
 function buildSelect(){
-  const claims = latest.claims || {};
   const grid = $("#selectGrid"); grid.innerHTML = "";
-  GAME_ORDER.forEach(g=>{
-    const taken = claims[g] && g!==myGame;              // já em uso em outra mesa
+  Object.keys(GAME_TYPES).forEach(g=>{
     const btn = document.createElement("button");
-    btn.className = "game-btn" + (taken?" taken":"");
-    btn.disabled = taken;
-    btn.innerHTML = `<span class="gi">${GAME_ICONS[g]}</span><span>${GAME_TYPES[g]}</span>${taken?'<span class="tag">em uso em outra mesa</span>':''}`;
+    btn.className = "game-btn";
+    btn.innerHTML = `<span class="gi">${GAME_ICONS[g]}</span><span>${GAME_TYPES[g]}</span>`;
     btn.addEventListener("click", ()=> selectGame(g));
     grid.appendChild(btn);
   });
 }
 function selectGame(g){
   myGame = g; localStorage.setItem("mesaGame", g);
-  claimGame(g); ensureStarted(); lastGameSignature = ""; render();
+  render();
   toast("Mesa configurada: "+GAME_TYPES[g]);
 }
-/* marca o jogo como "em uso" e libera automaticamente se a mesa fechar/desconectar */
-let claimedGame = null;
-function claimGame(g){
-  if(claimedGame === g) return;                 // evita reescritas repetidas
-  claimedGame = g;
-  const r = db.ref("claims/"+g);
-  r.onDisconnect().remove();
-  r.set(true);
+
+/* volta ao menu inicial e libera a mesa para escolher outro jogo */
+function goToMenu(){
+  myGame = null; localStorage.removeItem("mesaGame");
+  render();
 }
-/* inicializa o estado compartilhado (equipes/rodada) uma única vez */
-function ensureStarted(){
-  if(latest.gameState && latest.gameState.started) return;
-  const progress = {}; for(let i=0;i<NUM_TEAMS;i++) progress[teamId(i)] = { currentStation:i, score:0 };
-  const stations = {}; GAME_ORDER.forEach((g,i)=> stations[i] = { gameType:g });
-  rootRef.update({
-    config:{ stations },
-    progress,
-    gameState:{ started:true, currentRound:0, finished:false, roundStartedAt: Date.now() }
-  });
-}
+$("#btnMenu").addEventListener("click", goToMenu);
+
+/* recomeça o jogo atual do zero (novos desafios, pontuação zerada) */
+$("#btnRestart").addEventListener("click", ()=>{ buildStation(); toast("Jogo reiniciado 🔄"); });
+
+/* apaga o que está gravado neste navegador (jogo escolhido da mesa) */
+$("#btnClearData").addEventListener("click", ()=>{
+  if(!confirm("Limpar os dados gravados neste computador (jogo escolhido da mesa)?")) return;
+  localStorage.removeItem("mesaGame"); myGame = null;
+  render();
+  toast("Dados apagados 🗑️");
+});
 
 /* ======================================================================
-   TELA DE JOGO
+   ESTAÇÃO / PONTUAÇÃO (somente local, sem ranking)
 ====================================================================== */
-function teamAtStation(s){ const p=latest.progress||{}; for(let i=0;i<NUM_TEAMS;i++) if((p[teamId(i)]||{}).currentStation===s) return i; return -1; }
-function teamScore(i){ return ((latest.progress||{})[teamId(i)]||{}).score||0; }
-
-function renderGameScreen(){
-  const gs = latest.gameState || {};
-  if(!gs.started){ ensureStarted(); return; }         // aguarda inicialização
-  const round = gs.currentRound || 0;
-  $("#roundInfo").textContent = "Rodada " + (round+1) + " de " + NUM_STATIONS;
-  $("#btnNext").textContent = (round+1>=NUM_STATIONS) ? "🏁 Finalizar Jogo" : "⏭️ Próxima Rodada";
-  const myStation = GAME_ORDER.indexOf(myGame);
-  const sig = myGame + "|r" + round;
-  if(sig !== lastGameSignature){ lastGameSignature = sig; buildStation(myStation); }
-  updateHeaderSolo(myStation);
-  renderLeaderboard();
-}
-
-/* renderiza SOMENTE a estação/jogo desta mesa */
-function buildStation(s){
+function buildStation(){
+  score = 0;
   const host = $("#stationHost"); host.innerHTML = "";
-  const t = teamAtStation(s);
   const card = document.createElement("div");
-  card.className = "card station station-solo"; card.dataset.station = s;
+  card.className = "card station";
   card.innerHTML = `
-    <div class="station-head" style="background:${TEAM_COLORS[t]||'#627d98'}">
-      <span class="st-left"><span class="st-title">${GAME_ICONS[myGame]} ${GAME_TYPES[myGame]}</span><span class="st-team">${t>=0?('Vez da '+teamLabel(t)):'—'}</span></span>
-      <span class="st-score">🏆 <b class="sc">${t>=0?teamScore(t):0}</b></span>
+    <div class="station-head">
+      <span class="st-title">${GAME_ICONS[myGame]} ${GAME_TYPES[myGame]}</span>
+      <span class="st-score">🏆 <b class="sc">0</b></span>
     </div>
     <div class="st-inner">
       <div class="st-body"></div>
@@ -403,73 +301,26 @@ function buildStation(s){
     </div>
     <div class="flash">✅</div>`;
   host.appendChild(card);
-  if(t>=0) mountGame(card, myGame, t);
+  mountGame(card, myGame);
 }
 
-/* pontua: soma no Firebase por transação (cada equipe escreve só o seu nó) */
-function award(teamIdx, pts, card){
-  db.ref("progress/"+teamId(teamIdx)+"/score").transaction(v => (v||0)+pts);
-  if(card){ const f=card.querySelector(".flash"); f.classList.add("on"); setTimeout(()=>f.classList.remove("on"),350); }
+function award(pts, card){
+  score += pts;
+  card.querySelector(".sc").textContent = score;
+  const f = card.querySelector(".flash");
+  f.classList.add("on"); setTimeout(()=>f.classList.remove("on"),350);
 }
-function updateHeaderSolo(s){
-  const t = teamAtStation(s);
-  const card = $("#stationHost .station");
-  if(card && t>=0){ const sc=card.querySelector(".sc"); if(sc) sc.textContent = teamScore(t); }
-}
-/* placar geral (todas as equipes) visível em cada mesa */
-function renderLeaderboard(){
-  const el = $("#leaderboard"); if(!el) return;
-  const rows = []; for(let i=0;i<NUM_TEAMS;i++) rows.push({ i, score:teamScore(i) });
-  rows.sort((a,b)=>b.score-a.score);
-  el.innerHTML = "<b style='width:100%;text-align:center;color:var(--ink)'>Placar geral</b>" +
-    rows.map(r=>`<span class="lb"><span class="team-dot" style="background:${TEAM_COLORS[r.i]}"></span>${teamLabel(r.i)}: <b>${r.score}</b></span>`).join("");
-}
-
-/* ---- Cronômetro sincronizado por rodada ---- */
-function startTimerLoop(){ if(!timerInterval) timerInterval = setInterval(tickTimer, 1000); tickTimer(); }
-function tickTimer(){
-  const gs = latest.gameState || {};
-  if(!gs.started || gs.finished) return;
-  const start = gs.roundStartedAt || Date.now();
-  const rem = Math.max(0, ROUND_SECONDS - Math.floor((Date.now()-start)/1000));
-  const mm = String(Math.floor(rem/60)).padStart(2,"0");
-  const ss = String(rem%60).padStart(2,"0");
-  const banner = $("#gameBanner");
-  if(rem===0){ banner.classList.add("time-up"); banner.innerHTML = "⏰ Tempo esgotado! Clique em «Próxima Rodada»."; }
-  else { banner.classList.remove("time-up"); banner.innerHTML = "⏱️ Tempo da rodada: <span class='timer'>"+mm+":"+ss+"</span> — cada equipe joga o máximo que conseguir."; }
-}
-
-/* ---- Rotação / Fim ---- */
-function advanceRound(){
-  const gs = latest.gameState || {};
-  const round = gs.currentRound || 0;
-  if(round+1 >= NUM_STATIONS){ db.ref("gameState").update({ finished:true }); return; }
-  const p = latest.progress || {};
-  const updates = {};
-  for(let i=0;i<NUM_TEAMS;i++){
-    const cur = (p[teamId(i)]||{}).currentStation ?? i;
-    updates["progress/"+teamId(i)+"/currentStation"] = (cur+1)%NUM_STATIONS;
-  }
-  updates["gameState/currentRound"] = round+1;
-  updates["gameState/roundStartedAt"] = Date.now();
-  rootRef.update(updates).then(()=>toast("Rotação concluída ➡️"));
-}
-$("#btnNext").addEventListener("click", advanceRound);
-$("#btnReset").addEventListener("click", ()=>{ if(confirm("Reiniciar o jogo de TODAS as mesas? Todo o progresso será apagado.")) doReset(); });
-$("#btnResetEnd").addEventListener("click", doReset);
-/* zera o estado compartilhado; a mesa mantém o jogo escolhido e reinicializa */
-function doReset(){ rootRef.remove().then(()=>{ lastGameSignature=""; clearInterval(timerInterval); timerInterval=null; }); }
 
 /* ======================================================================
-   JOGOS — cada estação é uma SEQUÊNCIA contínua de desafios
+   JOGOS — cada mesa é uma SEQUÊNCIA contínua de desafios
 ====================================================================== */
-function mountGame(card, type, teamIdx){
+function mountGame(card, type){
   const body = card.querySelector(".st-body");
   const counter = card.querySelector(".counter");
-  ({ quiz:mountQuiz, scramble:mountScramble, memory:mountMemory, ordering:mountOrdering, riddle:mountRiddle, math:mountMath }[type])(body, counter, teamIdx, card);
+  ({ quiz:mountQuiz, scramble:mountScramble, memory:mountMemory, ordering:mountOrdering, riddle:mountRiddle, math:mountMath }[type])(body, counter, card);
 }
 
-function mountQuiz(body, counter, teamIdx, card){
+function mountQuiz(body, counter, card){
   const bank = shuffle(BANK.quiz); let idx=0, hits=0;
   function show(){
     const item = bank[idx % bank.length];
@@ -478,17 +329,17 @@ function mountQuiz(body, counter, teamIdx, card){
     item.o.forEach((opt,k)=>{
       const b=document.createElement("button"); b.className="opt"; b.textContent=String.fromCharCode(65+k)+") "+opt;
       b.addEventListener("click", ()=>{
-        if(k===item.c){ hits++; award(teamIdx,POINTS.quiz,card); idx++; show(); }
+        if(k===item.c){ hits++; award(POINTS.quiz,card); idx++; show(); }
         else { b.classList.add("wrong"); fb.className="feedback err"; fb.textContent="Tente novamente!"; setTimeout(()=>b.classList.remove("wrong"),400); }
       });
       body.querySelector(".opts").appendChild(b);
     });
-    counter.textContent = "Acertos nesta estação: "+hits;
+    counter.textContent = "Acertos: "+hits;
   }
   show();
 }
 
-function mountScramble(body, counter, teamIdx, card){
+function mountScramble(body, counter, card){
   const bank = shuffle(BANK.scramble); let idx=0, hits=0;
   function scr(w){ let a; do{ a=shuffle(w.split("")).join(""); }while(a===w && w.length>1); return a; }
   function show(){
@@ -499,16 +350,17 @@ function mountScramble(body, counter, teamIdx, card){
       <div class="inline-form"><input class="in" placeholder="Digite a palavra" style="text-transform:uppercase"><button class="btn-primary">OK</button></div>
       <div class="feedback"></div>`;
     const inp=body.querySelector(".in"), fb=body.querySelector(".feedback");
-    const go=()=>{ if(inp.value.trim().toUpperCase()===item.word){ hits++; award(teamIdx,POINTS.scramble,card); idx++; show(); }
+    const go=()=>{ if(inp.value.trim().toUpperCase()===item.word){ hits++; award(POINTS.scramble,card); idx++; show(); }
                    else { fb.className="feedback err"; fb.textContent="Não é essa. Tente de novo!"; } };
     body.querySelector("button").addEventListener("click", go);
     inp.addEventListener("keydown", e=>{ if(e.key==="Enter") go(); });
+    inp.focus();
     counter.textContent = "Palavras corretas: "+hits;
   }
   show();
 }
 
-function mountRiddle(body, counter, teamIdx, card){
+function mountRiddle(body, counter, card){
   const bank = shuffle(BANK.riddle); let idx=0, hits=0;
   function show(){
     const item = bank[idx % bank.length];
@@ -517,16 +369,17 @@ function mountRiddle(body, counter, teamIdx, card){
       <div class="inline-form"><input class="in" placeholder="Sua resposta"><button class="btn-primary">OK</button></div>
       <div class="feedback"></div>`;
     const inp=body.querySelector(".in"), fb=body.querySelector(".feedback");
-    const go=()=>{ if(norm(inp.value)===norm(item.a)){ hits++; award(teamIdx,POINTS.riddle,card); idx++; show(); }
+    const go=()=>{ if(norm(inp.value)===norm(item.a)){ hits++; award(POINTS.riddle,card); idx++; show(); }
                    else { fb.className="feedback err"; fb.textContent="Não é isso. Pense mais um pouco!"; } };
     body.querySelector("button").addEventListener("click", go);
     inp.addEventListener("keydown", e=>{ if(e.key==="Enter") go(); });
+    inp.focus();
     counter.textContent = "Charadas resolvidas: "+hits;
   }
   show();
 }
 
-function mountMath(body, counter, teamIdx, card){
+function mountMath(body, counter, card){
   const bank = shuffle(BANK.math); let idx=0, hits=0;
   function show(){
     const item = bank[idx % bank.length];
@@ -535,16 +388,17 @@ function mountMath(body, counter, teamIdx, card){
       <div class="inline-form"><input type="number" class="in" placeholder="Resultado"><button class="btn-primary">OK</button></div>
       <div class="feedback"></div>`;
     const inp=body.querySelector(".in"), fb=body.querySelector(".feedback");
-    const go=()=>{ if(Number(inp.value)===item.a){ hits++; award(teamIdx,POINTS.math,card); idx++; show(); }
+    const go=()=>{ if(Number(inp.value)===item.a){ hits++; award(POINTS.math,card); idx++; show(); }
                    else { fb.className="feedback err"; fb.textContent="Resultado incorreto!"; } };
     body.querySelector("button").addEventListener("click", go);
     inp.addEventListener("keydown", e=>{ if(e.key==="Enter") go(); });
+    inp.focus();
     counter.textContent = "Contas certas: "+hits;
   }
   show();
 }
 
-function mountMemory(body, counter, teamIdx, card){
+function mountMemory(body, counter, card){
   let boards=0;
   function newBoard(){
     const deck = pick(BANK.memory);
@@ -560,7 +414,7 @@ function mountMemory(body, counter, teamIdx, card){
         if(!first){ first={el,key:cd.key}; return; }
         if(first.key===cd.key && first.el!==el){
           first.el.classList.add("matched"); el.classList.add("matched"); first=null; matched++;
-          if(matched===deck.pairs.length){ boards++; award(teamIdx,POINTS.memory,card); counter.textContent="Tabuleiros completos: "+boards; setTimeout(newBoard,600); }
+          if(matched===deck.pairs.length){ boards++; award(POINTS.memory,card); counter.textContent="Tabuleiros completos: "+boards; setTimeout(newBoard,600); }
         } else {
           lock=true; const fe=first.el; setTimeout(()=>{ fe.classList.remove("flip"); el.classList.remove("flip"); first=null; lock=false; },800);
         }
@@ -572,7 +426,7 @@ function mountMemory(body, counter, teamIdx, card){
   newBoard();
 }
 
-function mountOrdering(body, counter, teamIdx, card){
+function mountOrdering(body, counter, card){
   let sets=0;
   function newSet(){
     const set = pick(BANK.ordering);
@@ -596,7 +450,7 @@ function mountOrdering(body, counter, teamIdx, card){
         cat.querySelector(".drop").appendChild(chip);
         selected.classList.add("placed"); selected.classList.remove("selected"); selected=null; placed++;
         fb.className="feedback ok"; fb.textContent="Correto!";
-        if(placed===set.items.length){ sets++; award(teamIdx,POINTS.ordering,card); counter.textContent="Classificações certas: "+sets; setTimeout(newSet,600); }
+        if(placed===set.items.length){ sets++; award(POINTS.ordering,card); counter.textContent="Classificações certas: "+sets; setTimeout(newSet,600); }
       } else { fb.className="feedback err"; fb.textContent="Categoria errada, tente outra."; cat.classList.add("hot"); setTimeout(()=>cat.classList.remove("hot"),400); }
     }));
     counter.textContent = "Classificações certas: "+sets;
@@ -604,24 +458,7 @@ function mountOrdering(body, counter, teamIdx, card){
   newSet();
 }
 
-/* ======================================================================
-   TELA FINAL
-====================================================================== */
-function renderEnd(){
-  clearInterval(timerInterval); timerInterval=null;
-  const rows = [];
-  for(let i=0;i<NUM_TEAMS;i++) rows.push({ i, score: teamScore(i) });
-  rows.sort((a,b)=>b.score-a.score);
-  const medal = ["🥇","🥈","🥉"];
-  $("#scoreTable").innerHTML = `
-    <tr><th>Pos.</th><th>Equipe</th><th>Pontos</th></tr>
-    ${rows.map((r,idx)=>`
-      <tr>
-        <td>${medal[idx]||(idx+1)}</td>
-        <td><span class="team-dot" style="background:${TEAM_COLORS[r.i]}"></span>${teamLabel(r.i)}</td>
-        <td><b>${r.score}</b></td>
-      </tr>`).join("")}`;
-}
+render();
 </script>
 </body>
 </html>
