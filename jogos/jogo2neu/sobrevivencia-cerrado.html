@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sobrevivência no Cerrado — Física e Sustentabilidade</title>
+<style>
+/* =========================================================================
+   ESTILOS (CSS) — Tema FLORESTA/CERRADO: madeira, plantas e cipós.
+   Fundo: imagem "im.png" (floresta). O professor pode trocar as cores
+   nas variáveis :root abaixo.
+   ========================================================================= */
+:root{
+  --terra:#8a5a2b;
+  --terra-escuro:#4a2f14;
+  --madeira:#6b4423;
+  --madeira-clara:#8a5a30;
+  --verde:#3f6f2a;
+  --verde-escuro:#274d17;
+  --verde-folha:#5aa02e;
+  --laranja:#e08a1e;
+  --laranja-claro:#f3b25a;
+  --creme:#fffaf0;
+  --pergaminho:#f3e7c9;
+  --vermelho:#c0392b;
+  --amarelo:#d4a017;
+  --texto:#3a2a12;
+  --sombra:0 6px 20px rgba(20,35,12,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Segoe UI',Tahoma,Verdana,sans-serif;
+  color:var(--texto);
+  /* Fundo com a imagem da floresta, fixa e cobrindo toda a tela */
+  background:url('im.png') center center / cover fixed no-repeat, #274d17;
+  min-height:100vh;
+  line-height:1.5;
+}
+/* Camada escura translúcida por cima da imagem, para dar contraste ao texto */
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(30,60,20,.15), transparent 60%),
+    linear-gradient(180deg, rgba(20,40,14,.30) 0%, rgba(18,35,12,.60) 100%);
+}
+.container{max-width:1100px;margin:0 auto;padding:18px;position:relative}
+/* Barra de navegação com botão de voltar ao início */
+.nav-topo{display:flex;justify-content:flex-end;margin-bottom:10px}
+h1,h2,h3{color:var(--terra-escuro);line-height:1.2}
+h1{font-size:clamp(1.6rem,4vw,2.6rem)}
+.oculto{display:none !important}
+
+/* ---- CIPÓ / trepadeira decorativa (divisória com folhas) ---- */
+.cipo{
+  text-align:center;font-size:1.1rem;letter-spacing:4px;
+  margin:2px 0 12px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3));
+  user-select:none;
+}
+
+/* ---- CARTÕES estilo pergaminho com moldura de MADEIRA ---- */
+.card{
+  background:linear-gradient(180deg,var(--creme),var(--pergaminho));
+  border:5px solid var(--madeira);
+  border-radius:16px;
+  padding:20px;
+  box-shadow:var(--sombra), inset 0 0 0 2px rgba(255,255,255,.35);
+  margin-bottom:16px;position:relative;
+}
+/* Faixa de "madeira" (tábua) usada em cabeçalhos */
+.tabua{
+  background:
+    repeating-linear-gradient(90deg,#5c3a1c 0,#5c3a1c 3px,#6b4423 3px,#6b4423 9px,#7a4f28 9px,#7a4f28 12px);
+  color:#ffe9c2;border-radius:12px;padding:14px 18px;margin:-4px -4px 12px;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.4), 0 3px 8px rgba(0,0,0,.3);
+  text-shadow:1px 1px 2px rgba(0,0,0,.6);border:2px solid #4a2f14;
+}
+.tabua h1,.tabua h2,.tabua h3{color:#ffe9c2}
+.narrativa{background:linear-gradient(180deg,rgba(39,77,23,.96),rgba(20,45,14,.97));border-color:#4a2f14}
+.narrativa,.narrativa h1,.narrativa h2,.narrativa h3,.narrativa b{color:#f4ecd2}
+.narrativa .card{background:rgba(255,255,255,.08);border-color:rgba(200,230,160,.35)}
+
+/* ---- BOTÕES estilo madeira/folha ---- */
+button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:600;
+  transition:transform .08s, box-shadow .15s, filter .15s}
+button:active{transform:translateY(1px)}
+.btn{
+  background:linear-gradient(180deg,var(--laranja),var(--terra));
+  color:#fff;padding:14px 26px;font-size:1.05rem;
+  box-shadow:var(--sombra), inset 0 1px 0 rgba(255,255,255,.3);
+  border:2px solid rgba(74,47,20,.5);text-shadow:0 1px 2px rgba(0,0,0,.35);
+}
+.btn:hover{filter:brightness(1.09)}
+.btn-verde{background:linear-gradient(180deg,var(--verde-folha),var(--verde-escuro))}
+.btn-cinza{background:linear-gradient(180deg,#9c8a6a,#6f6047)}
+.btn-vermelho{background:linear-gradient(180deg,#e05a4a,var(--vermelho))}
+.btn-madeira{background:linear-gradient(180deg,var(--madeira-clara),var(--madeira))}
+.btn-pequeno{padding:8px 14px;font-size:.9rem}
+.centro{text-align:center}
+.row-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+
+/* ---- MEDIDORES (barras de progresso) ---- */
+.medidor{margin:10px 0}
+.medidor .rotulo{display:flex;justify-content:space-between;font-size:.9rem;font-weight:600;margin-bottom:4px}
+.barra{background:rgba(74,47,20,.18);border-radius:20px;height:20px;overflow:hidden;position:relative;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.25);border:1px solid rgba(74,47,20,.3)}
+.barra .preenche{height:100%;width:0;border-radius:20px;transition:width .4s ease, background .3s;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.barra.fino{height:14px}
+
+/* ---- LOJA ---- */
+.grid-loja{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.item{
+  background:linear-gradient(180deg,#fffdf6,#f0e3c2);border:3px solid var(--madeira);border-radius:12px;padding:12px;
+  display:flex;flex-direction:column;gap:6px;position:relative;box-shadow:0 3px 8px rgba(20,35,12,.25)}
+.item.comprado{border-color:var(--verde-folha);box-shadow:0 0 0 3px rgba(90,160,46,.4)}
+.item .icone{font-size:2rem;filter:drop-shadow(0 2px 2px rgba(0,0,0,.2))}
+.item .nome{font-weight:700;font-size:1rem}
+.item .infos{font-size:.82rem;color:#6b5636;display:flex;flex-wrap:wrap;gap:6px}
+.tag{background:rgba(107,68,35,.14);border-radius:6px;padding:1px 6px;white-space:nowrap}
+.impacto-1{color:#2f7d2f}.impacto-2{color:#5a8a1e}.impacto-3{color:#c99400}
+.impacto-4{color:#d2691e}.impacto-5{color:var(--vermelho);font-weight:700}
+
+.duas-colunas{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+@media(max-width:850px){.duas-colunas{grid-template-columns:1fr}}
+.painel-lateral{position:sticky;top:10px}
+
+/* ---- MOCHILA ---- */
+#lista-mochila{display:flex;flex-direction:column;gap:6px;min-height:60px}
+.item-mochila{display:flex;justify-content:space-between;align-items:center;
+  background:rgba(90,160,46,.15);border-radius:8px;padding:6px 10px;font-size:.9rem;border:1px solid rgba(63,111,42,.3)}
+.dropzone{border:3px dashed rgba(107,68,35,.5);border-radius:10px;padding:10px;transition:background .2s,border-color .2s}
+.dropzone.dragover{background:rgba(224,138,30,.18);border-color:var(--laranja)}
+.arrastavel{cursor:grab}
+
+/* ---- TRILHA ---- */
+.opcao{
+  display:block;width:100%;text-align:left;
+  background:linear-gradient(180deg,#fffdf6,#efe2c1);
+  border:3px solid var(--madeira);border-radius:12px;padding:14px 16px;margin-bottom:10px;
+  font-size:1rem;color:var(--texto);box-shadow:0 3px 6px rgba(20,35,12,.2)}
+.opcao:hover{border-color:var(--laranja);background:#fff;transform:translateX(3px)}
+.status-bar-topo{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+
+/* ---- DIÁRIO ---- */
+#diario{max-height:240px;overflow:auto;font-size:.9rem}
+#diario .entrada{padding:6px 0;border-bottom:1px dashed rgba(107,68,35,.3)}
+
+/* ---- FEEDBACK e ANIMAÇÕES ---- */
+.feedback{border-radius:12px;padding:14px;margin:12px 0;font-weight:600}
+.feedback.bom{background:rgba(90,160,46,.20);border:2px solid var(--verde-folha)}
+.feedback.ruim{background:rgba(192,57,43,.15);border:2px solid var(--vermelho);color:var(--vermelho)}
+.feedback.neutro{background:rgba(212,160,23,.20);border:2px solid var(--amarelo)}
+@keyframes tremer{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(7px)}}
+.tremendo{animation:tremer .5s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.tela{animation:fadeIn .35s}
+
+/* ---- RESULTADOS ---- */
+.selo{font-size:1.6rem;font-weight:800;padding:10px 20px;border-radius:14px;display:inline-block;color:#fff;
+  border:2px solid rgba(0,0,0,.2);text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.nota-grande{font-size:2.2rem;font-weight:800}
+.grade-resultados{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.qr{width:120px;height:120px;image-rendering:pixelated;border:6px solid #fff;box-shadow:var(--sombra)}
+.recorde{background:rgba(224,138,30,.18);border-radius:10px;padding:8px 12px;display:inline-block;font-weight:700}
+small.dica{color:#6b5028;font-style:italic}
+.legenda-impacto{font-size:.8rem;color:#6b5636;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Botão para voltar à tela inicial (aparece fora da tela inicial) -->
+<div id="nav-topo" class="nav-topo oculto">
+  <button class="btn btn-madeira btn-pequeno" onclick="voltarInicio()">🏠 Tela Inicial</button>
+</div>
+
+<!-- ================= TELA INICIAL ================= -->
+<section id="tela-inicio" class="tela">
+  <div class="card narrativa">
+    <div class="tabua"><h1>🌄 Sobrevivência no Cerrado</h1></div>
+    <div class="cipo">🌿🍃🌱🍃🌿🍃🌱🍃🌿🍃🌱🍃🌿</div>
+    <h3 style="color:#ffd28a">Física &amp; Sustentabilidade — Cerrado de Figueirão</h3>
+    <p style="margin-top:12px">
+      Você é um(a) jovem expedicionário(a) que sonha em atravessar por <b>3 dias</b> as trilhas do
+      <b>Cerrado de Figueirão</b> — um dos berços de água do Brasil, no coração do bioma Cerrado.
+      Cânions, cachoeiras de quartzo, veredas de buritis, cipós e um sol impiedoso ao meio-dia esperam por você.
+    </p>
+    <p style="margin-top:10px">
+      Mas a natureza não perdoa o despreparo. Você tem apenas <b>R$ 350,00</b> para se equipar e uma
+      mochila que suporta no máximo <b>12 kg</b> e <b>25 litros</b>. Cada grama a mais é mais esforço
+      (força peso 💪); cada item errado é mais lixo no bioma 🌱.
+    </p>
+    <div class="card" style="margin-top:14px">
+      <h3 style="color:#ffe9c2">🎯 Seus objetivos</h3>
+      <ul style="margin-left:20px;margin-top:8px">
+        <li>Comprar e organizar os itens sem estourar peso, volume ou orçamento.</li>
+        <li>Sobreviver a <b>16 etapas</b> (13 desafios + 3 imprevistos) mantendo Hidratação, Energia e Temperatura sob controle.</li>
+        <li>Causar o <b>menor impacto ambiental</b> possível (pegada de carbono baixa!).</li>
+        <li>Conquistar o selo de <b>"Guardião(ã) do Cerrado"</b> 🏆.</li>
+      </ul>
+    </div>
+    <div id="recorde-inicio"></div>
+    <div class="row-btns">
+      <button class="btn" onclick="irParaLoja()">Iniciar Expedição ➜</button>
+    </div>
+  </div>
+  <p class="centro"><small class="dica" style="color:#e8dcb8">💡 Física: peso, força e centro de massa · Matemática: orçamento, volume e médias · Educação Ambiental: impacto e pegada de carbono.</small></p>
+</section>
+
+<!-- ================= TELA DA LOJA + MOCHILA ================= -->
+<section id="tela-loja" class="tela oculto">
+  <div class="card">
+    <div class="tabua"><h1>🛒 Loja Base do Expedicionário</h1></div>
+    <div class="cipo">🌿🍃🌱🍃🌿🍃🌱🍃🌿🍃🌱🍃🌿</div>
+    <p>Compre com sabedoria! Depois, guarde os itens na mochila (arraste ou clique). Observe os medidores em tempo real.</p>
+    <p class="legenda-impacto">🌱 <b>Impacto ambiental:</b>
+      <span class="impacto-1">1 = biodegradável/reutilizável</span> ···
+      <span class="impacto-5">5 = poluente/descartável</span>
+    </p>
+  </div>
+
+  <div class="duas-colunas">
+    <div>
+      <div id="grid-loja" class="grid-loja"></div>
+    </div>
+
+    <div class="painel-lateral">
+      <div class="card">
+        <div class="tabua"><h3>📊 Medidores</h3></div>
+        <div class="medidor">
+          <div class="rotulo"><span>💰 Orçamento</span><span id="txt-orcamento">R$ 0 / R$ 350</span></div>
+          <div class="barra"><div id="barra-orcamento" class="preenche"></div></div>
+        </div>
+        <div class="medidor">
+          <div class="rotulo"><span>⚖️ Peso (máx 12 kg)</span><span id="txt-peso">0,00 kg</span></div>
+          <div class="barra"><div id="barra-peso" class="preenche"></div></div>
+        </div>
+        <div class="medidor">
+          <div class="rotulo"><span>📦 Volume (máx 25 L)</span><span id="txt-volume">0,0 L</span></div>
+          <div class="barra"><div id="barra-volume" class="preenche"></div></div>
+        </div>
+        <div class="medidor">
+          <div class="rotulo"><span>🌍 Impacto médio</span><span id="txt-impacto">—</span></div>
+          <div class="barra fino"><div id="barra-impacto" class="preenche"></div></div>
+        </div>
+        <p style="margin-top:8px"><small class="dica">Pegada de carbono estimada: <b id="txt-carbono">0,0 kg CO₂</b></small></p>
+      </div>
+
+      <div class="card">
+        <div class="tabua"><h3>🎒 Sua Mochila</h3></div>
+        <p><small class="dica">Só itens guardados aqui vão para a trilha!</small></p>
+        <div id="mochila-drop" class="dropzone" style="margin-top:8px">
+          <div id="lista-mochila"><em style="color:#8a7a5a">Vazia — guarde seus itens comprados.</em></div>
+        </div>
+        <div id="aviso-mochila" class="feedback ruim oculto" style="margin-top:10px"></div>
+        <div class="row-btns" style="justify-content:stretch">
+          <button class="btn btn-verde" style="flex:1" onclick="iniciarTrilha()">Partir para a Trilha ➜</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TELA DA TRILHA ================= -->
+<section id="tela-trilha" class="tela oculto">
+  <div class="card" id="painel-status">
+    <div class="status-bar-topo">
+      <div class="medidor">
+        <div class="rotulo"><span>💧 Hidratação</span><span id="txt-hidra">100%</span></div>
+        <div class="barra fino"><div id="barra-hidra" class="preenche"></div></div>
+      </div>
+      <div class="medidor">
+        <div class="rotulo"><span>⚡ Energia</span><span id="txt-energia">100%</span></div>
+        <div class="barra fino"><div id="barra-energia" class="preenche"></div></div>
+      </div>
+      <div class="medidor">
+        <div class="rotulo"><span>🌡️ Temperatura</span><span id="txt-temp">36,5°C</span></div>
+        <div class="barra fino"><div id="barra-temp" class="preenche"></div></div>
+      </div>
+    </div>
+    <div style="text-align:center;font-weight:700;color:var(--terra-escuro)" id="txt-progresso-trilha"></div>
+  </div>
+
+  <div class="card" id="painel-cenario">
+    <div class="tabua"><h2 id="titulo-cenario"></h2></div>
+    <p id="texto-cenario" style="margin:10px 0"></p>
+    <div id="opcoes-cenario"></div>
+  </div>
+
+  <div class="card oculto" id="painel-feedback">
+    <div id="feedback-conteudo"></div>
+    <div class="row-btns">
+      <button class="btn" id="btn-continuar" onclick="proximoPasso()">Continuar ➜</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tabua"><h3>📓 Diário de Bordo</h3></div>
+    <div id="diario"></div>
+  </div>
+</section>
+
+<!-- ================= TELA DE RESULTADOS ================= -->
+<section id="tela-resultados" class="tela oculto">
+  <div id="resultados-conteudo"></div>
+</section>
+
+</div>
+
+<script>
+/* =========================================================================
+   LÓGICA DO JOGO (JavaScript puro)
+   Todo o estado fica no objeto global `gameState` para fácil depuração:
+   basta abrir o console do navegador e digitar `gameState`.
+   ========================================================================= */
+
+// ------- Configurações gerais (o professor pode ajustar) -------
+const CONFIG = {
+  ORCAMENTO: 350,       // R$ iniciais
+  PESO_MAX: 12,         // kg
+  VOLUME_MAX: 25,       // litros
+  HIDRA_INICIAL: 100,
+  ENERGIA_INICIAL: 100,
+  TEMP_INICIAL: 36.5,
+  TEMP_LIMITE: 40,      // °C -> falha por hipertermia
+  QUEDA_HIDRA: 3,       // % por ação (menor porque agora há 16 etapas)
+  QUEDA_ENERGIA: 3,     // % por ação (base, ajustada pelo peso)
+  SUBIDA_TEMP: 0.4,     // °C por ação sem proteção solar
+  LIMITE_VITORIA: 20,   // status devem ficar acima disso
+  CARBONO_POR_IMPACTO: 0.35 // kg CO2 estimado por ponto de impacto de cada item
+};
+
+/* -------------------------------------------------------------------------
+   CATÁLOGO DA LOJA — 23 itens.
+   Campos: id, nome, icone, custo(R$), peso(kg), volume(L),
+           impacto(1-5), capacidade(L, só p/ mochilas) e "tags" de utilidade
+           usadas pelos cenários e eventos aleatórios.
+   ------------------------------------------------------------------------- */
+const CATALOGO = [
+  {id:'mochila',    nome:'Mochila leve 30L',            icone:'🎒', custo:150, peso:0.8, volume:0, impacto:2, capacidade:30, tags:['mochila']},
+  {id:'garrafa_al', nome:'Garrafa de alumínio 1L',      icone:'🥤', custo:60,  peso:0.3, volume:1, impacto:1, tags:['agua','garrafa_reserva']},
+  {id:'garrafa_pet',nome:'Garrafa PET descartável 1L',  icone:'🍶', custo:10,  peso:0.1, volume:1, impacto:5, tags:['agua']},
+  {id:'bota',       nome:'Bota impermeável',            icone:'🥾', custo:70,  peso:1.2, volume:3, impacto:2, tags:['bota']},
+  {id:'tenis',      nome:'Tênis comum',                 icone:'👟', custo:25,  peso:0.7, volume:3, impacto:2, tags:['tenis']},
+  {id:'fogareiro',  nome:'Fogareiro portátil',          icone:'🔥', custo:55,  peso:0.9, volume:2, impacto:1, tags:['fogareiro']},
+  {id:'protetor',   nome:'Protetor solar biodegradável',icone:'🧴', custo:40,  peso:0.2, volume:0.5,impacto:1, tags:['protetor']},
+  {id:'repelente',  nome:'Repelente aerossol industrial',icone:'🦟',custo:20,  peso:0.3, volume:0.5,impacto:5, tags:['repelente']},
+  {id:'chapeu',     nome:'Chapéu de sol',               icone:'👒', custo:30,  peso:0.15,volume:1, impacto:2, tags:['chapeu']},
+  {id:'lenco',      nome:'Lenço de proteção (bandana)', icone:'🧣', custo:15,  peso:0.1, volume:0.3,impacto:1, tags:['lenco']},
+  {id:'barraca',    nome:'Barraca/tenda de sombra',     icone:'⛺', custo:80,  peso:2.0, volume:6, impacto:2, tags:['barraca']},
+  {id:'canivete',   nome:'Canivete leve multiuso',      icone:'🔪', custo:35,  peso:0.15,volume:0.3,impacto:2, tags:['corte']},
+  {id:'facao',      nome:'Facão pesado',                icone:'🪓', custo:45,  peso:1.5, volume:2, impacto:5, tags:['corte']},
+  {id:'veda',       nome:'Fita veda-rosca / reparo',    icone:'🩹', custo:8,   peso:0.05,volume:0.2,impacto:2, tags:['reparo']},
+  {id:'comida',     nome:'Ração de trilha (3 dias)',    icone:'🥫', custo:50,  peso:1.5, volume:4, impacto:2, tags:['comida']},
+  {id:'cantil',     nome:'Cantil térmico 1L',           icone:'🧉', custo:45,  peso:0.4, volume:1, impacto:1, tags:['agua','garrafa_reserva']},
+  {id:'filtro',     nome:'Filtro de água portátil',     icone:'🚰', custo:65,  peso:0.25,volume:0.5,impacto:1, tags:['agua','filtro']},
+  {id:'poncho',     nome:'Poncho impermeável',          icone:'🧥', custo:25,  peso:0.3, volume:1, impacto:2, tags:['chuva']},
+  {id:'lanterna',   nome:'Lanterna de cabeça recarregável',icone:'🔦',custo:40, peso:0.2, volume:0.5,impacto:2, tags:['luz']},
+  {id:'kit',        nome:'Kit de primeiros socorros',   icone:'⛑️', custo:35,  peso:0.4, volume:1, impacto:2, tags:['saude']},
+  {id:'castanhas',  nome:'Castanhas de baru (snack)',   icone:'🌰', custo:20,  peso:0.4, volume:1, impacto:1, tags:['comida']},
+  {id:'oculos',     nome:'Óculos de sol',               icone:'🕶️', custo:25,  peso:0.1, volume:0.3,impacto:2, tags:['sol']},
+  {id:'saco',       nome:'Saco de dormir compacto',     icone:'🛏️', custo:60,  peso:1.0, volume:5, impacto:2, tags:['dormir']}
+];
+
+/* -------------------------------------------------------------------------
+   ESTADO GLOBAL DO JOGO
+   ------------------------------------------------------------------------- */
+let gameState = {};
+
+function novoEstado(){
+  gameState = {
+    orcamentoUsado:0,
+    comprados:[],        // ids comprados
+    mochila:[],          // ids guardados na mochila
+    status:{hidra:CONFIG.HIDRA_INICIAL, energia:CONFIG.ENERGIA_INICIAL, temp:CONFIG.TEMP_INICIAL},
+    passo:0,             // índice atual na sequência da trilha
+    sequencia:[],        // ordem de cenários e eventos
+    diario:[],           // registros das escolhas
+    somaImpactoItens:0,  // para nota de sustentabilidade
+    encerrado:false
+  };
+}
+
+/* -------------------------------------------------------------------------
+   UTILIDADES
+   ------------------------------------------------------------------------- */
+const $ = id => document.getElementById(id);
+const item = id => CATALOGO.find(i=>i.id===id);
+// Arredonda com N casas evitando erros de ponto flutuante (ex.: 0.1+0.2)
+const arred = (n,casas=2) => Math.round((n+Number.EPSILON)*Math.pow(10,casas))/Math.pow(10,casas);
+// Verifica se a mochila contém algum item com determinada tag
+const temTag = tag => gameState.mochila.some(id => item(id).tags.includes(tag));
+// Aceita uma tag (string) OU uma lista de tags (basta ter qualquer uma delas)
+const temAlgumaTag = t => Array.isArray(t) ? t.some(temTag) : temTag(t);
+
+function mostrarTela(idTela){
+  ['tela-inicio','tela-loja','tela-trilha','tela-resultados'].forEach(t=>$(t).classList.add('oculto'));
+  $(idTela).classList.remove('oculto');
+  $(idTela).classList.remove('tela'); void $(idTela).offsetWidth; $(idTela).classList.add('tela');
+  // O botão "Tela Inicial" aparece em todas as telas, menos na própria inicial
+  $('nav-topo').classList.toggle('oculto', idTela==='tela-inicio');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Volta à tela inicial. Se houver expedição/compras em andamento, confirma antes (reinicia).
+function voltarInicio(){
+  if(!gameState.encerrado && (gameState.diario.length>0 || gameState.comprados.length>0)){
+    if(!confirm('Voltar à tela inicial vai reiniciar a expedição atual (compras e progresso serão perdidos). Deseja continuar?')) return;
+  }
+  reiniciar();
+}
+
+// Cor da barra conforme o percentual (verde -> amarelo -> vermelho)
+function corPorPercentual(p){
+  if(p>=60) return '#4e7d3a';
+  if(p>=30) return '#d4a017';
+  return '#c0392b';
+}
+
+/* =========================================================================
+   CÁLCULOS DA MOCHILA (peso, volume, capacidade, impacto, carbono)
+   ========================================================================= */
+function capacidadeMochila(){
+  const temMochila = gameState.comprados.includes('mochila');
+  if(!temMochila) return {temMochila:false, volumeMax:0};
+  return {temMochila:true, volumeMax:Math.min(item('mochila').capacidade, CONFIG.VOLUME_MAX)};
+}
+
+function totaisMochila(){
+  let peso=0, volume=0, somaImpacto=0, n=0;
+  gameState.mochila.forEach(id=>{
+    const it=item(id);
+    peso+=it.peso; volume+=it.volume; somaImpacto+=it.impacto; n++;
+  });
+  return {peso:arred(peso), volume:arred(volume,1), impactoMedio:n? arred(somaImpacto/n,2):0, itens:n, somaImpacto};
+}
+
+function totaisComprados(){
+  let custo=0, somaImpacto=0, n=0;
+  gameState.comprados.forEach(id=>{const it=item(id);custo+=it.custo;somaImpacto+=it.impacto;n++;});
+  return {custo, impactoMedio:n?arred(somaImpacto/n,2):0, somaImpacto, n};
+}
+
+/* =========================================================================
+   TELA DA LOJA — renderização e interação
+   ========================================================================= */
+function renderLoja(){
+  const grid=$('grid-loja'); grid.innerHTML='';
+  CATALOGO.forEach(it=>{
+    const comprado=gameState.comprados.includes(it.id);
+    const div=document.createElement('div');
+    div.className='item'+(comprado?' comprado':'');
+    div.innerHTML=`
+      <div class="icone">${it.icone}</div>
+      <div class="nome">${it.nome}</div>
+      <div class="infos">
+        <span class="tag">💰 R$ ${it.custo}</span>
+        <span class="tag">⚖️ ${String(it.peso).replace('.',',')} kg</span>
+        <span class="tag">📦 ${String(it.volume).replace('.',',')} L</span>
+        ${it.capacidade?`<span class="tag">🎒 cap. ${it.capacidade}L</span>`:''}
+        <span class="tag impacto-${it.impacto}">🌱 impacto ${it.impacto}</span>
+      </div>
+      <button class="btn btn-pequeno ${comprado?'btn-vermelho':'btn-verde'}" onclick="alternarCompra('${it.id}')">
+        ${comprado?'Vender / Remover':'Comprar'}
+      </button>`;
+    grid.appendChild(div);
+  });
+  renderMedidores();
+  renderMochila();
+}
+
+function alternarCompra(id){
+  const it=item(id);
+  const idx=gameState.comprados.indexOf(id);
+  if(idx>=0){
+    gameState.comprados.splice(idx,1);
+    gameState.orcamentoUsado-=it.custo;
+    const m=gameState.mochila.indexOf(id);
+    if(m>=0) gameState.mochila.splice(m,1);
+  }else{
+    if(gameState.orcamentoUsado+it.custo > CONFIG.ORCAMENTO){
+      mostrarAvisoMochila('❌ Orçamento insuficiente para comprar '+it.nome+'!');
+      return;
+    }
+    gameState.comprados.push(id);
+    gameState.orcamentoUsado+=it.custo;
+  }
+  renderLoja();
+}
+
+function renderMedidores(){
+  const t=totaisMochila();
+  const c=totaisComprados();
+  const cap=capacidadeMochila();
+
+  const pctOrc = (gameState.orcamentoUsado/CONFIG.ORCAMENTO)*100;
+  $('txt-orcamento').textContent=`R$ ${gameState.orcamentoUsado} / R$ ${CONFIG.ORCAMENTO}`;
+  setBarra('barra-orcamento', pctOrc, pctOrc>100?'#c0392b':'#8a5a2b');
+
+  const pctPeso=(t.peso/CONFIG.PESO_MAX)*100;
+  $('txt-peso').textContent=`${t.peso.toFixed(2).replace('.',',')} kg`;
+  setBarra('barra-peso', pctPeso, pctPeso>100?'#c0392b':corPorPercentual(100-pctPeso));
+
+  const volMax = cap.temMochila?cap.volumeMax:CONFIG.VOLUME_MAX;
+  const pctVol=(t.volume/volMax)*100;
+  $('txt-volume').textContent=`${t.volume.toFixed(1).replace('.',',')} / ${volMax} L`;
+  setBarra('barra-volume', pctVol, pctVol>100?'#c0392b':corPorPercentual(100-pctVol));
+
+  $('txt-impacto').textContent = t.itens? t.impactoMedio.toFixed(2).replace('.',',')+' / 5' : '—';
+  const pctImp=(t.impactoMedio/5)*100;
+  setBarra('barra-impacto', pctImp, corPorPercentual(100-pctImp));
+
+  const carbono = arred(c.somaImpacto*CONFIG.CARBONO_POR_IMPACTO,1);
+  $('txt-carbono').textContent=`${carbono.toFixed(1).replace('.',',')} kg CO₂`;
+}
+
+function setBarra(idBarra, pct, cor){
+  const el=$(idBarra);
+  el.style.width=Math.min(100,Math.max(0,pct))+'%';
+  el.style.background=cor;
+}
+
+function renderMochila(){
+  const lista=$('lista-mochila');
+  if(gameState.mochila.length===0){
+    lista.innerHTML='<em style="color:#8a7a5a">Vazia — guarde seus itens comprados.</em>';
+  }else{
+    lista.innerHTML='';
+    gameState.mochila.forEach(id=>{
+      const it=item(id);
+      const div=document.createElement('div');
+      div.className='item-mochila';
+      div.innerHTML=`<span>${it.icone} ${it.nome}</span>
+        <button class="btn btn-pequeno btn-cinza" onclick="tirarDaMochila('${id}')">Retirar</button>`;
+      lista.appendChild(div);
+    });
+  }
+  atualizarBotoesGuardar();
+}
+
+// Adiciona um botão "Guardar" nos itens comprados que ainda não estão na mochila
+function atualizarBotoesGuardar(){
+  document.querySelectorAll('.item').forEach((el,i)=>{
+    const id=CATALOGO[i].id;
+    if(gameState.comprados.includes(id) && !gameState.mochila.includes(id)){
+      if(!el.querySelector('.btn-guardar')){
+        const b=document.createElement('button');
+        b.className='btn btn-pequeno btn-guardar btn-madeira';
+        b.textContent='🎒 Guardar na mochila';
+        b.setAttribute('draggable','true');
+        b.classList.add('arrastavel');
+        b.ondragstart=e=>{e.dataTransfer.setData('text/plain',id);};
+        b.onclick=()=>guardarNaMochila(id);
+        el.appendChild(b);
+      }
+    }else{
+      const b=el.querySelector('.btn-guardar'); if(b) b.remove();
+    }
+  });
+}
+
+function guardarNaMochila(id){
+  if(gameState.mochila.includes(id)) return;
+  if(!gameState.comprados.includes('mochila')){
+    mostrarAvisoMochila('⚠️ Você precisa comprar uma MOCHILA antes de guardar itens!');
+    return;
+  }
+  const t=totaisMochila();
+  const it=item(id);
+  const cap=capacidadeMochila();
+  const novoPeso=arred(t.peso+it.peso);
+  const novoVol=arred(t.volume+it.volume,1);
+  if(novoPeso>CONFIG.PESO_MAX){
+    mostrarAvisoMochila(`⚠️ Peso excedido! ${novoPeso.toFixed(2).replace('.',',')} kg ultrapassa o limite de ${CONFIG.PESO_MAX} kg. A locomoção ficaria perigosa (força peso!).`);
+    return;
+  }
+  if(novoVol>cap.volumeMax){
+    mostrarAvisoMochila(`⚠️ Volume excedido! ${novoVol.toFixed(1).replace('.',',')} L não cabe na mochila (máx ${cap.volumeMax} L).`);
+    return;
+  }
+  gameState.mochila.push(id);
+  esconderAvisoMochila();
+  renderLoja();
+}
+
+function tirarDaMochila(id){
+  const i=gameState.mochila.indexOf(id);
+  if(i>=0) gameState.mochila.splice(i,1);
+  renderLoja();
+}
+
+function mostrarAvisoMochila(msg){
+  const el=$('aviso-mochila');
+  el.textContent=msg; el.classList.remove('oculto');
+  el.classList.remove('tremendo'); void el.offsetWidth; el.classList.add('tremendo');
+}
+function esconderAvisoMochila(){ $('aviso-mochila').classList.add('oculto'); }
+
+function configurarDropzone(){
+  const dz=$('mochila-drop');
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+  dz.addEventListener('drop',e=>{
+    e.preventDefault();dz.classList.remove('dragover');
+    const id=e.dataTransfer.getData('text/plain');
+    if(id) guardarNaMochila(id);
+  });
+}
+
+function irParaLoja(){
+  mostrarTela('tela-loja');
+  renderLoja();
+}
+
+/* =========================================================================
+   VALIDAÇÃO ANTES DA TRILHA
+   ========================================================================= */
+function iniciarTrilha(){
+  esconderAvisoMochila();
+  if(!gameState.comprados.includes('mochila')){
+    mostrarAvisoMochila('❌ Sem mochila não há expedição! Compre uma mochila primeiro.');
+    return;
+  }
+  if(gameState.mochila.length===0){
+    mostrarAvisoMochila('❌ Sua mochila está vazia. Guarde ao menos alguns itens essenciais (água, comida...).');
+    return;
+  }
+  const t=totaisMochila();
+  const cap=capacidadeMochila();
+  if(t.peso>CONFIG.PESO_MAX){ mostrarAvisoMochila('❌ Peso acima de 12 kg — impossível partir!'); return; }
+  if(t.volume>cap.volumeMax){ mostrarAvisoMochila('❌ Volume acima do limite — impossível partir!'); return; }
+  if(!temTag('agua') || !temTag('comida')){
+    if(!confirm('⚠️ Atenção: você não guardou '+(!temTag('agua')?'ÁGUA ':'')+(!temTag('comida')?'COMIDA ':'')+'na mochila. Partir assim é arriscado. Deseja continuar mesmo assim?')) return;
+  }
+  gameState.somaImpactoItens=t.somaImpacto;
+  montarSequenciaTrilha();
+  mostrarTela('tela-trilha');
+  gameState.passo=0;
+  renderStatus();
+  renderProximoPasso();
+}
+
+/* =========================================================================
+   TRILHA — 13 cenários + 3 eventos aleatórios entre eles = 16 etapas.
+   Cada cenário: 3 opções com efeitos nos status.
+   Alguns cenários da natureza RECUPERAM status (nascente, frutos, banho, descanso).
+   ========================================================================= */
+const CENARIOS = [
+  {
+    id:'riacho', titulo:'🏞️ Cruzando o Riacho',
+    texto:'Um riacho de águas cristalinas corta a trilha. Você precisa atravessar sem se molhar e sem ferir a mata ciliar.',
+    opcoes:[
+      {txt:'(A) Pisar com cuidado nas pedras usando bota impermeável', certa:true, requerTag:'bota',
+        semRequisito:{msg:'Sem bota impermeável, você pisou nas pedras de tênis e escorregou, molhando os pés.', efeito:{energia:-5}, tipo:'ruim'},
+        efeito:{energia:-3}, msg:'Travessia perfeita! As botas protegeram seus pés e você não pisou na vegetação das margens.', tipo:'bom'},
+      {txt:'(B) Pisar direto na água com o tênis', efeito:{energia:-9, hidra:-2},
+        msg:'Pés encharcados aumentam o atrito e o cansaço. Bolhas à vista! Perdeu energia.', tipo:'ruim'},
+      {txt:'(C) Desviar 5 km pela mata fechada', efeito:{energia:-14, hidra:-6},
+        msg:'O desvio foi exaustivo e você quase se perdeu. Muito esforço e desidratação por nada.', tipo:'ruim'}
+    ]
+  },
+  {
+    id:'veredas', titulo:'🌴 Vereda dos Buritis',
+    texto:'Você entra numa vereda úmida cheia de buritis. Uma nuvem de mosquitos zumbe ao redor!',
+    opcoes:[
+      {txt:'(A) Cobrir a pele com o lenço/roupas e passar rápido', certa:true, requerTag:'lenco',
+        semRequisito:{msg:'Sem lenço para cobrir a pele, os mosquitos picaram bastante. Coceira e cansaço.', efeito:{energia:-6}, tipo:'ruim'},
+        efeito:{temp:-0.2, energia:-3}, msg:'Bem protegido pelo lenço, você cruzou a vereda na sombra fresca dos buritis.', tipo:'bom'},
+      {txt:'(B) Borrifar repelente industrial em aerossol', efeito:{energia:-3},
+        msg:'Funcionou contra os mosquitos, mas o aerossol contaminou a água da vereda (impacto alto).', tipo:'ruim'},
+      {txt:'(C) Seguir se coçando o tempo todo', efeito:{energia:-10, hidra:-3},
+        msg:'As picadas te deixaram irritado e exausto. A noite será mal dormida.', tipo:'ruim'}
+    ]
+  },
+  {
+    id:'nascente', titulo:'💧 Nascente Cristalina',
+    texto:'Brota do chão uma nascente de água limpíssima — verdadeiro tesouro do Cerrado. Hora de se reidratar!',
+    opcoes:[
+      {txt:'(A) Encher a garrafa e beber sem pisar na nascente', certa:true,
+        efeito:{hidra:+25}, msg:'Água pura! Você reidratou muito bem e preservou a nascente, berço dos rios brasileiros. 💧', tipo:'bom'},
+      {txt:'(B) Entrar na nascente para se refrescar', efeito:{hidra:+10, temp:-0.3},
+        msg:'Você se refrescou, mas revolveu o sedimento e sujou a água que outros animais bebem. Impacto médio.', tipo:'ruim'},
+      {txt:'(C) Ignorar e economizar tempo', efeito:{hidra:-3, energia:-4},
+        msg:'Perdeu uma ótima chance de reidratar de graça. O corpo cobrará isso adiante.', tipo:'neutro'}
+    ]
+  },
+  {
+    id:'fogueira', titulo:'🍲 Jantar ao Anoitecer',
+    texto:'A noite chega fria no Cerrado. É hora de preparar a comida sem agredir o solo.',
+    opcoes:[
+      {txt:'(A) Usar o fogareiro portátil reutilizável', certa:true, requerTag:'fogareiro',
+        semRequisito:{msg:'Sem fogareiro, você comeu a ração fria e passou um pouco mal.', efeito:{energia:-6, hidra:-3}, tipo:'ruim'},
+        efeito:{energia:+10}, msg:'Refeição quente e zero impacto! O fogareiro não queima o solo nem deixa cicatrizes.', tipo:'bom'},
+      {txt:'(B) Fazer fogueira no chão com pedras', efeito:{energia:+6},
+        msg:'Comeu quente, mas queimou o solo e a matéria orgânica. Cicatrizes de fogo demoram anos para sarar!', tipo:'ruim'},
+      {txt:'(C) Comer tudo cru', efeito:{energia:-8, hidra:-3},
+        msg:'Sem a energia da comida quente e com mal-estar, seu corpo sofreu.', tipo:'ruim'}
+    ]
+  },
+  {
+    id:'pequi', titulo:'🌰 Frutos do Cerrado',
+    texto:'Você encontra um pequizeiro carregado e frutos maduros de cagaita caídos no chão.',
+    opcoes:[
+      {txt:'(A) Comer os frutos maduros caídos no chão', certa:true,
+        efeito:{energia:+15}, msg:'Energia da terra! Aproveitar frutos caídos é sustentável e recupera o fôlego. 🌱', tipo:'bom'},
+      {txt:'(B) Subir na árvore e arrancar vários frutos', efeito:{energia:+8},
+        msg:'Você comeu, mas quebrou galhos e tirou o alimento da fauna local. Impacto na flora.', tipo:'ruim'},
+      {txt:'(C) Não comer nada, com medo', efeito:{energia:-4},
+        msg:'Cauteloso demais: perdeu uma fonte natural de energia.', tipo:'neutro'}
+    ]
+  },
+  {
+    id:'sol', titulo:'☀️ Sol Forte do Meio-dia',
+    texto:'O sol do Cerrado ao meio-dia é impiedoso. O termômetro dispara. Como evitar a hipertermia?',
+    opcoes:[
+      {txt:'(A) Montar sombra e passar protetor solar', certa:true, requerTag:'protetor',
+        semRequisito:{msg:'Sem protetor solar, mesmo na sombra sua pele sofreu e a temperatura subiu.', efeito:{temp:+0.4, energia:-4}, tipo:'ruim'},
+        efeito:{temp:-0.5, energia:-3, hidra:-4}, msg:'Excelente! Sombra + protetor biodegradável mantiveram sua temperatura sob controle.', tipo:'bom'},
+      {txt:'(B) Seguir andando sem proteção', efeito:{temp:+1.5, hidra:-10, energia:-8},
+        msg:'O sol castigou você. Temperatura em alta e muita perda de água!', tipo:'ruim'},
+      {txt:'(C) Abrigar-se numa caverna escura', efeito:{temp:-0.3, energia:-6, hidra:-3},
+        msg:'A caverna era fresca, mas havia morcegos e você perturbou a fauna. Susto e cansaço.', tipo:'neutro'}
+    ]
+  },
+  {
+    id:'cachoeira', titulo:'🐎 Poço Azul da Cachoeira',
+    texto:'Uma cachoeira de quartzo forma um poço de água esverdeada, um convite para refrescar.',
+    opcoes:[
+      {txt:'(A) Banho rápido sem sabão nem protetor na água', certa:true,
+        efeito:{temp:-0.8, hidra:+5, energia:+4}, msg:'Que refresco! Sem produtos na água, você baixou a temperatura e não poluiu o poço.', tipo:'bom'},
+      {txt:'(B) Entrar cheio de protetor/repelente', efeito:{temp:-0.6},
+        msg:'Você se refrescou, mas os produtos formaram uma película na água e afetaram a vida aquática.', tipo:'ruim'},
+      {txt:'(C) Só molhar o rosto e seguir', efeito:{temp:-0.2, energia:-3},
+        msg:'Refresco modesto — melhor que nada, mas você perdeu uma boa chance de descansar.', tipo:'neutro'}
+    ]
+  },
+  {
+    id:'lobo', titulo:'🐺 Encontro com o Lobo-guará',
+    texto:'Ao entardecer, um lobo-guará surge na trilha, curioso. Espécie ameaçada e símbolo do Cerrado!',
+    opcoes:[
+      {txt:'(A) Observar de longe, em silêncio, e deixá-lo seguir', certa:true,
+        efeito:{energia:-2}, msg:'Respeito à vida selvagem! Você admirou sem interferir. Momento inesquecível. 🌿', tipo:'bom'},
+      {txt:'(B) Oferecer sua comida ao animal', efeito:{energia:-6},
+        msg:'Nunca alimente animais silvestres! Isso altera a dieta e o comportamento deles. Ainda perdeu comida.', tipo:'ruim'},
+      {txt:'(C) Chegar perto para uma selfie', efeito:{energia:-8, hidra:-3},
+        msg:'Você assustou o animal e quase levou um susto de volta. Estresse para os dois.', tipo:'ruim'}
+    ]
+  },
+  {
+    id:'lixo', titulo:'🗑️ Lixo e Dejetos',
+    texto:'Depois das refeições sobrou embalagem e resíduo. O que fazer com o lixo no meio da natureza?',
+    opcoes:[
+      {txt:'(A) Guardar TODO o lixo na mochila para levar de volta', certa:true, efeito:{energia:-3},
+        msg:'Atitude nota 10! "Não deixe rastros." Todo resíduo volta com você. O Cerrado agradece. 🌱', tipo:'bom'},
+      {txt:'(B) Enterrar o lixo orgânico', efeito:{energia:-5},
+        msg:'Enterrar parece inofensivo, mas atrai animais que desenterram e mudam a dieta da fauna. Impacto médio.', tipo:'ruim'},
+      {txt:'(C) Jogar o lixo no mato', falhaImediata:true,
+        msg:'💀 VOCÊ POLUIU O CERRADO! O lixo contaminou o solo e pode atingir o lençol freático — nascente de rios importantes do Brasil. Expedição encerrada por crime ambiental.', tipo:'ruim'}
+    ]
+  },
+  {
+    id:'tempestade', titulo:'⛈️ Tempestade Repentina',
+    texto:'Nuvens escuras cobrem o céu e cai uma tempestade forte. Você precisa de abrigo agora!',
+    opcoes:[
+      {txt:'(A) Abrigar-se na barraca ou vestir o poncho e esperar', certa:true, requerTag:['barraca','chuva'],
+        semRequisito:{msg:'Sem barraca nem poncho, você ficou encharcado e com frio esperando a chuva passar.', efeito:{energia:-6, hidra:-3, temp:-0.3}, tipo:'ruim'},
+        efeito:{energia:-2}, msg:'Protegido da chuva, você descansou seco enquanto a tempestade passava.', tipo:'bom'},
+      {txt:'(B) Continuar caminhando na chuva', efeito:{energia:-10, temp:-0.4, hidra:-2},
+        msg:'Encharcado e com risco de hipotermia, você gastou muita energia lutando contra a lama.', tipo:'ruim'},
+      {txt:'(C) Abrigar-se sob uma árvore alta isolada', efeito:{energia:-6},
+        msg:'PERIGO! Árvore isolada atrai raios. Você teve sorte, mas foi uma péssima decisão.', tipo:'ruim'}
+    ]
+  },
+  {
+    id:'ponte', titulo:'🌉 Tronco Caído sobre a Ravina',
+    texto:'Um tronco atravessa uma ravina profunda coberta de cipós. É a única passagem. Aqui a FÍSICA decide!',
+    opcoes:[
+      {txt:'(A) Atravessar devagar, com a mochila baixa e junto ao corpo', certa:true, efeito:{energia:-4},
+        msg:'Física aplicada! Baixar o centro de massa e mantê-lo sobre a base de apoio aumenta o equilíbrio. Travessia segura. 💪', tipo:'bom'},
+      {txt:'(B) Atravessar correndo para acabar logo', efeito:{energia:-12, hidra:-3},
+        msg:'Correndo, seu centro de massa saiu da base de apoio e você quase caiu! Muito esforço e susto.', tipo:'ruim'},
+      {txt:'(C) Pular de tronco em tronco', efeito:{energia:-14, hidra:-4},
+        msg:'Saltos desequilibraram tudo. Você se agarrou aos cipós no susto e gastou energia demais.', tipo:'ruim'}
+    ]
+  },
+  {
+    id:'aclive', titulo:'⛰️ Aclive: a Subida Íngreme',
+    texto:'O trecho é uma subida forte. A mochila pesada puxa você para trás. De novo, a FÍSICA no comando!',
+    opcoes:[
+      {txt:'(A) Reorganizar o peso: itens pesados no fundo e junto às costas', certa:true, efeito:{energia:-6},
+        msg:'Ao aproximar o centro de massa da mochila do seu corpo, o torque diminui, exige menos força e você sobe com muito menos esforço. 💪', tipo:'bom'},
+      {txt:'(B) Subir correndo com tudo', efeito:{energia:-18, hidra:-6, temp:+0.5},
+        msg:'Correr com peso mal distribuído dobrou o gasto energético e forçou sua lombar!', tipo:'ruim'},
+      {txt:'(C) Abandonar a mochila para subir mais leve', falhaImediata:true,
+        msg:'💀 Sem mochila, sem água, comida ou abrigo. Você não completa a expedição de 3 dias. Nunca abandone seus recursos!', tipo:'ruim'}
+    ]
+  },
+  {
+    id:'mirante', titulo:'🌅 Acampamento no Mirante',
+    texto:'Você chega a um mirante com vista para o pôr do sol do Cerrado. É o último acampamento antes do fim.',
+    opcoes:[
+      {txt:'(A) Montar acampamento organizado e descansar bem', certa:true,
+        efeito:{energia:+12, hidra:-2}, msg:'Noite tranquila e reparadora! Você recupera as forças para o último trecho. 🌙', tipo:'bom'},
+      {txt:'(B) Seguir caminhando no escuro para adiantar', efeito:{energia:-12, hidra:-4},
+        msg:'Caminhar exausto no escuro foi perigoso e cansativo. Péssima ideia.', tipo:'ruim'},
+      {txt:'(C) Fazer uma grande fogueira comemorativa', efeito:{energia:+4},
+        msg:'A festa foi boa, mas a fogueira grande deixou marcas no solo e risco de incêndio no Cerrado seco.', tipo:'ruim'}
+    ]
+  }
+];
+
+/* Eventos aleatórios (imprevistos) — testam o estoque da mochila */
+const EVENTOS = [
+  {
+    id:'furo', titulo:'💦 Imprevisto — Sua garrafa de água furou!',
+    texto:'Um espinho perfurou sua garrafa e a água começou a vazar!',
+    resolver(){
+      if(temTag('reparo')){
+        return {msg:'Boa! Você usou a fita veda-rosca/reparo e tampou o furo a tempo. Nenhuma água perdida.', efeito:{}, tipo:'bom'};
+      }else if(gameState.mochila.filter(id=>item(id).tags.includes('agua')).length>=2){
+        return {msg:'Você tinha uma garrafa reserva e transferiu a água. Crise evitada!', efeito:{}, tipo:'bom'};
+      }else{
+        return {msg:'Sem fita de reparo nem garrafa reserva, você perdeu muita água. -18% de hidratação!', efeito:{hidra:-18}, tipo:'ruim'};
+      }
+    }
+  },
+  {
+    id:'vento', titulo:'🌬️ Imprevisto — Um vento forte levou seu chapéu!',
+    texto:'Uma rajada arrancou o chapéu da sua cabeça e o levou pelo cânion!',
+    resolver(){
+      if(temTag('lenco')){
+        return {msg:'Sem problemas! Você amarrou o lenço/bandana na cabeça e continuou protegido do sol.', efeito:{}, tipo:'bom'};
+      }else{
+        return {msg:'Cabeça exposta ao sol do Cerrado! Sua temperatura corporal subiu. +0,8°C', efeito:{temp:+0.8}, tipo:'ruim'};
+      }
+    }
+  },
+  {
+    id:'enxame', titulo:'🐝 Imprevisto — Nuvem de mosquitos-pólvora!',
+    texto:'Ao anoitecer, uma nuvem de insetos ataca você em pleno acampamento!',
+    resolver(){
+      if(temTag('repelente') || temTag('lenco')){
+        return {msg:'Você se protegeu com repelente/lenço e escapou das picadas. Noite tranquila.', efeito:{}, tipo:'bom'};
+      }else{
+        return {msg:'Sem qualquer proteção, foi uma noite de coceira e sono ruim. -10% de energia.', efeito:{energia:-10}, tipo:'ruim'};
+      }
+    }
+  }
+];
+
+/* Monta a sequência: 13 cenários + 3 eventos (inseridos após os cenários
+   de índice 2, 6 e 10). A ordem dos 3 eventos é sorteada. Total = 16 etapas. */
+function montarSequenciaTrilha(){
+  const idxEvt=[0,1,2].sort(()=>Math.random()-0.5); // embaralha os eventos
+  const slots=[2,6,10];                              // após quais cenários inserir
+  const seq=[]; let e=0;
+  CENARIOS.forEach((c,i)=>{
+    seq.push({tipo:'cenario', ref:i});
+    if(slots.includes(i)){ seq.push({tipo:'evento', ref:idxEvt[e]}); e++; }
+  });
+  gameState.sequencia=seq;
+}
+
+/* -------------------------------------------------------------------------
+   RENDERIZAÇÃO DOS STATUS
+   ------------------------------------------------------------------------- */
+function renderStatus(){
+  const s=gameState.status;
+  $('txt-hidra').textContent=Math.round(s.hidra)+'%';
+  setBarra('barra-hidra', s.hidra, corPorPercentual(s.hidra));
+  $('txt-energia').textContent=Math.round(s.energia)+'%';
+  setBarra('barra-energia', s.energia, corPorPercentual(s.energia));
+  $('txt-temp').textContent=s.temp.toFixed(1).replace('.',',')+'°C';
+  const pctTemp=((s.temp-36.5)/(CONFIG.TEMP_LIMITE-36.5))*100;
+  setBarra('barra-temp', pctTemp, corPorPercentual(100-pctTemp));
+}
+
+function renderProximoPasso(){
+  const total=gameState.sequencia.length;
+  $('txt-progresso-trilha').textContent=`Etapa ${gameState.passo+1} de ${total}`;
+  const passo=gameState.sequencia[gameState.passo];
+  $('painel-feedback').classList.add('oculto');
+  $('painel-cenario').classList.remove('oculto');
+
+  if(passo.tipo==='cenario'){
+    const c=CENARIOS[passo.ref];
+    $('titulo-cenario').textContent=c.titulo;
+    $('texto-cenario').textContent=c.texto;
+    const box=$('opcoes-cenario'); box.innerHTML='';
+    c.opcoes.forEach(op=>{
+      const b=document.createElement('button');
+      b.className='opcao';
+      b.textContent=op.txt;
+      b.onclick=()=>escolherOpcao(c, op);
+      box.appendChild(b);
+    });
+  }else{
+    const ev=EVENTOS[passo.ref];
+    $('titulo-cenario').textContent=ev.titulo;
+    $('texto-cenario').textContent=ev.texto;
+    const box=$('opcoes-cenario'); box.innerHTML='';
+    const b=document.createElement('button');
+    b.className='opcao';
+    b.innerHTML='<b>Enfrentar o imprevisto ➜</b> (o resultado depende do que você trouxe na mochila!)';
+    b.onclick=()=>resolverEvento(ev);
+    box.appendChild(b);
+  }
+}
+
+/* Aplica os efeitos de uma escolha nos status */
+function aplicarEfeito(efeito){
+  if(!efeito) return;
+  const s=gameState.status;
+  if(efeito.hidra) s.hidra=Math.max(0,Math.min(100,s.hidra+efeito.hidra));
+  if(efeito.energia) s.energia=Math.max(0,Math.min(100,s.energia+efeito.energia));
+  if(efeito.temp) s.temp=arred(s.temp+efeito.temp,2);
+}
+
+/* Desgaste natural de qualquer ação, com influência do PESO na energia */
+function desgasteNaturalDaAcao(){
+  const s=gameState.status;
+  const t=totaisMochila();
+  const fatorPeso = 1 + (t.peso/CONFIG.PESO_MAX)*0.8; // mochila cheia gasta até +80%
+  s.hidra=Math.max(0,s.hidra-CONFIG.QUEDA_HIDRA);
+  s.energia=Math.max(0,s.energia-arred(CONFIG.QUEDA_ENERGIA*fatorPeso,1));
+  if(!temTag('protetor') && !temTag('chapeu')){
+    s.temp=arred(s.temp+CONFIG.SUBIDA_TEMP,2);
+  }
+}
+
+function escolherOpcao(cenario, opcao){
+  registrarDiario(cenario.titulo, opcao.txt);
+
+  if(opcao.falhaImediata){
+    aplicarEfeito(opcao.efeito);
+    mostrarFeedback(opcao.msg, opcao.tipo);
+    setTimeout(()=>gameOver(opcao.msg), 400);
+    return;
+  }
+
+  // Se a opção "certa" exige um item que o aluno não tem, usa o efeito alternativo
+  let efeitoUsado=opcao.efeito, msg=opcao.msg, tipo=opcao.tipo;
+  if(opcao.requerTag && !temAlgumaTag(opcao.requerTag) && opcao.semRequisito){
+    efeitoUsado=opcao.semRequisito.efeito;
+    msg=opcao.semRequisito.msg;
+    tipo=opcao.semRequisito.tipo;
+  }
+
+  desgasteNaturalDaAcao();
+  aplicarEfeito(efeitoUsado);
+  renderStatus();
+
+  const falha=checarFalhaStatus();
+  mostrarFeedback(msg, tipo);
+  if(falha){ setTimeout(()=>gameOver(falha),400); }
+}
+
+function resolverEvento(evento){
+  const r=evento.resolver();
+  registrarDiario(evento.titulo, r.msg);
+  aplicarEfeito(r.efeito);
+  renderStatus();
+  const falha=checarFalhaStatus();
+  mostrarFeedback(r.msg, r.tipo);
+  if(falha){ setTimeout(()=>gameOver(falha),400); }
+}
+
+function checarFalhaStatus(){
+  const s=gameState.status;
+  if(s.hidra<=0) return '💀 Você desidratou completamente (0% de hidratação). No Cerrado seco, a água é vida.';
+  if(s.energia<=0) return '💀 Sua energia acabou (0%). Exausto, você não consegue mais seguir. O peso da mochila cobrou seu preço.';
+  if(s.temp>=CONFIG.TEMP_LIMITE) return `💀 Hipertermia! Sua temperatura chegou a ${s.temp.toFixed(1).replace('.',',')}°C. O sol do Cerrado venceu.`;
+  return null;
+}
+
+/* Feedback visual (com tremor da tela em caso de erro) */
+function mostrarFeedback(msg, tipo){
+  $('painel-cenario').classList.add('oculto');
+  const painel=$('painel-feedback');
+  painel.classList.remove('oculto');
+  $('feedback-conteudo').innerHTML=`<div class="feedback ${tipo}">${msg}</div>`;
+  if(tipo==='ruim'){
+    painel.classList.remove('tremendo'); void painel.offsetWidth; painel.classList.add('tremendo');
+  }
+}
+
+function proximoPasso(){
+  if(gameState.encerrado) return;
+  gameState.passo++;
+  if(gameState.passo>=gameState.sequencia.length){
+    vitoria();
+  }else{
+    renderStatus();
+    renderProximoPasso();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+
+function registrarDiario(titulo, escolha){
+  gameState.diario.push({titulo, escolha, status:{...gameState.status}});
+  renderDiario();
+}
+function renderDiario(){
+  const d=$('diario'); d.innerHTML='';
+  gameState.diario.forEach((e,i)=>{
+    const div=document.createElement('div');
+    div.className='entrada';
+    div.innerHTML=`<b>${i+1}. ${e.titulo}</b><br>➜ ${e.escolha}
+      <br><small class="dica">💧${Math.round(e.status.hidra)}% ⚡${Math.round(e.status.energia)}% 🌡️${e.status.temp.toFixed(1).replace('.',',')}°C</small>`;
+    d.appendChild(div);
+  });
+  d.scrollTop=d.scrollHeight;
+}
+
+/* =========================================================================
+   FIM DE JOGO — FALHA (Game Over) e VITÓRIA
+   ========================================================================= */
+function gameOver(motivo){
+  if(gameState.encerrado) return;
+  gameState.encerrado=true;
+  mostrarTela('tela-resultados');
+  const piadas=[
+    'Dica do guia: no Cerrado, "quem não tem cão, caça com fogareiro" — nunca com fogueira no chão! 🔥',
+    'Notícia do resgate: o lobo-guará que te encontrou pediu que você estude mais Física da próxima vez. 🐺',
+    'O helicóptero de resgate chegou... movido a energia solar, claro. ♻️',
+    'Boa notícia: você virou meme na sala. Má notícia: era sobre não levar água. 💧'
+  ];
+  const piada=piadas[Math.floor(Math.random()*piadas.length)];
+  const qr=gerarQRFicticio();
+  $('resultados-conteudo').innerHTML=`
+    <div class="card" style="border-color:var(--vermelho)">
+      <div class="tabua" style="background:repeating-linear-gradient(90deg,#7a2018 0,#7a2018 3px,#902a20 3px,#902a20 9px,#a03328 9px,#a03328 12px)"><h1 style="color:#ffe1dc">☠️ Expedição Fracassada</h1></div>
+      <div class="feedback ruim">${motivo}</div>
+      <div class="card" style="text-align:center">
+        <h3>🚁 Central de Resgate do Cerrado</h3>
+        <p>Escaneie para pedir resgate (ou só respire fundo e tente de novo):</p>
+        <img class="qr" src="${qr}" alt="QR Code de resgate fictício">
+        <p style="margin-top:10px"><em>${piada}</em></p>
+      </div>
+      ${blocoDiarioResumo()}
+      <div class="row-btns">
+        <button class="btn btn-verde" onclick="reiniciar()">🔄 Tentar Novamente</button>
+      </div>
+    </div>`;
+}
+
+function vitoria(){
+  if(gameState.encerrado) return;
+  gameState.encerrado=true;
+  const s=gameState.status;
+
+  const passou = s.hidra>CONFIG.LIMITE_VITORIA && s.energia>CONFIG.LIMITE_VITORIA && s.temp<CONFIG.TEMP_LIMITE;
+
+  // ---- CÁLCULO DAS NOTAS ----
+  const t=totaisMochila();
+
+  // Nota de Física (peso x esforço): ideal <= 10 kg; perde pontos acima disso.
+  let notaFisica = t.peso<=10 ? 100 : Math.max(0, 100 - (t.peso-10)*40);
+  notaFisica=arred(notaFisica,0);
+
+  // Nota de Sustentabilidade: impacto médio dos itens levados (1->100, 5->0).
+  const impMedio = t.itens? gameState.somaImpactoItens/t.itens : 5;
+  const notaSustentabilidade = arred((5-impMedio)/4*100,0);
+
+  // Nota de Planejamento: usar bem o orçamento + folga de peso/volume.
+  const cap=capacidadeMochila();
+  const eficOrc = Math.min(1, gameState.orcamentoUsado/CONFIG.ORCAMENTO);
+  const folgaPeso = 1 - (t.peso/CONFIG.PESO_MAX);
+  const folgaVol = 1 - (t.volume/cap.volumeMax);
+  const notaPlanejamento = arred((eficOrc*0.4 + folgaPeso*0.3 + folgaVol*0.3)*100,0);
+
+  // Bônus por manter status altos ao final
+  const bonusStatus = arred(((s.hidra+s.energia)/2),0);
+
+  let notaFinal = arred(
+    notaFisica*0.25 + notaSustentabilidade*0.30 + notaPlanejamento*0.25 + bonusStatus*0.20, 0);
+  if(!passou) notaFinal=Math.min(notaFinal,49);
+
+  // Ranking / selo
+  let selo, corSelo;
+  if(notaFinal>=90){ selo='🏆 Guardião(ã) do Cerrado'; corSelo='var(--verde-folha)'; }
+  else if(notaFinal>=70){ selo='🌿 Aventureiro(a) Consciente'; corSelo='var(--laranja)'; }
+  else if(notaFinal>=50){ selo='🙂 Trilheiro(a) Iniciante'; corSelo='var(--amarelo)'; }
+  else { selo='🧳 Turista Despreparado(a)'; corSelo='var(--vermelho)'; }
+
+  const c=totaisComprados();
+  const carbono=arred(c.somaImpacto*CONFIG.CARBONO_POR_IMPACTO,1);
+
+  const recordeAntigo = Number(localStorage.getItem('cerrado_recorde')||0);
+  let novoRecorde=false;
+  if(notaFinal>recordeAntigo){ localStorage.setItem('cerrado_recorde', notaFinal); novoRecorde=true; }
+  const melhorNota=Math.max(recordeAntigo, notaFinal);
+
+  mostrarTela('tela-resultados');
+  $('resultados-conteudo').innerHTML=`
+    <div class="card narrativa" style="text-align:center">
+      <div class="tabua"><h1>${passou?'🎉 Missão Concluída!':'⚠️ Você sobreviveu... no limite'}</h1></div>
+      <div class="cipo">🌿🍃🌱🍃🌿🍃🌱🍃🌿🍃🌱🍃🌿</div>
+      <p>3 dias no Cerrado de Figueirão chegaram ao fim.</p>
+      <div style="margin:16px 0"><span class="selo" style="background:${corSelo}">${selo}</span></div>
+      <div class="nota-grande" style="color:#ffe9c2">Nota Final: ${notaFinal}/100</div>
+      ${novoRecorde?'<p class="recorde" style="margin-top:10px">⭐ NOVO RECORDE DO NAVEGADOR!</p>':`<p style="margin-top:10px">Melhor nota neste navegador: <b>${melhorNota}</b></p>`}
+    </div>
+
+    <div class="card">
+      <div class="tabua"><h2>📋 Relatório Final</h2></div>
+      <div class="grade-resultados">
+        <div class="card" style="margin:0">
+          <h3>💧 Status Final</h3>
+          <div class="medidor"><div class="rotulo"><span>Hidratação</span><span>${Math.round(s.hidra)}%</span></div><div class="barra fino"><div class="preenche" style="width:${s.hidra}%;background:${corPorPercentual(s.hidra)}"></div></div></div>
+          <div class="medidor"><div class="rotulo"><span>Energia</span><span>${Math.round(s.energia)}%</span></div><div class="barra fino"><div class="preenche" style="width:${s.energia}%;background:${corPorPercentual(s.energia)}"></div></div></div>
+          <p>🌡️ Temperatura: <b>${s.temp.toFixed(1).replace('.',',')}°C</b></p>
+        </div>
+        <div class="card" style="margin:0">
+          <h3>🧮 Notas</h3>
+          <p>💪 <b>Física</b> (peso × esforço): <b>${notaFisica}</b>/100<br>
+             <small class="dica">Mochila levada: ${t.peso.toFixed(2).replace('.',',')} kg ${t.peso>10?'(acima de 10kg — penalizado!)':'(leve, ótimo!)'}</small></p>
+          <p>🌱 <b>Sustentabilidade</b>: <b>${notaSustentabilidade}</b>/100<br>
+             <small class="dica">Impacto médio dos itens: ${impMedio.toFixed(2).replace('.',',')}/5</small></p>
+          <p>📐 <b>Planejamento</b>: <b>${notaPlanejamento}</b>/100<br>
+             <small class="dica">Usou R$ ${gameState.orcamentoUsado} de R$ ${CONFIG.ORCAMENTO}; volume ${t.volume.toFixed(1).replace('.',',')} L</small></p>
+        </div>
+        <div class="card" style="margin:0">
+          <h3>🌍 Impacto Ambiental</h3>
+          <p>Pegada de carbono estimada:</p>
+          <div class="nota-grande" style="color:${carbono>4?'var(--vermelho)':'var(--verde)'}">${carbono.toFixed(1).replace('.',',')} kg CO₂</div>
+          <p><small class="dica">${carbono>4?'Tente escolher itens reutilizáveis para reduzir!':'Excelente consciência ecológica! ♻️'}</small></p>
+        </div>
+      </div>
+    </div>
+
+    ${blocoDiarioResumo()}
+
+    <div class="card centro">
+      <h3>Quer melhorar sua nota?</h3>
+      <p><small class="dica">Experimente combinações diferentes: menos peso, itens reutilizáveis e as escolhas de menor impacto!</small></p>
+      <div class="row-btns">
+        <button class="btn btn-verde" onclick="reiniciar()">🔄 Tentar Novamente</button>
+      </div>
+    </div>`;
+}
+
+// Bloco reutilizável com o resumo do Diário de Bordo
+function blocoDiarioResumo(){
+  if(gameState.diario.length===0) return '';
+  let linhas='';
+  gameState.diario.forEach((e,i)=>{
+    linhas+=`<div class="entrada"><b>${i+1}. ${e.titulo}</b><br>➜ ${e.escolha}</div>`;
+  });
+  return `<div class="card"><div class="tabua"><h3>📓 Diário de Bordo (suas escolhas)</h3></div><div id="diario">${linhas}</div></div>`;
+}
+
+/* Gera um "QR Code" fictício (padrão pseudoaleatório) via canvas — só lúdico */
+function gerarQRFicticio(){
+  const n=21, escala=6;
+  const cv=document.createElement('canvas');
+  cv.width=cv.height=n*escala;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#3a2a12';
+  for(let y=0;y<n;y++) for(let x=0;x<n;x++){
+    if((x*y + x*3 + y*7)%3===0 && Math.random()>0.4) ctx.fillRect(x*escala,y*escala,escala,escala);
+  }
+  const marcador=(px,py)=>{
+    ctx.fillStyle='#3a2a12'; ctx.fillRect(px,py,7*escala,7*escala);
+    ctx.fillStyle='#fff'; ctx.fillRect(px+escala,py+escala,5*escala,5*escala);
+    ctx.fillStyle='#3a2a12'; ctx.fillRect(px+2*escala,py+2*escala,3*escala,3*escala);
+  };
+  marcador(0,0); marcador((n-7)*escala,0); marcador(0,(n-7)*escala);
+  return cv.toDataURL();
+}
+
+/* REINICIAR — reset total para replay rápido */
+function reiniciar(){
+  novoEstado();
+  mostrarRecordeInicio();
+  mostrarTela('tela-inicio');
+}
+
+function mostrarRecordeInicio(){
+  const r=Number(localStorage.getItem('cerrado_recorde')||0);
+  $('recorde-inicio').innerHTML = r>0
+    ? `<p class="recorde" style="margin-top:14px">🏅 Recorde deste navegador: ${r}/100 — supere-o!</p>`
+    : '';
+}
+
+/* INICIALIZAÇÃO */
+window.addEventListener('DOMContentLoaded', ()=>{
+  novoEstado();
+  configurarDropzone();
+  mostrarRecordeInicio();
+  mostrarTela('tela-inicio');
+});
+</script>
+</body>
+</html>
