@@ -7,62 +7,29 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <header>
-    <div class="header-container">
-      <img src="assets/logoescola.jpg" alt="Logo EE Dr. Arnaldo" class="logo">
-      <div class="header-text">
-        <h1>EE. DR ARNALDO ESTEVÃO DE FIGUEIREDO</h1>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <div class="grid">
+  <div class="wrap">
+    <main class="layout">
+     <div class="coluna-principal">
       <section class="card">
-        <h2>1. Selecione a Turma</h2>
+        <h2 class="step-title">1. Selecione a sua turma</h2>
         <label for="serie">Série/Turma</label>
         <select id="serie">
           <option value="">Carregando turmas...</option>
         </select>
-
-        <div class="row info-row">
-          <div class="pill" id="countPill">0 estudantes</div>
-        </div>
-
-        <div class="action-buttons">
-          <button id="btnAbrirLink" class="btn-dashed">ABRIR LINK DO PROFESSOR</button>
-          <div class="dotted-sep"></div>
-          <button id="btnAbrirJogos" class="btn-dashed">ABRIR PASTA DE JOGOS</button>
-        </div>
       </section>
 
       <section class="card">
-        <h2>2. Lista de Estudantes</h2>
-
-        <div class="instrucoes-login" style="color: #cc0000;">
-          <strong>ATENÇÃO - PASSO A PASSO PARA O LOGIN:</strong><br><br>
-          1. Pesquise e encontre o seu nome na lista abaixo.<br>
-          2. Clique no botão <b>Copiar E-mail</b>.<br>
-          3. No canto superior direito do navegador Chrome, clique na <b>Círculo com foto de perfil ou letra</b> <br> 
-          4. No menu que abrir, clique em <b>"Adicionar perfil do Chrome"</b>.<br>
-          5. Na janela seguinte, escolha a opção <b>"Iniciar sessão" ou "Fazer Login"</b>.<br>
-          6. No campo de e-mail, aperte <kbd>Ctrl</kbd> + <kbd>V</kbd> para colar o seu endereço.<br>
-          7. Clique em <b>Seguinte</b> e digite a sua senha.
-        </div>
+        <h2 class="step-title">2. Encontre o seu nome</h2>
 
         <div id="studentsPlaceholder" class="placeholder-text">
-          <p>Selecione uma turma ao lado para carregar a lista automaticamente.</p>
+          <p>Selecione uma turma acima para carregar a lista.</p>
         </div>
 
         <div id="studentsView" class="hidden">
-          <div class="row">
-            <div class="search-box">
-              <label for="search">Buscar estudante</label>
-              <input id="search" placeholder="Digite o nome ou e-mail..." />
-            </div>
-          </div>
+          <label for="search">Buscar estudante</label>
+          <input id="search" placeholder="Digite o nome ou e-mail..." />
 
-          <div class="row info-row">
+          <div class="info-row">
             <div class="pill highlight" id="seriePill"></div>
             <div class="pill" id="shownPill"></div>
           </div>
@@ -70,30 +37,35 @@
           <div class="list" id="list"></div>
         </div>
       </section>
-    </div>
-  </main>
+     </div>
 
-  <footer class="admin-bar">
-    <div class="admin-container">
-      <div class="admin-actions">
-        <h3>ADMINISTRATIVO</h3>
-        <div class="admin-buttons">
-          <button id="btnCompartilharLink" class="btn-dashed">COMPARTILHAR LINK</button>
-          <button id="btnAdicionarJogo" class="btn-dashed">ADICIONAR JOGO</button>
+     <aside class="coluna-lateral">
+      <section class="card">
+        <h2 class="step-title">Acessos</h2>
+        <div class="acessos">
+          <button id="btnAbrirLink" class="btn-acesso">Link do Professor</button>
+          <button id="btnAbrirJogos" class="btn-acesso">Jogos</button>
         </div>
-      </div>
-    </div>
-  </footer>
+      </section>
+     </aside>
+    </main>
 
-  <div id="passwordModal" class="modal hidden">
+    <footer>
+      EE Dr. Arnaldo Estevão de Figueiredo &middot; Figueirão - MS
+    </footer>
+  </div>
+
+  <!-- MODAL DE JOGOS -->
+  <div id="jogosModal" class="modal hidden">
     <div class="modal-content">
-      <h3 style="margin-top: 0; color: var(--primary);">Autenticação</h3>
-      <p id="modalMsg" style="font-size: 14px; color: var(--text-muted);">Digite a senha do professor:</p>
-      <input type="password" id="senhaInput" placeholder="********" />
-      <div class="modal-actions">
-        <button id="btnCancelarSenha" class="btn-cancel">Cancelar</button>
-        <button id="btnConfirmarSenha" class="btn-primary">Confirmar</button>
+      <div class="modal-head">
+        <h3>Jogos disponíveis</h3>
+        <button id="btnFecharJogos" class="btn-fechar">Fechar</button>
       </div>
+      <div id="jogosPlaceholder" class="placeholder-text">
+        <p>Carregando jogos...</p>
+      </div>
+      <div class="jogos-grid" id="jogosGrid"></div>
     </div>
   </div>
 
