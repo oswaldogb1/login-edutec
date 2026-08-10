@@ -25,6 +25,8 @@ const jogosPlaceholder = document.getElementById("jogosPlaceholder");
 const FIREBASE_BASE = "https://edutec-arnaldo-default-rtdb.firebaseio.com";
 const FIREBASE_URL = FIREBASE_BASE + "/link_temporario.json";
 const JOGOS_URL = FIREBASE_BASE + "/jogos.json";
+// Links que o professor anexou a uma aula na página de agendamento.
+const LINKS_AULA_URL = FIREBASE_BASE + "/links_aula.json";
 
 // Senha para excluir jogos.
 const SENHA_JOGOS = "54321Paz";
@@ -169,7 +171,39 @@ searchInput.addEventListener("input", renderizarLista);
 
 let linkAtivo = null;
 
+// Link anexado a uma aula agendada: vale apenas entre "inicio" e "fim" daquela
+// aula. Fora dessa janela ele simplesmente não aparece — nada é apagado no
+// Firebase, a expiração é decidida aqui na leitura.
+async function buscarLinkDaAula() {
+  try {
+    const res = await fetch(LINKS_AULA_URL);
+    const data = await res.json();
+    if (!data) return null;
+
+    const agora = Date.now();
+    const vigentes = Object.values(data).filter(l =>
+      l && l.url && l.ativo !== false && agora >= l.inicio && agora < l.fim
+    );
+    if (!vigentes.length) return null;
+
+    // Se houver mais de uma aula no mesmo horário, mostra a mais recente.
+    vigentes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    return vigentes[0].url;
+  } catch (e) {
+    console.error("Erro ao carregar o link da aula.", e);
+    return null;
+  }
+}
+
 async function carregarLinkCompartilhado() {
+  // O link da aula tem prioridade sobre o link avulso do professor.
+  const linkDaAula = await buscarLinkDaAula();
+  if (linkDaAula) {
+    linkAtivo = linkDaAula;
+    atualizarBotaoLink();
+    return;
+  }
+
   try {
     const res = await fetch(FIREBASE_URL);
     const data = await res.json();
