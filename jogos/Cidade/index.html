@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cidade Inteligente</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+<!-- ==========================================================================
+     CIDADE INTELIGENTE - jogo educacional (6º e 7º ano)
+     Estrutura de telas. Cada <section class="tela"> é uma "página" do jogo.
+     Só uma tela fica visível por vez (classe "ativa"), controlado por js/app.js
+     ========================================================================== -->
+
+<div id="app">
+
+  <!-- ---------------------------------------------------------------- -->
+  <!-- TELA 1 - Início: escolher se é professor ou aluno                 -->
+  <!-- ---------------------------------------------------------------- -->
+  <section id="tela-inicio" class="tela ativa">
+    <div class="caixa-centro">
+      <h1 class="titulo-jogo">CIDADE<span>INTELIGENTE</span></h1>
+      <p class="subtitulo">Construa a cidade mais eficiente da turma.<br>
+        Mas atenção: <b>toda tecnologia tem um preço</b>.</p>
+
+      <div class="botoes-inicio">
+        <button class="btn btn-grande btn-roxo" id="btn-sou-professor">Sou Professor</button>
+        <button class="btn btn-grande btn-verde" id="btn-sou-aluno">Sou Aluno</button>
+      </div>
+
+      <p class="rodape-inicio">Tecnologia, trabalho e sociedade &middot; aula de 50 minutos</p>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------------- -->
+  <!-- TELA 2 - Senha do professor                                       -->
+  <!-- ---------------------------------------------------------------- -->
+  <section id="tela-senha" class="tela">
+    <div class="caixa-centro caixa-form">
+      <h2>Área do Professor</h2>
+      <p class="ajuda">Digite a senha de acesso.</p>
+      <input type="password" id="campo-senha" class="campo" inputmode="numeric" placeholder="senha" autocomplete="off">
+      <p class="erro" id="erro-senha"></p>
+      <div class="linha-botoes">
+        <button class="btn btn-neutro" data-voltar="tela-inicio">Voltar</button>
+        <button class="btn btn-roxo" id="btn-confirmar-senha">Entrar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------------- -->
+  <!-- TELA 3 - Painel do Professor (feito para PROJETAR na lousa)       -->
+  <!-- ---------------------------------------------------------------- -->
+  <section id="tela-painel" class="tela">
+
+    <header class="painel-topo">
+      <div class="painel-codigo">
+        <span class="rotulo">CÓDIGO DA SALA</span>
+        <strong id="codigo-sala">----</strong>
+      </div>
+
+      <div class="painel-info">
+        <div class="painel-num"><b id="painel-qtd-jogadores">0</b> jogadores</div>
+        <div class="tag" id="painel-status">aguardando</div>
+        <div class="tag" id="painel-conexao">conectando…</div>
+      </div>
+
+      <div class="painel-acoes">
+        <button class="btn btn-peq btn-verde"  id="btn-iniciar-partida">Iniciar partida</button>
+        <button class="btn btn-peq btn-ambar"  id="btn-encerrar-partida">Encerrar partida</button>
+        <button class="btn btn-peq btn-neutro" id="btn-nova-sala">Nova sala</button>
+        <button class="btn btn-peq btn-neutro" id="btn-limpar-sala">Limpar sala</button>
+        <button class="btn btn-peq btn-neutro" id="btn-sair-painel">Sair</button>
+      </div>
+    </header>
+
+    <div class="painel-corpo">
+      <div class="painel-grafico">
+        <h2 class="titulo-secao">Pontuação de cada cidade <span class="legenda-secao">— atualiza sozinho a cada 3 segundos</span></h2>
+        <canvas id="grafico-painel" width="1160" height="620" role="img"
+                aria-label="Gráfico de barras com a pontuação de cada aluno"></canvas>
+      </div>
+
+      <aside class="painel-ranking">
+        <h2 class="titulo-secao">Ranking</h2>
+        <ol id="lista-ranking" class="lista-ranking"></ol>
+        <p class="painel-dica">Alunos entram em <b>qualquer navegador</b> e digitam o código da sala.</p>
+      </aside>
+    </div>
+
+    <!-- Comemoração do vencedor (aparece ao encerrar a partida) -->
+    <div id="painel-vencedor" class="oculto">
+      <canvas id="confete"></canvas>
+      <div class="vencedor-caixa">
+        <p class="vencedor-rotulo">CIDADE MAIS EFICIENTE</p>
+        <h2 id="vencedor-nome">—</h2>
+        <p class="vencedor-pontos"><b id="vencedor-pontos">0</b> pontos</p>
+        <ol id="vencedor-podio" class="vencedor-podio"></ol>
+        <button class="btn btn-neutro" id="btn-fechar-vencedor">Voltar ao painel</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ---------------------------------------------------------------- -->
+  <!-- TELA 4 - Aluno entra na sala                                      -->
+  <!-- ---------------------------------------------------------------- -->
+  <section id="tela-entrar" class="tela">
+    <div class="caixa-centro caixa-form">
+      <h2>Entrar na partida</h2>
+      <label class="rotulo-campo" for="campo-codigo">Código da sala (está na lousa)</label>
+      <input type="text" id="campo-codigo" class="campo campo-codigo" maxlength="4"
+             autocomplete="off" autocapitalize="characters" placeholder="ABCD">
+
+      <label class="rotulo-campo" for="campo-nome">Seu nome ou apelido</label>
+      <input type="text" id="campo-nome" class="campo" maxlength="16" autocomplete="off" placeholder="Ex.: Ana">
+
+      <p class="erro" id="erro-entrar"></p>
+      <div class="linha-botoes">
+        <button class="btn btn-neutro" data-voltar="tela-inicio">Voltar</button>
+        <button class="btn btn-verde" id="btn-confirmar-entrar">Jogar</button>
+      </div>
+      <p class="ajuda ajuda-peq">Sem internet? Você ainda consegue jogar — a pontuação é enviada quando a conexão voltar.</p>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------------- -->
+  <!-- TELA 5 - Tutorial (3 telas curtas)                                -->
+  <!-- ---------------------------------------------------------------- -->
+  <section id="tela-tutorial" class="tela">
+    <div class="caixa-centro caixa-tutorial">
+      <div id="tutorial-conteudo"></div>
+      <div class="tutorial-pontos" id="tutorial-pontos"></div>
+      <div class="linha-botoes">
+        <button class="btn btn-neutro" id="btn-tutorial-voltar">Voltar</button>
+        <button class="btn btn-verde" id="btn-tutorial-avancar">Próximo</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------------- -->
+  <!-- TELA 6 - O jogo do aluno                                          -->
+  <!-- ---------------------------------------------------------------- -->
+  <section id="tela-jogo" class="tela">
+
+    <header class="jogo-topo">
+      <div class="jogo-marca">CIDADE INTELIGENTE</div>
+      <div class="jogo-info">
+        <span class="chip" id="chip-nome">—</span>
+        <span class="chip">Sala <b id="chip-sala">----</b></span>
+        <span class="chip chip-dinheiro">Verba: <b id="chip-orcamento">0</b></span>
+        <span class="chip chip-pontos">Pontos: <b id="chip-pontos">0</b></span>
+        <span class="chip chip-conexao" id="chip-conexao">—</span>
+      </div>
+      <div class="jogo-acoes">
+        <button class="btn btn-peq btn-neutro" id="btn-desfazer">Desfazer</button>
+        <button class="btn btn-peq btn-neutro" id="btn-ajuda">Ajuda</button>
+        <button class="btn btn-peq btn-ambar" id="btn-reiniciar">Reiniciar minha cidade</button>
+      </div>
+    </header>
+
+    <div class="jogo-corpo">
+
+      <div class="coluna-mapa">
+        <div class="moldura-mapa">
+          <canvas id="mapa" width="384" height="384"></canvas>
+        </div>
+        <p class="dica-mapa" id="dica-mapa">Escolha uma solução na lista e toque no mapa.</p>
+
+        <div class="indicadores" id="lista-indicadores"></div>
+      </div>
+
+      <aside class="coluna-solucoes">
+        <h2 class="titulo-secao">Soluções inteligentes</h2>
+        <p class="ajuda ajuda-peq">Toque em uma solução, depois toque em um lugar do mapa que ficar brilhando.</p>
+        <div id="lista-solucoes" class="lista-solucoes"></div>
+      </aside>
+
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------------- -->
+  <!-- TELA 7 - Relatório final da cidade do aluno                       -->
+  <!-- ---------------------------------------------------------------- -->
+  <section id="tela-relatorio" class="tela">
+    <div class="caixa-centro caixa-relatorio">
+      <p class="rotulo-relatorio">A SUA CIDADE FICOU…</p>
+      <h2 id="relatorio-perfil">—</h2>
+      <p class="relatorio-texto" id="relatorio-texto"></p>
+
+      <div class="relatorio-nota">
+        <span>Pontuação final</span>
+        <b id="relatorio-pontos">0</b>
+      </div>
+
+      <div class="indicadores" id="relatorio-indicadores"></div>
+
+      <h3 class="titulo-secao">Para pensar e conversar na sala</h3>
+      <ol class="relatorio-perguntas" id="relatorio-perguntas"></ol>
+
+      <div class="linha-botoes">
+        <button class="btn btn-neutro" id="btn-relatorio-voltar">Ver minha cidade</button>
+        <button class="btn btn-verde" id="btn-relatorio-inicio">Tela inicial</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Caixa de diálogo (consequências, ajuda, confirmações) -->
+<div id="modal" class="modal oculto">
+  <div class="modal-caixa">
+    <div class="modal-icone" id="modal-icone">💡</div>
+    <h3 id="modal-titulo">Título</h3>
+    <div id="modal-corpo" class="modal-corpo"></div>
+    <div class="linha-botoes" id="modal-botoes"></div>
+  </div>
+</div>
+
+<!-- Avisos rápidos (canto da tela) -->
+<div id="avisos" class="avisos"></div>
+
+<!-- ==========================================================================
+     Scripts (ordem importa). Nenhuma biblioteca externa, nenhum CDN.
+     ========================================================================== -->
+<script src="js/firebase.js"></script>
+<script src="js/dados.js"></script>
+<script src="js/mapa.js"></script>
+<script src="js/jogo.js"></script>
+<script src="js/professor.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

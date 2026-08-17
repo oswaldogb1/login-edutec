@@ -1,0 +1,359 @@
+/* ==========================================================================
+   CIDADE INTELIGENTE - estilos
+   Tema escuro "retrô", pensado para:
+   - ser projetado no datashow (fontes grandes, cores fortes)
+   - funcionar em computadores antigos (sem sombras pesadas, sem fontes externas)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1) CORES DO JOGO
+   As cores dos indicadores vieram de uma paleta já testada para daltonismo
+   sobre fundo escuro. Mesmo assim, NENHUMA informação depende só da cor:
+   todo indicador tem também nome, ícone e número.
+   -------------------------------------------------------------------------- */
+:root {
+  --fundo:            #0d0d0d;   /* plano de fundo da página */
+  --superficie:       #1a1a19;   /* caixas e painéis */
+  --superficie-2:     #232322;   /* caixas internas */
+  --borda:            rgba(255,255,255,0.12);
+  --tinta:            #ffffff;   /* texto principal */
+  --tinta-2:          #c3c2b7;   /* texto secundário */
+  --tinta-3:          #898781;   /* texto apagado (eixos, legendas) */
+  --grade:            #2c2c2a;   /* linhas de grade do gráfico */
+  --linha-base:       #383835;
+
+  /* Cores dos 5 indicadores */
+  --cor-empregos:     #3987e5;
+  --cor-ambiente:     #199e70;
+  --cor-qualidade:    #c98500;
+  --cor-direitos:     #9085e9;
+  --cor-desigualdade: #e66767;
+
+  /* Cores de ação */
+  --verde:  #199e70;
+  --roxo:   #9085e9;
+  --ambar:  #c98500;
+  --azul:   #3987e5;
+  --vermelho:#e66767;
+
+  --bom:   #0ca30c;
+  --ruim:  #e66767;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body { overflow-x: hidden; }
+
+/* --------------------------------------------------------------------------
+   2) TELAS - só a tela com a classe "ativa" aparece
+   -------------------------------------------------------------------------- */
+.tela { display: none; min-height: 100vh; }
+.tela.ativa { display: block; }
+.oculto { display: none !important; }
+
+.caixa-centro {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   3) TELA INICIAL
+   -------------------------------------------------------------------------- */
+.titulo-jogo {
+  font-size: 54px;
+  line-height: 1;
+  letter-spacing: 3px;
+  margin: 0 0 18px;
+  font-weight: 800;
+  color: var(--tinta);
+}
+.titulo-jogo span {
+  display: block;
+  color: var(--verde);
+  font-size: 44px;
+  letter-spacing: 6px;
+}
+.subtitulo { font-size: 19px; color: var(--tinta-2); line-height: 1.5; margin: 0 0 34px; max-width: 520px; }
+.botoes-inicio { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.rodape-inicio { margin-top: 40px; color: var(--tinta-3); font-size: 14px; }
+
+/* --------------------------------------------------------------------------
+   4) BOTÕES E CAMPOS
+   -------------------------------------------------------------------------- */
+.btn {
+  border: 2px solid var(--borda);
+  background: var(--superficie-2);
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.btn:hover  { filter: brightness(1.18); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-grande { font-size: 22px; padding: 20px 34px; min-width: 230px; }
+.btn-peq    { font-size: 14px; padding: 9px 14px; }
+
+.btn-verde  { background: var(--verde);  border-color: var(--verde);  color: #fff; }
+.btn-roxo   { background: var(--roxo);   border-color: var(--roxo);   color: #14121f; }
+.btn-ambar  { background: var(--ambar);  border-color: var(--ambar);  color: #1a1200; }
+.btn-neutro { background: var(--superficie-2); }
+
+.campo {
+  width: 100%;
+  font: inherit;
+  font-size: 20px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 2px solid var(--borda);
+  background: var(--superficie-2);
+  color: var(--tinta);
+  margin-bottom: 6px;
+}
+.campo:focus { outline: 3px solid var(--verde); outline-offset: 2px; }
+.campo-codigo { text-transform: uppercase; letter-spacing: 10px; text-align: center; font-size: 34px; font-weight: 800; }
+
+.caixa-form { max-width: 460px; }
+.caixa-form h2 { font-size: 30px; margin: 0 0 8px; }
+.rotulo-campo { display: block; text-align: left; font-size: 14px; color: var(--tinta-2); margin: 14px 0 6px; }
+.linha-botoes { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+.ajuda { color: var(--tinta-2); font-size: 15px; }
+.ajuda-peq { font-size: 13px; color: var(--tinta-3); }
+.erro { color: var(--vermelho); font-weight: 700; min-height: 22px; margin: 8px 0 0; }
+
+/* --------------------------------------------------------------------------
+   5) PAINEL DO PROFESSOR (para projetar)
+   -------------------------------------------------------------------------- */
+#tela-painel { display: none; }
+#tela-painel.ativa { display: flex; flex-direction: column; height: 100vh; }
+
+.painel-topo {
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  padding: 14px 22px;
+  background: var(--superficie);
+  border-bottom: 2px solid var(--borda);
+}
+.painel-codigo { display: flex; flex-direction: column; line-height: 1; }
+.painel-codigo .rotulo { font-size: 13px; color: var(--tinta-3); letter-spacing: 2px; }
+.painel-codigo strong {
+  font-size: 64px; letter-spacing: 10px; color: var(--verde); font-weight: 800;
+}
+.painel-info { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.painel-num { font-size: 24px; color: var(--tinta-2); }
+.painel-num b { color: var(--tinta); font-size: 30px; }
+.tag {
+  font-size: 14px; font-weight: 700; padding: 6px 12px; border-radius: 999px;
+  background: var(--superficie-2); border: 2px solid var(--borda); color: var(--tinta-2);
+}
+.tag-ok    { color: #d7ffe9; border-color: var(--verde);    background: rgba(25,158,112,0.25); }
+.tag-ruim  { color: #ffe0e0; border-color: var(--vermelho); background: rgba(230,103,103,0.25); }
+.painel-acoes { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+.painel-corpo { flex: 1; display: flex; gap: 18px; padding: 18px 22px; min-height: 0; }
+.painel-grafico { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.painel-grafico canvas { width: 100%; height: 100%; flex: 1; min-height: 0; }
+.painel-ranking {
+  width: 340px; flex: 0 0 340px;
+  background: var(--superficie); border: 2px solid var(--borda); border-radius: 14px;
+  padding: 14px 16px; overflow: auto;
+}
+.titulo-secao { font-size: 20px; margin: 0 0 10px; }
+.legenda-secao { font-size: 14px; color: var(--tinta-3); font-weight: 400; }
+.lista-ranking { list-style: none; margin: 0; padding: 0; }
+.lista-ranking li {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 8px; border-bottom: 1px solid var(--grade);
+  font-size: 20px;
+}
+.lista-ranking .pos { width: 34px; color: var(--tinta-3); font-weight: 800; }
+.lista-ranking .nome { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lista-ranking .pts { font-weight: 800; font-variant-numeric: tabular-nums; }
+.painel-dica { color: var(--tinta-3); font-size: 13px; margin-top: 14px; }
+
+/* Comemoração do vencedor */
+#painel-vencedor {
+  position: fixed; inset: 0; background: rgba(5,5,5,0.94);
+  display: flex; align-items: center; justify-content: center; z-index: 60;
+}
+#confete { position: absolute; inset: 0; width: 100%; height: 100%; }
+.vencedor-caixa { position: relative; text-align: center; padding: 20px; }
+.vencedor-rotulo { letter-spacing: 6px; color: var(--tinta-3); font-size: 18px; margin: 0; }
+.vencedor-caixa h2 { font-size: 76px; margin: 6px 0; color: var(--ambar); }
+.vencedor-pontos { font-size: 26px; color: var(--tinta-2); margin: 0 0 18px; }
+.vencedor-pontos b { color: var(--tinta); font-size: 34px; }
+.vencedor-podio { list-style: none; padding: 0; margin: 0 0 22px; font-size: 22px; color: var(--tinta-2); }
+.vencedor-podio li { padding: 4px 0; }
+
+/* --------------------------------------------------------------------------
+   6) TUTORIAL
+   -------------------------------------------------------------------------- */
+.caixa-tutorial { max-width: 620px; }
+.tutorial-emoji { font-size: 64px; }
+.caixa-tutorial h2 { font-size: 30px; margin: 10px 0; }
+.caixa-tutorial p { font-size: 18px; color: var(--tinta-2); line-height: 1.6; }
+.tutorial-pontos { display: flex; gap: 8px; justify-content: center; margin-top: 18px; }
+.tutorial-pontos span { width: 12px; height: 12px; border-radius: 50%; background: var(--superficie-2); border: 2px solid var(--borda); }
+.tutorial-pontos span.on { background: var(--verde); border-color: var(--verde); }
+
+/* --------------------------------------------------------------------------
+   7) TELA DO JOGO
+   -------------------------------------------------------------------------- */
+#tela-jogo { display: none; }
+#tela-jogo.ativa { display: flex; flex-direction: column; min-height: 100vh; }
+
+.jogo-topo {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--superficie); border-bottom: 2px solid var(--borda);
+}
+.jogo-marca { font-weight: 800; letter-spacing: 2px; color: var(--verde); }
+.jogo-info { display: flex; gap: 8px; flex-wrap: wrap; }
+.jogo-acoes { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  background: var(--superficie-2); border: 2px solid var(--borda);
+  border-radius: 999px; padding: 5px 12px; font-size: 14px; color: var(--tinta-2);
+}
+.chip b { color: var(--tinta); font-variant-numeric: tabular-nums; }
+.chip-pontos   { border-color: var(--ambar); }
+.chip-dinheiro { border-color: var(--verde); }
+
+.jogo-corpo { flex: 1; display: flex; gap: 18px; padding: 16px; align-items: flex-start; }
+.coluna-mapa { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+.moldura-mapa {
+  background: var(--superficie); border: 3px solid var(--borda); border-radius: 12px;
+  padding: 8px; width: 100%; max-width: 500px;
+}
+#mapa {
+  width: 100%; height: auto; display: block;
+  image-rendering: pixelated;          /* mantém o visual "pixel art" ao ampliar */
+  image-rendering: crisp-edges;
+  cursor: crosshair; touch-action: manipulation;
+  background: #101a12;
+}
+.dica-mapa {
+  margin: 10px 0 4px; color: var(--tinta-2); font-size: 15px; text-align: center;
+  min-height: 22px; font-weight: 600;
+}
+
+/* Indicadores (barras) */
+.indicadores { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.indicador {
+  display: grid; grid-template-columns: 22px 210px 1fr 40px; align-items: center; gap: 10px;
+  background: var(--superficie); border: 2px solid var(--borda); border-radius: 10px; padding: 5px 10px;
+}
+.indicador .ic { font-size: 16px; text-align: center; }
+.indicador .nome { font-size: 13px; color: var(--tinta-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.indicador .nome i { color: var(--tinta-3); font-size: 11px; font-style: normal; }
+.indicador .trilho { height: 12px; background: var(--superficie-2); border-radius: 6px; overflow: hidden; }
+.indicador .barra { height: 100%; border-radius: 6px; transition: width .35s ease; }
+.indicador .valor { font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+.indicador.piscar { animation: piscada .6s ease; }
+@keyframes piscada { 0%,100% { background: var(--superficie); } 40% { background: #33332f; } }
+
+/* Painel de soluções */
+.coluna-solucoes {
+  width: 380px; flex: 0 0 380px;
+  background: var(--superficie); border: 2px solid var(--borda); border-radius: 14px;
+  padding: 14px; max-height: calc(100vh - 110px); overflow-y: auto;
+}
+.lista-solucoes { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.solucao {
+  display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: start;
+  text-align: left; width: 100%;
+  background: var(--superficie-2); border: 2px solid var(--borda); border-radius: 12px;
+  padding: 10px; cursor: pointer; color: var(--tinta); font: inherit;
+}
+.solucao:hover { border-color: var(--tinta-3); }
+.solucao.selecionada { border-color: var(--verde); background: rgba(25,158,112,0.18); }
+.solucao.cara { opacity: 0.45; cursor: not-allowed; }
+.solucao .ic { font-size: 28px; text-align: center; line-height: 1.1; }
+.solucao .titulo { font-weight: 800; font-size: 15px; margin-bottom: 2px; }
+.solucao .custo { font-size: 13px; color: var(--ambar); font-weight: 700; }
+.solucao .efeitos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.efeito { font-size: 12px; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--borda); white-space: nowrap; }
+.efeito.bom  { color: #b7f5cd; border-color: var(--bom); }
+.efeito.ruim { color: #ffd6d6; border-color: var(--ruim); }
+.solucao .qtd { font-size: 12px; color: var(--tinta-3); margin-top: 4px; }
+
+/* --------------------------------------------------------------------------
+   8) RELATÓRIO FINAL
+   -------------------------------------------------------------------------- */
+.caixa-relatorio { max-width: 720px; }
+.rotulo-relatorio { letter-spacing: 5px; color: var(--tinta-3); font-size: 14px; margin: 0; }
+#relatorio-perfil { font-size: 40px; margin: 6px 0 10px; color: var(--ambar); line-height: 1.15; }
+.relatorio-texto { font-size: 18px; color: var(--tinta-2); line-height: 1.6; }
+.relatorio-nota {
+  display: inline-flex; align-items: center; gap: 12px; margin: 16px 0;
+  background: var(--superficie); border: 2px solid var(--borda); border-radius: 12px; padding: 10px 20px;
+  color: var(--tinta-2);
+}
+.relatorio-nota b { font-size: 34px; color: var(--tinta); }
+.caixa-relatorio .titulo-secao { margin-top: 26px; font-size: 22px; }
+.caixa-relatorio .indicadores { margin: 0 auto; }
+.relatorio-perguntas { text-align: left; font-size: 17px; line-height: 1.6; color: var(--tinta-2); }
+.relatorio-perguntas li { margin-bottom: 10px; }
+
+/* --------------------------------------------------------------------------
+   9) MODAL E AVISOS
+   -------------------------------------------------------------------------- */
+.modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+  display: flex; align-items: center; justify-content: center; z-index: 80; padding: 16px;
+}
+.modal-caixa {
+  background: var(--superficie); border: 3px solid var(--borda); border-radius: 16px;
+  padding: 22px; max-width: 440px; width: 100%; text-align: center;
+  max-height: 90vh; overflow-y: auto;
+  animation: sobe .18s ease;
+}
+@keyframes sobe { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
+.modal-icone { font-size: 46px; line-height: 1; }
+.modal-caixa h3 { font-size: 24px; margin: 8px 0 10px; }
+.modal-corpo { color: var(--tinta-2); font-size: 17px; line-height: 1.55; text-align: left; }
+.modal-corpo p { margin: 8px 0; }
+.modal-corpo .conseq { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0; }
+.modal-corpo .conseq .sinal { font-weight: 800; }
+.modal-corpo ul { margin: 8px 0; padding-left: 20px; }
+
+.avisos { position: fixed; left: 50%; transform: translateX(-50%); bottom: 18px; z-index: 90; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+.aviso {
+  background: var(--superficie-2); border: 2px solid var(--borda); border-radius: 999px;
+  padding: 9px 18px; font-weight: 700; font-size: 15px; animation: sobe .2s ease;
+}
+.aviso.ok  { border-color: var(--verde); }
+.aviso.mau { border-color: var(--vermelho); }
+
+/* --------------------------------------------------------------------------
+   10) CELULAR / TABLET
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .jogo-corpo { flex-direction: column; align-items: stretch; }
+  .coluna-solucoes { width: auto; flex: 1 1 auto; max-height: none; }
+  .painel-corpo { flex-direction: column; }
+  .painel-ranking { width: auto; flex: 0 0 auto; max-height: 40vh; }
+  .painel-codigo strong { font-size: 44px; }
+  .titulo-jogo { font-size: 38px; }
+  .titulo-jogo span { font-size: 30px; }
+  .btn-grande { min-width: 200px; font-size: 19px; }
+  .vencedor-caixa h2 { font-size: 44px; }
+}
