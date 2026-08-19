@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Expresso Tônico</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚂</text></svg>">
+<style>/*{CSS}*/</style>
+</head>
+<body>
+
+<!-- =============================================== ENTRADA ========== -->
+<section class="tela" id="tela-entrada">
+  <div class="marca">
+    <div class="marca-simbolo">🚂</div>
+    <div>
+      <h1>Expresso Tônico</h1>
+      <p>Leve cada palavra para o bairro certo da cidade.</p>
+    </div>
+  </div>
+
+  <form class="cartao" id="form-entrada" autocomplete="off">
+    <div style="margin-bottom:16px">
+      <label for="apelido">Nome do maquinista</label>
+      <input type="text" id="apelido" maxlength="18" placeholder="Ex.: Bia Foguete">
+    </div>
+
+    <p class="nota" style="margin:0 0 16px">
+      Uma travessia só, de ponta a ponta: <b style="color:var(--ox)">18 entregas</b>
+      cruzando cidade, vilarejo, serra, deserto e floresta.
+    </p>
+
+    <button type="submit" class="botao">PARTIR</button>
+  </form>
+
+  <div class="cartao">
+    <h2 style="font-size:1rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ox)">
+      Como se pilota
+    </h2>
+    <div class="instrucoes">
+      <p style="margin-top:0">
+        A região tem três povoados: o <span class="pilula" style="background:#ffc93c">VILAREJO
+        OXÍTONA</span> na serra, o <span class="pilula" style="background:#37d6cf">OÁSIS
+        PAROXÍTONA</span> no deserto e a <span class="pilula" style="background:#ff5f9e">CLAREIRA
+        PROPAROXÍTONA</span> no meio da mata. Cada passageiro é uma palavra e mora
+        no povoado da sua sílaba tônica.
+      </p>
+      <ul>
+        <li><b>Embarque:</b> pare na <b>Estação Central</b> (chegue devagar!) para encher os vagões.</li>
+        <li><b>Entrega:</b> leve cada passageiro ao bairro certo e toque na ficha dele na plataforma.
+          Bairro errado custa pontos e 2,4 s parado.</li>
+        <li><b>Carvão:</b> acaba com o tempo. Há <b>dois depósitos</b> — o da serra e o
+          do oásis — e neles você enche a caldeira acertando onde vai o acento.</li>
+        <li><b>Paciência:</b> passageiro esquecido no vagão desiste da viagem.</li>
+        <li><b>Obstáculos:</b> vacas, carros na passagem, árvores caídas, pedras e areia
+          sobre os trilhos, além de sinais fechados e trechos em obras. Um aviso aparece
+          antes de cada um: vacas e carros saem com o <b>apito</b>, o resto exige
+          <b>reduzir a velocidade</b>.</li>
+        <li><b>Relevo:</b> as ladeiras seguram o trem na subida e empurram na descida,
+          e há <b>túneis</b> escuros na serra.</li>
+      </ul>
+      <p>
+        <span class="tecla">↑</span> acelera ·
+        <span class="tecla">↓</span> freia ·
+        <span class="tecla">←</span> <span class="tecla">→</span> escolhem o desvio no cruzamento ·
+        <span class="tecla">espaço</span> apita.
+        Em tela sensível ao toque, use os botões do canto.
+      </p>
+    </div>
+  </div>
+
+  <div class="cartao">
+    <h2 style="font-size:1rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ox)">
+      Melhores viagens deste computador
+    </h2>
+    <div id="recordes-entrada"></div>
+  </div>
+</section>
+
+<!-- ================================================== JOGO ========== -->
+<section class="tela oculto" id="tela-jogo">
+  <canvas id="cena"></canvas>
+
+  <div class="hud">
+    <div class="hud-topo">
+      <div class="medidor"><span>Tempo</span><strong id="hud-tempo">00:00</strong></div>
+      <div class="medidor"><span>Pontos</span><strong id="hud-pontos">0</strong></div>
+      <div class="medidor"><span>Entregas</span><strong id="hud-entregas">0/12</strong></div>
+      <div class="medidor"><span>Velocidade</span><strong id="hud-velocidade">0 km/h</strong></div>
+      <div class="medidor"><span>Paisagem</span><strong id="hud-lugar">Cidade</strong></div>
+      <div class="medidor carvao">
+        <span>Carvão</span>
+        <div class="barra"><i class="barra-cheia" id="hud-carvao-barra"></i></div>
+      </div>
+    </div>
+
+    <div id="alerta-obstaculo" class="oculto">
+      <div class="alerta-icone" id="alerta-icone">🐄</div>
+      <div class="alerta-texto">
+        <strong id="alerta-titulo">OBSTÁCULO</strong>
+        <span id="alerta-dica"></span>
+        <div class="alerta-barra"><i id="alerta-barra"></i></div>
+      </div>
+      <div class="alerta-metros" id="alerta-metros"></div>
+    </div>
+
+    <div id="hud-aviso" class="oculto"></div>
+    <div id="hud-trava" class="oculto"></div>
+    <div id="hud-bordo"></div>
+
+    <div class="controles">
+      <button id="bt-esq" title="desvio à esquerda">↰</button>
+      <button id="bt-acelerar" title="acelerar">▲</button>
+      <button id="bt-dir" title="desvio à direita">↱</button>
+      <button id="bt-apito" title="apito">📣</button>
+      <button id="bt-frear" title="frear">▼</button>
+      <button id="bt-ajuda" title="ajuda">?</button>
+    </div>
+  </div>
+
+  <!-- painel: estação central -->
+  <div class="painel oculto" id="painel-central">
+    <div class="painel-caixa">
+      <h2 style="color:var(--central)">🚉 ESTAÇÃO CENTRAL</h2>
+      <p class="lema">Vagões carregados. Escolha a saída e toque em partir.</p>
+      <div class="fichas" id="central-lista"></div>
+      <p class="nota" id="central-fila"></p>
+      <p class="nota" style="margin-bottom:6px">Por onde sair da Central:</p>
+      <div class="saidas" id="central-saidas"></div>
+      <button class="botao" onclick="fecharPainelNaTela()">PARTIR ▶</button>
+    </div>
+  </div>
+
+  <!-- painel: bairro -->
+  <div class="painel oculto" id="painel-bairro">
+    <div class="painel-caixa">
+      <h2 id="bairro-nome"></h2>
+      <p class="lema" id="bairro-lema"></p>
+      <div class="cartaz">
+        <span id="bairro-regra"></span>
+        <span class="exemplos" id="bairro-exemplos"></span>
+      </div>
+      <p class="nota">Toque na ficha de quem mora neste bairro:</p>
+      <div class="fichas" id="bairro-fichas"></div>
+      <div class="retorno" id="bairro-retorno"></div>
+      <button class="botao" onclick="fecharPainelNaTela()">SEGUIR VIAGEM ▶</button>
+    </div>
+  </div>
+
+  <!-- painel: depósito de carvão -->
+  <div class="painel oculto" id="painel-deposito">
+    <div class="painel-caixa">
+      <h2 style="color:var(--dep)">⛏ DEPÓSITO DE CARVÃO</h2>
+      <p class="lema">Arraste o acento até a vogal certa — ou jogue em SEM ACENTO.</p>
+      <div class="palavra-monte" id="dep-palavra"></div>
+      <div class="acentos">
+        <div class="chip-acento" data-acento="agudo">
+          <div class="simbolo">´</div><div class="nome">agudo</div>
+        </div>
+        <div class="chip-acento" data-acento="circunflexo">
+          <div class="simbolo">^</div><div class="nome">circunflexo</div>
+        </div>
+      </div>
+      <div class="zona-sem-acento" id="dep-sem-acento">SEM ACENTO</div>
+      <div class="retorno" id="dep-retorno"></div>
+    </div>
+  </div>
+
+  <div class="painel oculto" id="caixa-ajuda">
+    <div class="painel-caixa">
+      <h2>Comandos</h2>
+      <div class="instrucoes" style="text-align:left">
+        <p><span class="tecla">↑</span> acelerar · <span class="tecla">↓</span> frear ·
+        <span class="tecla">←</span><span class="tecla">→</span> desvio ·
+        <span class="tecla">espaço</span> apito</p>
+        <p>Pare devagar na Central para embarcar. Nos terminais o trem para sozinho
+        e sai de ré quando você segue viagem.</p>
+      </div>
+      <button class="botao" onclick="document.getElementById('caixa-ajuda').classList.add('oculto')">
+        VOLTAR AO JOGO
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================== FIM =========== -->
+<section class="tela oculto" id="tela-fim">
+  <div class="marca">
+    <div class="marca-simbolo">🏁</div>
+    <div>
+      <h1>Fim da linha</h1>
+      <p id="fim-apelido"></p>
+    </div>
+  </div>
+
+  <div class="placar-final">
+    <div class="placar-item destaque"><span>Pontos</span><strong id="fim-pontos">0</strong></div>
+    <div class="placar-item"><span>Tempo</span><strong id="fim-tempo">00:00</strong></div>
+    <div class="placar-item"><span>Entregas</span><strong id="fim-entregas">0</strong></div>
+    <div class="placar-item"><span>Erros</span><strong id="fim-erros">0</strong></div>
+  </div>
+
+  <div class="relatorio">
+    <h2 style="font-size:1.05rem">📋 Relatório de viagem</h2>
+    <div id="fim-lista"></div>
+  </div>
+
+  <div class="cartao">
+    <h2 style="font-size:1rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ox)">
+      Melhores viagens deste computador
+    </h2>
+    <div id="recordes-fim"></div>
+  </div>
+
+  <button class="botao-secundario" id="btn-de-novo">JOGAR DE NOVO</button>
+</section>
+
+<script>
+/*{PALAVRAS}*/
+/*{DADOS}*/
+/*{MOTOR}*/
+/*{DESENHO}*/
+/*{INTERFACE}*/
+</script>
+</body>
+</html>

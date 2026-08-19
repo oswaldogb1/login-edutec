@@ -1,0 +1,12 @@
+# dependências (o projeto não tem nenhuma em tempo de execução)
+node_modules/
+
+# documentos pessoais que às vezes caem na pasta do projeto
+*.docx
+*.xlsx
+*.pdf
+
+# lixo do sistema
+Thumbs.db
+desktop.ini
+.DS_Store

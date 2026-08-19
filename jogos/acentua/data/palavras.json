@@ -1,0 +1,1139 @@
+{
+  "_leiame": "Banco de palavras do Expresso Tônico. Para incluir palavras novas, acrescente um objeto com: palavra (grafia correta, já com acento se houver), tipo (oxitona | paroxitona | proparoxitona | monossilabo), nivel (1 fácil, 2 médio, 3 pegadinha) e regra (texto mostrado no relatório de viagem). O servidor deriva sozinho a forma sem acento, a vogal que recebe o acento e o tipo de acento (agudo/circunflexo).",
+  "palavras": [
+    {
+      "palavra": "médico",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "sábado",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "música",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "número",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "rápido",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "público",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "último",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "época",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "árvore",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "xícara",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "fábrica",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "máquina",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "lâmpada",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "câmera",
+      "tipo": "proparoxitona",
+      "nivel": 1,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "hipótese",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "matemática",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "semáforo",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "abóbora",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "quilômetro",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "estômago",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "relâmpago",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "simpático",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "político",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "dinâmico",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "líquido",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "cálculo",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "década",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "trânsito",
+      "tipo": "proparoxitona",
+      "nivel": 2,
+      "regra": "Toda proparoxítona é acentuada, sem exceção."
+    },
+    {
+      "palavra": "oxítona",
+      "tipo": "proparoxitona",
+      "nivel": 3,
+      "regra": "Toda proparoxítona é acentuada, sem exceção — inclusive as palavras que dão nome às próprias regras."
+    },
+    {
+      "palavra": "paroxítona",
+      "tipo": "proparoxitona",
+      "nivel": 3,
+      "regra": "Toda proparoxítona é acentuada, sem exceção — inclusive as palavras que dão nome às próprias regras."
+    },
+    {
+      "palavra": "proparoxítona",
+      "tipo": "proparoxitona",
+      "nivel": 3,
+      "regra": "Toda proparoxítona é acentuada, sem exceção — inclusive as palavras que dão nome às próprias regras."
+    },
+    {
+      "palavra": "íntegro",
+      "tipo": "proparoxitona",
+      "nivel": 3,
+      "regra": "Toda proparoxítona é acentuada, sem exceção — inclusive as palavras que dão nome às próprias regras."
+    },
+    {
+      "palavra": "ímpeto",
+      "tipo": "proparoxitona",
+      "nivel": 3,
+      "regra": "Toda proparoxítona é acentuada, sem exceção — inclusive as palavras que dão nome às próprias regras."
+    },
+    {
+      "palavra": "êxodo",
+      "tipo": "proparoxitona",
+      "nivel": 3,
+      "regra": "Toda proparoxítona é acentuada, sem exceção — inclusive as palavras que dão nome às próprias regras."
+    },
+    {
+      "palavra": "fácil",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -L é acentuada."
+    },
+    {
+      "palavra": "útil",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -L é acentuada."
+    },
+    {
+      "palavra": "nível",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -L é acentuada."
+    },
+    {
+      "palavra": "ágil",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -L é acentuada."
+    },
+    {
+      "palavra": "frágil",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -L é acentuada."
+    },
+    {
+      "palavra": "fóssil",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -L é acentuada."
+    },
+    {
+      "palavra": "hábil",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -L é acentuada."
+    },
+    {
+      "palavra": "réptil",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -L é acentuada."
+    },
+    {
+      "palavra": "hífen",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -N é acentuada."
+    },
+    {
+      "palavra": "pólen",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -N é acentuada."
+    },
+    {
+      "palavra": "abdômen",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -N é acentuada."
+    },
+    {
+      "palavra": "açúcar",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -R é acentuada."
+    },
+    {
+      "palavra": "caráter",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -R é acentuada."
+    },
+    {
+      "palavra": "câncer",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -R é acentuada."
+    },
+    {
+      "palavra": "revólver",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -R é acentuada."
+    },
+    {
+      "palavra": "mártir",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -R é acentuada."
+    },
+    {
+      "palavra": "ímpar",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -R é acentuada."
+    },
+    {
+      "palavra": "tórax",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -X é acentuada."
+    },
+    {
+      "palavra": "fênix",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -X é acentuada."
+    },
+    {
+      "palavra": "látex",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -X é acentuada."
+    },
+    {
+      "palavra": "bíceps",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Paroxítona terminada em -PS é acentuada."
+    },
+    {
+      "palavra": "fórceps",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Paroxítona terminada em -PS é acentuada."
+    },
+    {
+      "palavra": "júri",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -I ou -IS é acentuada."
+    },
+    {
+      "palavra": "táxi",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -I ou -IS é acentuada."
+    },
+    {
+      "palavra": "lápis",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -I ou -IS é acentuada."
+    },
+    {
+      "palavra": "tênis",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -I ou -IS é acentuada."
+    },
+    {
+      "palavra": "íris",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -I ou -IS é acentuada."
+    },
+    {
+      "palavra": "grátis",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -I ou -IS é acentuada."
+    },
+    {
+      "palavra": "vírus",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -US é acentuada."
+    },
+    {
+      "palavra": "bônus",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -US é acentuada."
+    },
+    {
+      "palavra": "ônus",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -US é acentuada."
+    },
+    {
+      "palavra": "álbum",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -UM ou -UNS é acentuada."
+    },
+    {
+      "palavra": "fórum",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -UM ou -UNS é acentuada."
+    },
+    {
+      "palavra": "álbuns",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em -UM ou -UNS é acentuada."
+    },
+    {
+      "palavra": "ímã",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Paroxítona terminada em -Ã(S) ou -ÃO(S) é acentuada. Atenção: o til marca nasalidade e NÃO conta como acento gráfico."
+    },
+    {
+      "palavra": "órfã",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Paroxítona terminada em -Ã(S) ou -ÃO(S) é acentuada. Atenção: o til marca nasalidade e NÃO conta como acento gráfico."
+    },
+    {
+      "palavra": "órgão",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Paroxítona terminada em -Ã(S) ou -ÃO(S) é acentuada. Atenção: o til marca nasalidade e NÃO conta como acento gráfico."
+    },
+    {
+      "palavra": "sótão",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Paroxítona terminada em -Ã(S) ou -ÃO(S) é acentuada. Atenção: o til marca nasalidade e NÃO conta como acento gráfico."
+    },
+    {
+      "palavra": "bênção",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Paroxítona terminada em -Ã(S) ou -ÃO(S) é acentuada. Atenção: o til marca nasalidade e NÃO conta como acento gráfico."
+    },
+    {
+      "palavra": "história",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "memória",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "glória",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "relógio",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "colégio",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "série",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "espécie",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "armário",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "silêncio",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "ciência",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "água",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "mágoa",
+      "tipo": "paroxitona",
+      "nivel": 2,
+      "regra": "Paroxítona terminada em ditongo (duas vogais na mesma sílaba final) é acentuada."
+    },
+    {
+      "palavra": "casa",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "mesa",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "livro",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "escola",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "janela",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "cadeira",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "caneta",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "cachorro",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "amigo",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "cabelo",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "garrafa",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "brinquedo",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "floresta",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "montanha",
+      "tipo": "paroxitona",
+      "nivel": 1,
+      "regra": "Paroxítona terminada em -A, -E ou -O (com ou sem -S) não leva acento: essas são as terminações mais comuns do português."
+    },
+    {
+      "palavra": "atmosfera",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Pegadinha de sílaba tônica: a tônica cai na penúltima sílaba e a terminação é -A/-E/-O, então não há acento."
+    },
+    {
+      "palavra": "recorde",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Pegadinha de sílaba tônica: a tônica cai na penúltima sílaba e a terminação é -A/-E/-O, então não há acento."
+    },
+    {
+      "palavra": "gratuito",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Pegadinha de sílaba tônica: a tônica cai na penúltima sílaba e a terminação é -A/-E/-O, então não há acento."
+    },
+    {
+      "palavra": "fluido",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Pegadinha de sílaba tônica: a tônica cai na penúltima sílaba e a terminação é -A/-E/-O, então não há acento."
+    },
+    {
+      "palavra": "rubrica",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Pegadinha de sílaba tônica: a tônica cai na penúltima sílaba e a terminação é -A/-E/-O, então não há acento."
+    },
+    {
+      "palavra": "sofá",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -A ou -AS é acentuada."
+    },
+    {
+      "palavra": "maracujá",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -A ou -AS é acentuada."
+    },
+    {
+      "palavra": "guaraná",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -A ou -AS é acentuada."
+    },
+    {
+      "palavra": "alvará",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -A ou -AS é acentuada."
+    },
+    {
+      "palavra": "vatapá",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -A ou -AS é acentuada."
+    },
+    {
+      "palavra": "café",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -E ou -ES é acentuada."
+    },
+    {
+      "palavra": "jacaré",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -E ou -ES é acentuada."
+    },
+    {
+      "palavra": "você",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -E ou -ES é acentuada."
+    },
+    {
+      "palavra": "pontapé",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -E ou -ES é acentuada."
+    },
+    {
+      "palavra": "purê",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -E ou -ES é acentuada."
+    },
+    {
+      "palavra": "bebê",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -E ou -ES é acentuada."
+    },
+    {
+      "palavra": "português",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -E ou -ES é acentuada."
+    },
+    {
+      "palavra": "através",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -E ou -ES é acentuada."
+    },
+    {
+      "palavra": "cipó",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -O ou -OS é acentuada."
+    },
+    {
+      "palavra": "avó",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -O ou -OS é acentuada."
+    },
+    {
+      "palavra": "paletó",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -O ou -OS é acentuada."
+    },
+    {
+      "palavra": "dominó",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona terminada em -O ou -OS é acentuada."
+    },
+    {
+      "palavra": "robô",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -O ou -OS é acentuada."
+    },
+    {
+      "palavra": "vovô",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -O ou -OS é acentuada."
+    },
+    {
+      "palavra": "jiló",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -O ou -OS é acentuada."
+    },
+    {
+      "palavra": "também",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -EM ou -ENS é acentuada."
+    },
+    {
+      "palavra": "ninguém",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -EM ou -ENS é acentuada."
+    },
+    {
+      "palavra": "alguém",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -EM ou -ENS é acentuada."
+    },
+    {
+      "palavra": "armazém",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -EM ou -ENS é acentuada."
+    },
+    {
+      "palavra": "refém",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -EM ou -ENS é acentuada."
+    },
+    {
+      "palavra": "parabéns",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -EM ou -ENS é acentuada."
+    },
+    {
+      "palavra": "porém",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -EM ou -ENS é acentuada."
+    },
+    {
+      "palavra": "computador",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "feliz",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "capaz",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "jornal",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "papel",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "animal",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "professor",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "cantar",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "comer",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "ator",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "hotel",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "cartaz",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "rapaz",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "tambor",
+      "tipo": "oxitona",
+      "nivel": 1,
+      "regra": "Oxítona só é acentuada quando termina em -a(s), -e(s), -o(s), -em ou -ens. Terminando em outra letra, não leva acento."
+    },
+    {
+      "palavra": "urubu",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -I ou -U não entra na lista de terminações acentuadas, portanto não leva acento."
+    },
+    {
+      "palavra": "caju",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -I ou -U não entra na lista de terminações acentuadas, portanto não leva acento."
+    },
+    {
+      "palavra": "abacaxi",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -I ou -U não entra na lista de terminações acentuadas, portanto não leva acento."
+    },
+    {
+      "palavra": "colibri",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -I ou -U não entra na lista de terminações acentuadas, portanto não leva acento."
+    },
+    {
+      "palavra": "javali",
+      "tipo": "oxitona",
+      "nivel": 2,
+      "regra": "Oxítona terminada em -I ou -U não entra na lista de terminações acentuadas, portanto não leva acento."
+    },
+    {
+      "palavra": "cordão",
+      "tipo": "oxitona",
+      "nivel": 3,
+      "regra": "O til marca nasalidade e NÃO é acento gráfico. Oxítona terminada em -ã ou -ão não recebe acento."
+    },
+    {
+      "palavra": "amanhã",
+      "tipo": "oxitona",
+      "nivel": 3,
+      "regra": "O til marca nasalidade e NÃO é acento gráfico. Oxítona terminada em -ã ou -ão não recebe acento."
+    },
+    {
+      "palavra": "irmã",
+      "tipo": "oxitona",
+      "nivel": 3,
+      "regra": "O til marca nasalidade e NÃO é acento gráfico. Oxítona terminada em -ã ou -ão não recebe acento."
+    },
+    {
+      "palavra": "pá",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em -a(s), -e(s) ou -o(s) é acentuado."
+    },
+    {
+      "palavra": "pé",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em -a(s), -e(s) ou -o(s) é acentuado."
+    },
+    {
+      "palavra": "pó",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em -a(s), -e(s) ou -o(s) é acentuado."
+    },
+    {
+      "palavra": "nó",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em -a(s), -e(s) ou -o(s) é acentuado."
+    },
+    {
+      "palavra": "chá",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em -a(s), -e(s) ou -o(s) é acentuado."
+    },
+    {
+      "palavra": "fé",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em -a(s), -e(s) ou -o(s) é acentuado."
+    },
+    {
+      "palavra": "dá",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em -a(s), -e(s) ou -o(s) é acentuado."
+    },
+    {
+      "palavra": "mês",
+      "tipo": "monossilabo",
+      "nivel": 2,
+      "regra": "Monossílabo tônico terminado em -a(s), -e(s) ou -o(s) é acentuado."
+    },
+    {
+      "palavra": "três",
+      "tipo": "monossilabo",
+      "nivel": 2,
+      "regra": "Monossílabo tônico terminado em -a(s), -e(s) ou -o(s) é acentuado."
+    },
+    {
+      "palavra": "réu",
+      "tipo": "monossilabo",
+      "nivel": 3,
+      "regra": "Ditongo aberto -éu, -éi e -ói é acentuado em monossílabos e em oxítonas."
+    },
+    {
+      "palavra": "céu",
+      "tipo": "monossilabo",
+      "nivel": 3,
+      "regra": "Ditongo aberto -éu, -éi e -ói é acentuado em monossílabos e em oxítonas."
+    },
+    {
+      "palavra": "dói",
+      "tipo": "monossilabo",
+      "nivel": 3,
+      "regra": "Ditongo aberto -éu, -éi e -ói é acentuado em monossílabos e em oxítonas."
+    },
+    {
+      "palavra": "mar",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em outra letra (-r, -l, -z, -m...) não recebe acento."
+    },
+    {
+      "palavra": "sol",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em outra letra (-r, -l, -z, -m...) não recebe acento."
+    },
+    {
+      "palavra": "luz",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em outra letra (-r, -l, -z, -m...) não recebe acento."
+    },
+    {
+      "palavra": "paz",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em outra letra (-r, -l, -z, -m...) não recebe acento."
+    },
+    {
+      "palavra": "giz",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em outra letra (-r, -l, -z, -m...) não recebe acento."
+    },
+    {
+      "palavra": "flor",
+      "tipo": "monossilabo",
+      "nivel": 1,
+      "regra": "Monossílabo tônico terminado em outra letra (-r, -l, -z, -m...) não recebe acento."
+    },
+    {
+      "palavra": "saída",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Regra do hiato: o I ou o U tônico sozinho na sílaba recebe acento, mesmo que a regra geral não pedisse."
+    },
+    {
+      "palavra": "egoísta",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Regra do hiato: o I ou o U tônico sozinho na sílaba recebe acento, mesmo que a regra geral não pedisse."
+    },
+    {
+      "palavra": "saúde",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Regra do hiato: o I ou o U tônico sozinho na sílaba recebe acento, mesmo que a regra geral não pedisse."
+    },
+    {
+      "palavra": "ruído",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Regra do hiato: o I ou o U tônico sozinho na sílaba recebe acento, mesmo que a regra geral não pedisse."
+    },
+    {
+      "palavra": "viúva",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Regra do hiato: o I ou o U tônico sozinho na sílaba recebe acento, mesmo que a regra geral não pedisse."
+    },
+    {
+      "palavra": "faísca",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Regra do hiato: o I ou o U tônico sozinho na sílaba recebe acento, mesmo que a regra geral não pedisse."
+    },
+    {
+      "palavra": "heroína",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Regra do hiato: o I ou o U tônico sozinho na sílaba recebe acento, mesmo que a regra geral não pedisse."
+    },
+    {
+      "palavra": "cafeína",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Regra do hiato: o I ou o U tônico sozinho na sílaba recebe acento, mesmo que a regra geral não pedisse."
+    },
+    {
+      "palavra": "baú",
+      "tipo": "oxitona",
+      "nivel": 3,
+      "regra": "Regra do hiato: o I ou o U tônico sozinho na sílaba recebe acento, mesmo que a regra geral não pedisse."
+    },
+    {
+      "palavra": "país",
+      "tipo": "oxitona",
+      "nivel": 3,
+      "regra": "Regra do hiato: o I ou o U tônico sozinho na sílaba recebe acento, mesmo que a regra geral não pedisse."
+    },
+    {
+      "palavra": "aí",
+      "tipo": "oxitona",
+      "nivel": 3,
+      "regra": "Regra do hiato: o I ou o U tônico sozinho na sílaba recebe acento, mesmo que a regra geral não pedisse."
+    },
+    {
+      "palavra": "juiz",
+      "tipo": "oxitona",
+      "nivel": 3,
+      "regra": "Exceção do hiato: o I/U tônico NÃO é acentuado quando forma sílaba com S, Z, R, L, M ou N (ju-IZ, ra-IZ, ca-IR)."
+    },
+    {
+      "palavra": "raiz",
+      "tipo": "oxitona",
+      "nivel": 3,
+      "regra": "Exceção do hiato: o I/U tônico NÃO é acentuado quando forma sílaba com S, Z, R, L, M ou N (ju-IZ, ra-IZ, ca-IR)."
+    },
+    {
+      "palavra": "cair",
+      "tipo": "oxitona",
+      "nivel": 3,
+      "regra": "Exceção do hiato: o I/U tônico NÃO é acentuado quando forma sílaba com S, Z, R, L, M ou N (ju-IZ, ra-IZ, ca-IR)."
+    },
+    {
+      "palavra": "rainha",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Exceção do hiato: o I/U tônico NÃO é acentuado quando vem seguido de NH (ra-I-nha) nem quando vem depois de ditongo (fei-U-ra)."
+    },
+    {
+      "palavra": "bainha",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Exceção do hiato: o I/U tônico NÃO é acentuado quando vem seguido de NH (ra-I-nha) nem quando vem depois de ditongo (fei-U-ra)."
+    },
+    {
+      "palavra": "moinho",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Exceção do hiato: o I/U tônico NÃO é acentuado quando vem seguido de NH (ra-I-nha) nem quando vem depois de ditongo (fei-U-ra)."
+    },
+    {
+      "palavra": "feiura",
+      "tipo": "paroxitona",
+      "nivel": 3,
+      "regra": "Exceção do hiato: o I/U tônico NÃO é acentuado quando vem seguido de NH (ra-I-nha) nem quando vem depois de ditongo (fei-U-ra)."
+    }
+  ]
+}
