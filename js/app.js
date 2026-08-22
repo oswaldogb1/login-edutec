@@ -15,6 +15,7 @@ const list = document.getElementById("list");
 
 const btnAbrirLink = document.getElementById("btnAbrirLink");
 const btnAbrirJogos = document.getElementById("btnAbrirJogos");
+const linkStatus = document.getElementById("linkStatus");
 
 // Modal de jogos
 const jogosModal = document.getElementById("jogosModal");
@@ -170,13 +171,17 @@ searchInput.addEventListener("input", renderizarLista);
 // --- LINK TEMPORÁRIO DO PROFESSOR (somente leitura) ---
 
 let linkAtivo = null;
+let buscandoLink = false; // evita duas verificações ao mesmo tempo
+
+// De quanto em quanto tempo reconferimos o link enquanto a página está aberta.
+const INTERVALO_LINK = 20000; // 20 segundos
 
 // Link anexado a uma aula agendada: vale apenas entre "inicio" e "fim" daquela
 // aula. Fora dessa janela ele simplesmente não aparece — nada é apagado no
 // Firebase, a expiração é decidida aqui na leitura.
 async function buscarLinkDaAula() {
   try {
-    const res = await fetch(LINKS_AULA_URL);
+    const res = await fetch(LINKS_AULA_URL, { cache: "no-store" });
     const data = await res.json();
     if (!data) return null;
 
@@ -195,45 +200,89 @@ async function buscarLinkDaAula() {
   }
 }
 
+// Link avulso que o professor compartilha de outra página da escola. Vale por
+// 30 minutos; a expiração é só visual, nada é apagado no Firebase.
+async function buscarLinkAvulso() {
+  const res = await fetch(FIREBASE_URL, { cache: "no-store" });
+  const data = await res.json();
+  if (!data || !data.url || !data.timestamp) return null;
+
+  const tempoDecorrido = Date.now() - data.timestamp;
+  const trintaMinutos = 30 * 60 * 1000;
+  return tempoDecorrido > trintaMinutos ? null : data.url;
+}
+
 async function carregarLinkCompartilhado() {
-  // O link da aula tem prioridade sobre o link avulso do professor.
-  const linkDaAula = await buscarLinkDaAula();
-  if (linkDaAula) {
-    linkAtivo = linkDaAula;
-    atualizarBotaoLink();
-    return;
-  }
-
+  if (buscandoLink) return;
+  buscandoLink = true;
   try {
-    const res = await fetch(FIREBASE_URL);
-    const data = await res.json();
-
-    if (data && data.url && data.timestamp) {
-      const tempoDecorrido = new Date().getTime() - data.timestamp;
-      const trintaMinutos = 30 * 60 * 1000;
-      // Expiração é apenas visual aqui: como não há mais painel de administração,
-      // não removemos o registro no Firebase — só ignoramos links vencidos.
-      linkAtivo = tempoDecorrido > trintaMinutos ? null : data.url;
-    } else {
-      linkAtivo = null;
-    }
+    // O link da aula tem prioridade sobre o link avulso do professor.
+    const linkDaAula = await buscarLinkDaAula();
+    const novoLink = linkDaAula || await buscarLinkAvulso();
+    definirLinkAtivo(novoLink || null);
   } catch (e) {
-    console.error("Erro ao carregar o link compartilhado.", e);
+    // Falha de rede: mantém o último link conhecido em vez de sumir com o botão.
+    console.error("Erro ao verificar o link do professor.", e);
+  } finally {
+    buscandoLink = false;
   }
+}
+
+function definirLinkAtivo(url) {
+  const mudou = url !== linkAtivo;
+  linkAtivo = url;
   atualizarBotaoLink();
+  // Chama a atenção só quando um link novo aparece com a página já aberta.
+  if (!url) btnAbrirLink.classList.remove("link-novo");
+  else if (mudou) destacarBotaoLink();
 }
 
 function atualizarBotaoLink() {
   btnAbrirLink.classList.toggle("indisponivel", !linkAtivo);
+  if (!linkStatus) return;
+  linkStatus.textContent = linkAtivo
+    ? "Link disponível — clique para abrir."
+    : "Aguardando o professor compartilhar um link…";
+  linkStatus.classList.toggle("ativo", !!linkAtivo);
+}
+
+function destacarBotaoLink() {
+  btnAbrirLink.classList.remove("link-novo");
+  void btnAbrirLink.offsetWidth; // reinicia a animação
+  btnAbrirLink.classList.add("link-novo");
+  setTimeout(() => btnAbrirLink.classList.remove("link-novo"), 6000);
 }
 
 btnAbrirLink.addEventListener("click", () => {
   if (linkAtivo) {
     window.open(linkAtivo, "_blank");
   } else {
-    alert("Nenhum link foi compartilhado pelo professor no momento.");
+    // Reconfere na hora: talvez o professor tenha compartilhado agora mesmo.
+    carregarLinkCompartilhado();
+    alert(`Nenhum link foi compartilhado pelo professor no momento.
+
+Deixe esta página aberta: assim que o professor compartilhar, o botão fica verde sozinho. Não é preciso recarregar.`);
   }
 });
+
+// Os navegadores desaceleram e chegam a congelar os timers de abas que ficam em
+// segundo plano — era isso que obrigava o aluno a recarregar a página para o
+// link aparecer. Por isso, além do intervalo, reconferimos sempre que a página
+// volta a ficar visível, recebe foco, volta do histórico ou a rede retorna.
+function monitorarLink() {
+  carregarLinkCompartilhado();
+
+  setInterval(() => {
+    if (document.visibilityState !== "hidden") carregarLinkCompartilhado();
+  }, INTERVALO_LINK);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") carregarLinkCompartilhado();
+  });
+  window.addEventListener("focus", carregarLinkCompartilhado);
+  window.addEventListener("pageshow", carregarLinkCompartilhado);
+  window.addEventListener("online", carregarLinkCompartilhado);
+}
 
 
 // --- JOGOS (somente leitura) ---
@@ -334,7 +383,4 @@ jogosModal.addEventListener("click", (e) => {
 // --- INICIALIZAÇÃO ---
 
 carregarBancoDeDados();
-carregarLinkCompartilhado();
-
-// Reverifica o link do professor periodicamente (a cada 1 minuto).
-setInterval(carregarLinkCompartilhado, 60000);
+monitorarLink();
