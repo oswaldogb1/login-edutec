@@ -34,41 +34,67 @@ This file holds real minors' names and e-mails. Treat it as personal data — do
 
 ## Firebase (shared, no SDK, no auth)
 
-Everything dynamic goes through one unauthenticated Realtime Database over plain REST: `https://edutec-arnaldo-default-rtdb.firebaseio.com`. Nodes in use:
+Everything dynamic goes through one unauthenticated Realtime Database over plain REST: `https://edutec-arnaldo-default-rtdb.firebaseio.com`.
 
-- `/link_temporario` — the single URL a teacher broadcasts to the class.
-- `/links_aula` — append-only; links attached to a specific booked class by the scheduler app (`D:\SITEAGENDA\agendamento`). `buscarLinkDaAula()` shows the entry whose `[inicio, fim]` window contains "now" and whose `ativo !== false`, and takes priority over `link_temporario`. Expiry is decided on read — **never delete from this node**; that is what makes the link vanish when the class ends.
-- `/jogos` — the list of games shown to students (`{nome, url, timestamp}` per push key).
-- `/ranking` — score board written by `jogos/jogo9neu`.
-- `/cidade_inteligente/salas/{CODIGO}` — everything `jogos/Cidade` writes. That game's `js/firebase.js` has a single URL builder (`montarCaminho`) that forces this prefix, refuses `PUT`, and self-tests on load. Never add a raw Firebase `fetch()` there, and never widen its `DELETE`.
-- `jogos/jogo7neu` embeds the same `databaseURL` via the Firebase compat SDK for its own live ranking.
+The database is **shared across school projects**, so every writer confines itself to its own top-level node, and test data has to be cleaned up afterwards. Nodes in use:
 
-Because the database is shared across school projects, a game that writes must confine itself to its own node, and test data has to be cleaned up afterwards.
+| Node | Owner | Notes |
+|---|---|---|
+| `/link_temporario` | teacher's other site | The single URL broadcast to the class. `app.js` only reads it. |
+| `/links_aula` | scheduler app (`D:\SITEAGENDA\agendamento`) | Append-only. **Never delete from this node.** |
+| `/jogos` | teacher's "Adicionar Jogo" flow | `{nome, url, timestamp}` per push key. Deleted from by `js/app.js` and `js/jogos.js`. |
+| `/ranking` | `jogos/jogo9neu` | via its `js/firebase.js`. |
+| `/rankings` | `jogos/jogo8neu` | **Plural — a different node from `/ranking`.** Don't conflate the two. |
+| `/jogo_ritmo_memoria` | `jogos/jogo7neu` | The only game using the Firebase **compat SDK** rather than raw REST. |
+| `/bingoCidade` | `jogos/Bingo` | Both copies of the bingo share this node — see the Bingo warning below. |
+| `/cidade_inteligente/salas/{CODIGO}` | `jogos/Cidade` | Namespace enforced in code — see below. |
+| `/cidade_desperta/salas/{SALA}` | `jogos/quebra` | Namespace enforced by `NUVEM.raiz` + `urlSala()`. |
+
+`jogos/Cidade/js/firebase.js` has a single URL builder (`montarCaminho`) that forces its prefix, refuses `PUT`, and self-tests on load. Never add a raw Firebase `fetch()` there, and never widen its `DELETE`.
+
+### Link expiry is decided on read
+
+`buscarLinkDaAula()` shows the `/links_aula` entry whose `[inicio, fim]` window contains "now" and whose `ativo !== false`, and it takes priority over `link_temporario` (which expires 30 minutes after its `timestamp`). Neither is ever deleted — **expiry is applied lazily on read**, and that is exactly what makes the link vanish when the class ends. `app.js` is strictly read-only with respect to both nodes; the teacher-side write UI lives on a different site, not in this repo.
+
+Because the teacher shares the link from that other site while students already have this page open, `monitorarLink()` re-checks every 20 s **and** on `visibilitychange`/`focus`/`pageshow`/`online`. The event triggers are the important half: browsers throttle and eventually freeze timers in background tabs, which is what used to force students to reload the page before the link showed up. Keep those listeners if you touch this code, and keep `cache: "no-store"` on the two link fetches. A network failure deliberately keeps the last known link rather than making the button disappear.
+
+### Passwords are public
 
 The database is world-readable and world-writable. All "passwords" are string literals in client JS and therefore public — they are convenience gating, not security:
 
-- `js/app.js` `SENHA_JOGOS` — delete a game from the modal on the home page.
-- `js/jogos.js` `SENHA_ADMIN` — delete a game from the standalone `jogos.html` page.
-- `jogos/Cidade/js/app.js` `SENHA_PROFESSOR` — open the teacher panel of that game.
+| Constant | File | Value | Guards |
+|---|---|---|---|
+| `SENHA_JOGOS` | `js/app.js` | `54321Paz` | Delete a game from the modal on the home page. |
+| `SENHA_ADMIN` | `js/jogos.js` | `arnaldotec` | Delete a game from the standalone `jogos.html` page. |
+| `SENHA_PROFESSOR` | `jogos/Cidade/js/app.js` | `54321` | Teacher panel. |
+| `SENHA_PROFESSOR` | `jogos/Bingo/*.html` | `54321` | Teacher panel. |
+| `NUVEM.senha` | `jogos/quebra/index.html` | `54321` | Teacher panel. |
 
-The first two are **different values** guarding the same Firebase node. Note also that `app.js` is read-only with respect to `link_temporario`: it never writes or deletes, and 30-minute expiry is applied lazily on read (an expired link is ignored, not removed). The teacher-side write UI lives on a different site, not in this repo.
-
-Because the teacher shares the link from that other site while students already have this page open, `monitorarLink()` re-checks every 20 s **and** on `visibilitychange`/`focus`/`pageshow`/`online`. The event triggers are the important half: browsers throttle and eventually freeze timers in background tabs, which is what used to force students to reload the page before the link showed up. Keep those listeners if you touch this code, and keep `cache: "no-store"` on the two link fetches.
+The top two are **different values guarding the same `/jogos` node**; the games have separately converged on a shared `54321` for their teacher panels.
 
 ## Two overlapping games UIs
 
-`index.html` shows games in a **modal** driven by `js/app.js`; `jogos.html` is a **standalone page** driven by `js/jogos.js`. The card rendering, sorting (newest first by `timestamp`), and delete logic are duplicated between the two files with small divergences (different password, modal vs. `prompt()`). Changing games behavior usually means editing both.
+`index.html` shows games in a **modal** driven by `js/app.js`; `jogos.html` is a **standalone page** driven by `js/jogos.js`. The card rendering, sorting (newest first by `timestamp`), and delete logic are duplicated between the two files with small divergences — a different password, and a different way of asking for it: `app.js` uses a bare `prompt()`, while `jogos.js` drives the `#passwordModal` dialog in `jogos.html` through `abrirModalSenha(mensagem, acao)`. Changing games behavior usually means editing both.
 
 ## Adding a game
 
-Each game is a self-contained folder under `jogos/` with an `index.html` entry point and **relative** asset paths, so it works from any location. Most games (`Bingo`, `jogo1neu`, `jogo7neu`, `jogo8neu`, `ohm`) are single-file — markup, `<style>`, and `<script>` in one `index.html`. Others are split (`jogo6neu`: `script.js`/`perguntas.js`/`style.css`; `jogo9neu`: `js/{data,firebase,board,game}.js`; `Cidade`: `js/` modules on a `window.CI` namespace; `acentua`: `src/` compiled by `build.js`). Follow whichever shape the game you're touching already uses.
+Each game is a self-contained folder under `jogos/` with an `index.html` entry point and **relative** asset paths, so it works from any location. Follow whichever shape the game you're touching already uses:
+
+- **Single-file** (markup, `<style>`, and `<script>` in one `index.html`): `Bingo`, `jogo1neu`, `jogo7neu`, `jogo8neu`, `ohm`, `quebra`. Single-file does not mean small — `quebra` is ~4,100 lines.
+- **Split flat files**: `jogo6neu` (`script.js`/`perguntas.js`/`style.css`).
+- **`js/` modules**: `jogo9neu` (`js/{data,firebase,board,game}.js`), `Cidade` (modules on a `window.CI` namespace).
+- **Compiled**: `acentua` (`src/` concatenated by `build.js`).
 
 A game folder existing on disk does **not** put it in the list — the list comes from Firebase `/jogos`, populated via the teacher's "Adicionar Jogo" flow with a path like `jogos/quiz-matematica/index.html` (or any full `https://` URL, e.g. itch.io).
 
-Known oddities:
+### Live-ranking games
+
+`Cidade`, `Bingo`, and `quebra` share a pattern: students join a room code, and the teacher opens a password-gated panel that projects a live ranking. `quebra` reads its room with a Firebase REST `EventSource` stream (`put`/`patch` events) and falls back to a 4 s poll when the stream fails; its "Limpar sala" button is a two-click confirm that `DELETE`s only `/{raiz}/salas/{SALA}`. Keep new network calls in these games optional and silently failing — they are all designed to stay playable offline.
+
+### Known oddities
 
 - `jogos/jogo2neu/index.html.html` is misnamed and won't load as a folder entry point.
-- `jogos/Bingo/` holds two near-identical copies of the same bingo (`index.html` and `bingo-cidade-inteligente.html`) that have since diverged; check which one the Firebase `/jogos` entry actually points at before editing.
+- `jogos/Bingo/` holds two copies of the same bingo. `bingo-cidade-inteligente.html` is the **newer** one and has genuinely diverged from `index.html` (~180 diff lines): it adds "Encerrar e apurar", a most-correct-answers tie-break for when every theme is drawn with no winner, a penalty that frees a theme again on a wrong answer, and extra `estado` fields (`sorteadoEm`, `vencedor`) that the older copy does not understand. Both write to the **same** `/bingoCidade` room, so pointing the two copies at one room corrupts it. Check which file the Firebase `/jogos` entry actually references before editing.
 
 ## Conventions
 

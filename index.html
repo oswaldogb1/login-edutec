@@ -8,8 +8,26 @@
 </head>
 <body>
   <div class="wrap">
+    <header class="marca">
+      <img src="log-transparente.png" alt="Brasão da EE Dr. Arnaldo Estevão de Figueiredo" class="logo-marca" />
+      <h1>Sala de Tecnologia</h1>
+    </header>
+
+    <!-- Acessos: barra fixa no topo — as caixas abaixo rolam por baixo dela.
+         Fica FORA do <main class="layout"> de propósito: um item de grid tem a
+         própria célula como bloco de contenção, e ali o sticky não teria curso. -->
+    <div class="barra-acessos">
+      <section class="card">
+        <h2 class="step-title">Acessos</h2>
+        <div class="acessos">
+          <button id="btnAbrirLink" class="btn-acesso">Link do Professor</button>
+          <button id="btnAbrirJogos" class="btn-acesso">Jogos</button>
+        </div>
+        <p id="linkStatus" class="link-status">Verificando se há link do professor…</p>
+      </section>
+    </div>
+
     <main class="layout">
-     <div class="coluna-principal">
       <section class="card">
         <h2 class="step-title">1. Selecione a sua turma</h2>
         <label for="serie">Série/Turma</label>
@@ -37,22 +55,11 @@
           <div class="list" id="list"></div>
         </div>
       </section>
-     </div>
-
-     <aside class="coluna-lateral">
-      <section class="card">
-        <h2 class="step-title">Acessos</h2>
-        <div class="acessos">
-          <button id="btnAbrirLink" class="btn-acesso">Link do Professor</button>
-          <button id="btnAbrirJogos" class="btn-acesso">Jogos</button>
-        </div>
-        <p id="linkStatus" class="link-status">Verificando se há link do professor…</p>
-      </section>
-     </aside>
     </main>
 
     <footer>
-      EE Dr. Arnaldo Estevão de Figueiredo &middot; Figueirão - MS
+      <span>EE Dr. Arnaldo Estevão de Figueiredo &middot; Figueirão - MS</span>
+      <span>By Oswaldo Guimarães - Versão 1.3</span>
     </footer>
   </div>
 

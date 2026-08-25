@@ -3,9 +3,14 @@
   --primary-hover: #3b6347;
   --text-main: #1f2a24;
   --text-muted: #6b7a70;
-  --border: #dbe6de;
+  --border: #e2d9c3;
   --danger: #cc0000;
-  --card-bg: rgba(255, 255, 255, 0.96);
+  --bege: #f0e5d0;          /* fundo da página */
+  /* Véu bege por cima da textura: é o botão de volume dela. Mais alpha = mais
+     discreta; baixe para 0.35 se quiser os pontos bem marcados. */
+  --veu: rgba(240, 229, 208, 0.62);
+  --bege-escuro: #d8c9ab;   /* traços sobre o bege */
+  --card-bg: #fffdf8;
 }
 
 * { box-sizing: border-box; }
@@ -15,16 +20,35 @@ body {
   min-height: 100vh;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   color: var(--text-main);
-  background: #16302b url("../wall.jpg") center / cover no-repeat fixed;
 }
 
-/* Camada escura sobre a imagem de fundo para legibilidade. */
+/* TEXTURA DE FUNDO
+   textura.png é um halftone escuro sobre branco. O "multiply" dissolve esse
+   branco no bege (empilhado sem mesclar, o PNG taparia a cor) e o véu bege por
+   cima tira o peso dos pontos — o volume dela se ajusta em --veu.
+
+   "auto 100%" ajusta a textura pela ALTURA da viewport: com "cover" a imagem
+   era ampliada e os pontos saíam enormes. Ancorada à esquerda, ela ocupa a
+   faixa escura, e o lado direito dela — quase branco — se dissolve no bege,
+   por isso o no-repeat não deixa emenda à vista.
+
+   Vive numa camada própria position:fixed em vez de background-attachment:
+   fixed: esta é composta uma vez só, aquela re-rasteriza a cada rolagem e
+   chegou a travar o navegador aqui. */
+body { background-color: var(--bege); }
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: linear-gradient(180deg, rgba(10, 22, 19, 0.55), rgba(10, 22, 19, 0.75));
   z-index: -1;
+  background-color: var(--bege);
+  background-image:
+    linear-gradient(var(--veu), var(--veu)),
+    url("../textura.png");
+  background-repeat: no-repeat, no-repeat;
+  background-position: left center, left center;
+  background-size: auto 100%, auto 100%;
+  background-blend-mode: normal, multiply;
 }
 
 .wrap {
@@ -33,33 +57,55 @@ body::before {
   padding: 28px 16px 48px;
 }
 
-/* LAYOUT EM DUAS COLUNAS: conteúdo | acessos */
+/* BARRA DE ACESSOS: presa no topo enquanto o resto da página rola. Sem faixa
+   de fundo — o cartão de dentro é opaco e tem a mesma largura das caixas que
+   passam por baixo, então ele mesmo as esconde, e a textura do fundo segue
+   contínua ao redor. */
+.barra-acessos {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin-bottom: 20px;
+}
+.barra-acessos .card {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px 24px 14px;
+}
+
+/* LAYOUT: coluna única centralizada na tela. */
 .layout {
+  max-width: 720px;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
-  align-items: stretch;
-  justify-content: center;
 }
-/* Desktop: conteúdo e acessos lado a lado, centralizados. */
-@media (min-width: 1024px) {
-  .layout { grid-template-columns: minmax(0, 760px) 300px; }
-}
-.coluna-principal { min-width: 0; }
 
-/* Coluna de acessos acompanha a altura da coluna principal. */
-.coluna-lateral { display: flex; }
-.coluna-lateral .card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+/* MARCA DA HOME: brasão da escola e nome da sala. */
+.marca {
+  text-align: center;
+  margin-bottom: 18px;
 }
-.coluna-lateral .acessos { flex: 1; grid-auto-rows: 1fr; }
+.logo-marca {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+}
+.marca h1 {
+  margin: 4px 0 0;
+  /* explícito: a regra genérica de "header h1" (jogos.html) alinha à esquerda */
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--primary);
+}
 
-/* CABEÇALHO */
+/* CABEÇALHO (jogos.html) */
 header {
   text-align: center;
-  color: #fff;
+  color: var(--text-main);
   margin-bottom: 24px;
 }
 .header-top {
@@ -74,15 +120,14 @@ header {
   width: 96px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  border: 3px solid #fff;
+  box-shadow: 0 6px 18px rgba(90, 75, 45, 0.22);
   flex-shrink: 0;
 }
 header h1 {
   margin: 0;
   font-size: 20px;
   letter-spacing: 0.5px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   text-align: left;
 }
 header p {
@@ -90,16 +135,16 @@ header p {
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-muted);
 }
 
 /* CARTÃO PRINCIPAL */
 .card {
   background: var(--card-bg);
+  border: 1px solid var(--bege-escuro);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(4px);
+  box-shadow: 0 8px 24px rgba(90, 75, 45, 0.10);
 }
 
 .step-title {
@@ -108,7 +153,6 @@ header p {
   color: var(--primary);
   font-weight: 700;
 }
-.card + .card { margin-top: 20px; }
 
 label {
   font-size: 13px;
@@ -221,7 +265,7 @@ kbd {
 /* BOTÕES DE ACESSO (LINK / JOGOS) */
 .acessos {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
 .btn-acesso {
@@ -331,8 +375,11 @@ kbd {
 .btn-remover:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
 
 footer {
+  display: grid;
+  gap: 2px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.7);
+  color: #8d8064;
   font-size: 12px;
+  line-height: 1.5;
   margin-top: 28px;
 }
