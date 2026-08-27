@@ -12,8 +12,8 @@
  */
 import * as THREE from 'three';
 import { ZONAS, TODOS_OS_PONTOS } from './zones.js';
-import { box, cyl, arvore, mat } from './models.js';
-import { LIMITE_MUNDO } from './config.js';
+import { box, cyl, arvore, mat, buildAreaSegura } from './models.js';
+import { LIMITE_MUNDO, AREAS_SEGURAS, PERSEGUICAO } from './config.js';
 
 /** Pontos que o jogador pode atravessar (chão pintado, parque aberto). */
 const PONTOS_ATRAVESSAVEIS = new Set(['ciclovia', 'parque']);
@@ -218,6 +218,13 @@ function dentroDeZona(x, z, folga = 6) {
   });
 }
 
+/** Um endereço está sobre o terreno reservado de uma Área Segura? */
+function sobreAreaSegura(x, z, folga = 8) {
+  return AREAS_SEGURAS.some(
+    (a) => Math.hypot(x - a.x, z - a.z) < PERSEGUICAO.raioAreaSegura + folga
+  );
+}
+
 /* =========================================================================
  * Prédios (quarteirões procedurais)
  * ======================================================================= */
@@ -243,6 +250,7 @@ function criarPredios(scene, colisores) {
 
       if (sobreRua(px, pz)) continue;
       if (dentroDeZona(px, pz)) continue;
+      if (sobreAreaSegura(px, pz)) continue;
       if (rnd() < 0.22) continue; // alguns lotes vazios / praças
 
       // um pouco de vegetação em vez de prédio
@@ -485,6 +493,42 @@ function criarPontosDeInteracao(scene, colisores, animaveis, camera) {
 }
 
 /* =========================================================================
+ * Áreas Seguras (abrigos da mecânica de fuga)
+ * ======================================================================= */
+
+function criarAreasSeguras(scene, animaveis) {
+  return AREAS_SEGURAS.map((pos, i) => {
+    const grupo = new THREE.Group();
+    grupo.position.set(pos.x, 0, pos.z);
+
+    const abrigo = buildAreaSegura();
+    grupo.add(abrigo);
+
+    const rotulo = criarLabel('🛡️ Área Segura', '#4ade80', 6.8);
+    rotulo.position.y = 7.8;
+    grupo.add(rotulo);
+
+    // luz esverdeada que ajuda a identificar o abrigo à noite visual da zona
+    const luz = new THREE.PointLight(0x22c55e, 1.2, 30, 1.8);
+    luz.position.set(0, 6, 0);
+    grupo.add(luz);
+
+    scene.add(grupo);
+
+    const animarAbrigo = abrigo.userData.animar;
+    animaveis.push({
+      animar: (t) => {
+        if (animarAbrigo) animarAbrigo(t + i);
+        luz.intensity = 1.0 + Math.sin(t * 2.4 + i) * 0.35;
+      }
+    });
+
+    // Sem colisor: o jogador precisa poder entrar correndo no abrigo.
+    return { x: pos.x, z: pos.z, grupo };
+  });
+}
+
+/* =========================================================================
  * Cercas do limite do mundo
  * ======================================================================= */
 
@@ -522,6 +566,7 @@ export function criarMundo(scene, camera) {
   criarPredios(scene, colisores);
   criarZonas(scene, colisores, animaveis);
   criarLimites(scene, colisores);
+  const areasSeguras = criarAreasSeguras(scene, animaveis);
   const pontos = criarPontosDeInteracao(scene, colisores, animaveis, camera);
 
   animaveis.push({
@@ -532,6 +577,7 @@ export function criarMundo(scene, camera) {
 
   return {
     pontos,
+    areasSeguras,
     colisores,
     animar(t) {
       for (const a of animaveis) a.animar(t);

@@ -9,7 +9,7 @@
  * -----------------------------------------------------------------------------
  */
 import { ZONAS } from './zones.js';
-import { LIMITE_MUNDO } from './config.js';
+import { LIMITE_MUNDO, AREAS_SEGURAS, PERSEGUICAO } from './config.js';
 
 const DIRECOES = ['N', 'NE', 'L', 'SE', 'S', 'SO', 'O', 'NO'];
 
@@ -29,6 +29,63 @@ export class HUD {
     this.ctx = this.canvas.getContext('2d');
     this.tamanho = this.canvas.width;
     this.escala = this.tamanho / (LIMITE_MUNDO * 2 + 30);
+
+    // elementos da fuga
+    this.elAlerta = document.getElementById('alerta-fuga');
+    this.elAlertaAnimal = document.getElementById('alerta-animal');
+    this.elAlertaDistancia = document.getElementById('alerta-distancia');
+    this.elAlertaSeta = document.getElementById('alerta-seta');
+    this.elAlertaAbrigo = document.getElementById('alerta-abrigo');
+    this.elPerigo = document.getElementById('vinheta-perigo');
+
+    /** Estado atual da fuga, usado também no desenho do minimapa. */
+    this.fuga = null;
+  }
+
+  /**
+   * Liga/desliga o alerta de fuga.
+   * @param {?{icone:string, nome:string, cor:string}} animal  null encerra a fuga
+   * @param {?{x:number,z:number}} abrigoBloqueado  abrigo que nao vale nesta fuga
+   */
+  definirFuga(animal, abrigoBloqueado = null) {
+    this.fuga = animal ? { animal, posicaoAnimal: null, abrigoBloqueado } : null;
+    this.elAlerta.hidden = !animal;
+    this.elPerigo.hidden = !animal;
+    if (animal) {
+      this.elAlertaAnimal.textContent = `${animal.icone} ${animal.nome}`;
+      this.elAlertaAnimal.style.color = animal.cor;
+    } else {
+      this.elPerigo.style.opacity = 0;
+    }
+  }
+
+  /**
+   * Atualiza o painel de fuga a cada quadro.
+   * @param {{x:number,z:number}} posJogador
+   * @param {{x:number,z:number}} direcao      para onde o jogador olha
+   * @param {?{x:number,z:number}} posAnimal
+   * @param {number} distanciaAnimal
+   * @param {{x:number,z:number,distancia:number}} abrigo  Área Segura mais próxima
+   */
+  atualizarFuga(posJogador, direcao, posAnimal, distanciaAnimal, abrigo) {
+    if (!this.fuga) return;
+    this.fuga.posicaoAnimal = posAnimal;
+
+    this.elAlertaDistancia.textContent = `${Math.round(distanciaAnimal)} m atrás de você`;
+    this.elAlertaAbrigo.textContent = `Área Segura a ${Math.round(abrigo.distancia)} m`;
+
+    // seta apontando para o abrigo, relativa a para onde o jogador olha
+    const anguloAbrigo = Math.atan2(abrigo.x - posJogador.x, abrigo.z - posJogador.z);
+    const anguloOlhar = Math.atan2(direcao.x, direcao.z);
+    let relativo = anguloAbrigo - anguloOlhar;
+    while (relativo > Math.PI) relativo -= Math.PI * 2;
+    while (relativo < -Math.PI) relativo += Math.PI * 2;
+    this.elAlertaSeta.style.transform = `rotate(${(relativo * 180) / Math.PI}deg)`;
+
+    // vinheta vermelha: quanto mais perto o animal, mais forte
+    const perigo = Math.max(0, Math.min(1, 1 - (distanciaAnimal - 3) / 18));
+    this.elPerigo.style.opacity = (perigo * 0.85).toFixed(2);
+    this.elAlerta.classList.toggle('critico', distanciaAnimal < 8);
   }
 
   definirJogador(nome, turma) {
@@ -103,6 +160,28 @@ export class HUD {
       ctx.fillText(String(zona.numero), zx, zy - zona.raio * this.escala - 4);
     });
 
+    // Áreas Seguras (abrigos da fuga)
+    const bloqueado = this.fuga && this.fuga.abrigoBloqueado;
+    AREAS_SEGURAS.forEach((a) => {
+      // o abrigo ja usado nesta fuga aparece apagado
+      const usado = bloqueado && bloqueado.x === a.x && bloqueado.z === a.z;
+      const [ax, ay] = this._paraMapa(a.x, a.z);
+      ctx.beginPath();
+      ctx.arc(ax, ay, PERSEGUICAO.raioAreaSegura * this.escala, 0, Math.PI * 2);
+      ctx.fillStyle = usado ? 'rgba(120,130,145,0.22)' : 'rgba(34,197,94,0.28)';
+      ctx.fill();
+      ctx.strokeStyle = usado ? '#6b7280' : '#22c55e';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = usado ? '#9ca3af' : '#bbf7d0';
+      ctx.font = 'bold 9px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('S', ax, ay);
+      ctx.textBaseline = 'alphabetic';
+    });
+
     // pontos de interação
     pontos.forEach((p) => {
       const [px, py] = this._paraMapa(p.posicao.x, p.posicao.z);
@@ -114,6 +193,18 @@ export class HUD {
       ctx.lineWidth = 1.2;
       ctx.stroke();
     });
+
+    // animal perseguidor
+    if (this.fuga && this.fuga.posicaoAnimal) {
+      const [px, py] = this._paraMapa(this.fuga.posicaoAnimal.x, this.fuga.posicaoAnimal.z);
+      ctx.beginPath();
+      ctx.arc(px, py, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ef4444';
+      ctx.fill();
+      ctx.strokeStyle = '#fee2e2';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+    }
 
     // jogador (triângulo apontando para onde ele olha)
     const [jx, jy] = this._paraMapa(posicao.x, posicao.z);

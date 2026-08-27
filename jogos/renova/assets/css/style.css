@@ -682,3 +682,126 @@ body.professor {
   animation: pulsar 2s ease-in-out infinite;
 }
 .aviso-mouse[hidden] { display: none; }
+
+/* =============================================================================
+   FUGA DO ANIMAL
+   ============================================================================= */
+
+/* Vinheta vermelha nas bordas: fica mais forte conforme o animal se aproxima */
+.vinheta-perigo {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse at center,
+              transparent 35%, rgba(190, 18, 60, 0.28) 72%, rgba(136, 8, 30, 0.75) 100%);
+  transition: opacity 0.18s linear;
+}
+.vinheta-perigo[hidden] { display: none; }
+
+/* Painel de alerta no topo da tela */
+.alerta-fuga {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 6px;
+  min-width: 340px;
+  padding: 12px 22px;
+  border: 2px solid rgba(248, 113, 113, 0.7);
+  border-radius: 16px;
+  background: rgba(38, 8, 14, 0.88);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  text-align: center;
+  animation: entrarAlerta 0.25s ease;
+}
+.alerta-fuga[hidden] { display: none; }
+
+@keyframes entrarAlerta {
+  from { opacity: 0; transform: translate(-50%, -14px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.alerta-fuga.critico {
+  border-color: #f87171;
+  animation: bater 0.55s ease-in-out infinite;
+}
+@keyframes bater {
+  0%, 100% { box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(248, 113, 113, 0.28), 0 12px 34px rgba(0, 0, 0, 0.5); }
+}
+
+.alerta-linha {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.alerta-linha strong { font-size: 19px; }
+.alerta-linha span { font-variant-numeric: tabular-nums; }
+
+.alerta-rota {
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  color: #bbf7d0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.alerta-rota kbd { font-size: 12px; color: var(--texto); }
+
+.alerta-seta {
+  display: inline-block;
+  color: #4ade80;
+  font-size: 22px;
+  transform-origin: 50% 50%;
+  transition: transform 0.12s linear;
+}
+
+/* Bloco de dicas em tom de aviso, no tutorial */
+.dicas.alerta {
+  border-left-color: #f87171;
+  background: rgba(248, 113, 113, 0.09);
+}
+
+/* Aviso mostrado ao ser alcançado / ao chegar no abrigo */
+.aviso-fuga {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  max-width: 520px;
+  padding: 18px 28px;
+  border-radius: 16px;
+  background: rgba(8, 15, 30, 0.92);
+  border: 2px solid var(--borda);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  animation: entrarAlerta 0.25s ease;
+}
+.aviso-fuga[hidden] { display: none; }
+.aviso-fuga.ok { border-color: rgba(74, 222, 128, 0.7); color: #bbf7d0; }
+.aviso-fuga.ruim { border-color: rgba(248, 113, 113, 0.7); color: #fecaca; }
+
+/* Aviso dentro do painel de quiz, ao retomar a pergunta depois da fuga */
+.retomada {
+  margin: 0 0 14px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--ok);
+  border-radius: 0 10px 10px 0;
+  background: rgba(74, 222, 128, 0.1);
+  color: #bbf7d0;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+.retomada[hidden] { display: none; }
+
+.botao:disabled { opacity: 0.55; cursor: default; transform: none; }
+.botao:disabled:hover { background: rgba(255, 255, 255, 0.08); transform: none; }

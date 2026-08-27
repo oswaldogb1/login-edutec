@@ -526,3 +526,235 @@ export function buildDadosAbertos() {
   };
   return g;
 }
+
+/* =========================================================================
+ * FUGA DO ANIMAL — perseguidores e abrigos
+ * ======================================================================= */
+
+/**
+ * Cachorro bravo low-poly. A origem fica no chão (y = 0) e o focinho aponta
+ * para +Z, para o grupo poder ser girado com lookAt/atan2.
+ */
+export function buildCachorro() {
+  const g = new THREE.Group();
+  const pelo = 0x8a5a2b;
+  const peloEscuro = 0x6b431f;
+
+  g.add(box(0.7, 0.62, 1.5, pelo, 0, 0.85, 0));            // tronco
+  g.add(box(0.72, 0.3, 0.9, peloEscuro, 0, 1.05, -0.1));   // dorso mais escuro
+
+  // cabeca
+  const cabeca = new THREE.Group();
+  cabeca.add(box(0.55, 0.5, 0.5, pelo, 0, 0, 0));
+  cabeca.add(box(0.3, 0.26, 0.4, peloEscuro, 0, -0.09, 0.4));   // focinho
+  cabeca.add(sph(0.07, 0x111111, 0, -0.06, 0.6));              // nariz
+  cabeca.add(sph(0.06, 0xfff2c4, -0.16, 0.1, 0.26, {           // olhos "bravos"
+    emissive: 0xffd166, emissiveIntensity: 0.7
+  }));
+  cabeca.add(sph(0.06, 0xfff2c4, 0.16, 0.1, 0.26, {
+    emissive: 0xffd166, emissiveIntensity: 0.7
+  }));
+  cabeca.add(box(0.16, 0.3, 0.1, peloEscuro, -0.24, 0.3, -0.05)); // orelhas
+  cabeca.add(box(0.16, 0.3, 0.1, peloEscuro, 0.24, 0.3, -0.05));
+  cabeca.position.set(0, 1.15, 0.85);
+  g.add(cabeca);
+
+  // patas (guardadas para animar a corrida)
+  const patas = [];
+  [[-0.26, 0.5], [0.26, 0.5], [-0.26, -0.5], [0.26, -0.5]].forEach(([x, z]) => {
+    const p = box(0.2, 0.85, 0.22, peloEscuro, x, 0.42, z);
+    patas.push(p);
+    g.add(p);
+  });
+
+  const rabo = box(0.14, 0.14, 0.6, pelo, 0, 1.1, -0.85);
+  rabo.rotation.x = -0.6;
+  g.add(rabo);
+
+  g.userData.animar = (t) => {
+    // trote: patas cruzadas em oposicao de fase
+    patas.forEach((p, i) => {
+      const fase = i === 0 || i === 3 ? 0 : Math.PI;
+      p.rotation.x = Math.sin(t * 11 + fase) * 0.7;
+    });
+    rabo.rotation.y = Math.sin(t * 9) * 0.5;
+    g.position.y = Math.abs(Math.sin(t * 11)) * 0.09;
+  };
+  return g;
+}
+
+/** Enxame de abelhas: um punhado de corpinhos orbitando um centro. */
+export function buildEnxameAbelhas() {
+  const g = new THREE.Group();
+  const nucleo = new THREE.Group();
+  nucleo.position.y = 1.5;
+  g.add(nucleo);
+
+  // nuvem escura no meio: faz o enxame ser lido como UM bicho, nao como
+  // varias caixinhas soltas no ar
+  const nuvem = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.85, 0),
+    new THREE.MeshBasicMaterial({ color: 0x3f3a1a, transparent: true, opacity: 0.4 })
+  );
+  nucleo.add(nuvem);
+
+  const abelhas = [];
+  for (let i = 0; i < 20; i++) {
+    const a = new THREE.Group();
+    a.add(box(0.13, 0.11, 0.2, 0xf7c948, 0, 0, 0, {
+      emissive: 0xb08800, emissiveIntensity: 0.35
+    }));
+    a.add(box(0.14, 0.12, 0.06, 0x1a1a1a, 0, 0, 0.02));
+    a.add(box(0.26, 0.02, 0.14, 0xffffff, 0, 0.08, -0.02, {
+      transparent: true, opacity: 0.65
+    }));
+    a.userData.raio = 0.35 + Math.random() * 0.8;
+    a.userData.fase = Math.random() * Math.PI * 2;
+    a.userData.altura = (Math.random() - 0.5) * 0.85;
+    a.userData.giro = 2.0 + Math.random() * 2.0;
+    abelhas.push(a);
+    nucleo.add(a);
+  }
+
+  g.userData.animar = (t) => {
+    abelhas.forEach((a) => {
+      const ang = t * a.userData.giro + a.userData.fase;
+      a.position.set(
+        Math.cos(ang) * a.userData.raio,
+        a.userData.altura + Math.sin(t * 3 + a.userData.fase) * 0.25,
+        Math.sin(ang) * a.userData.raio
+      );
+      a.rotation.y = -ang;
+    });
+    nucleo.position.y = 1.5 + Math.sin(t * 2.2) * 0.25;
+    nuvem.scale.setScalar(1 + Math.sin(t * 3.5) * 0.09);
+  };
+  return g;
+}
+
+/** Ganso furioso: bicho pequeno, rapido e absurdamente irritado. */
+export function buildGanso() {
+  const g = new THREE.Group();
+  const branco = 0xf3f4f6;
+
+  g.add(box(0.6, 0.65, 1.1, branco, 0, 0.95, 0));           // corpo
+  g.add(box(0.62, 0.25, 0.5, 0xe5e7eb, 0, 1.0, -0.4));      // cauda
+
+  const pescoco = box(0.26, 0.9, 0.26, branco, 0, 1.6, 0.35);
+  pescoco.rotation.x = 0.35;
+  g.add(pescoco);
+
+  const cabeca = new THREE.Group();
+  cabeca.add(box(0.32, 0.32, 0.4, branco, 0, 0, 0));
+  cabeca.add(box(0.16, 0.14, 0.42, 0xf59e0b, 0, -0.03, 0.36)); // bico
+  cabeca.add(sph(0.06, 0x111111, -0.13, 0.08, 0.1));
+  cabeca.add(sph(0.06, 0x111111, 0.13, 0.08, 0.1));
+  cabeca.position.set(0, 2.15, 0.65);
+  g.add(cabeca);
+
+  const asas = [
+    box(0.12, 0.42, 0.8, 0xe5e7eb, -0.34, 1.05, 0),
+    box(0.12, 0.42, 0.8, 0xe5e7eb, 0.34, 1.05, 0)
+  ];
+  asas.forEach((a) => g.add(a));
+
+  const pernas = [
+    box(0.12, 0.6, 0.14, 0xf59e0b, -0.16, 0.3, 0),
+    box(0.12, 0.6, 0.14, 0xf59e0b, 0.16, 0.3, 0)
+  ];
+  pernas.forEach((p) => g.add(p));
+
+  g.userData.animar = (t) => {
+    pernas.forEach((p, i) => { p.rotation.x = Math.sin(t * 13 + i * Math.PI) * 0.8; });
+    asas[0].rotation.z = -0.4 - Math.abs(Math.sin(t * 8)) * 0.6;
+    asas[1].rotation.z = 0.4 + Math.abs(Math.sin(t * 8)) * 0.6;
+    cabeca.position.z = 0.65 + Math.sin(t * 6) * 0.08;
+    g.position.y = Math.abs(Math.sin(t * 13)) * 0.07;
+  };
+  return g;
+}
+
+/**
+ * Catalogo de perseguidores. A cada erro é sorteado um deles.
+ * `escala` ajusta o tamanho e `altura` diz a que altura fica o balão do nome.
+ */
+export const ANIMAIS = [
+  { id: 'cachorro', nome: 'Cachorro bravo', icone: '🐕', build: buildCachorro, altura: 2.4, cor: '#f87171' },
+  { id: 'abelhas', nome: 'Enxame de abelhas', icone: '🐝', build: buildEnxameAbelhas, altura: 3.2, cor: '#facc15' },
+  { id: 'ganso', nome: 'Ganso furioso', icone: '🦢', build: buildGanso, altura: 3.0, cor: '#fb923c' }
+];
+
+/**
+ * Abrigo da Área Segura: plataforma, telhado verde, escudo e um facho de luz
+ * bem alto, para o jogador conseguir localizar o abrigo de longe enquanto foge.
+ */
+export function buildAreaSegura() {
+  const g = new THREE.Group();
+
+  // plataforma octogonal
+  const base = cyl(6.2, 6.6, 0.45, 8, 0xd6d3d1, 0, 0.22, 0);
+  g.add(base);
+  g.add(cyl(5.4, 5.4, 0.12, 8, 0x22c55e, 0, 0.5, 0, {
+    emissive: 0x16a34a, emissiveIntensity: 0.45
+  }));
+
+  // pilares + telhado
+  for (let i = 0; i < 4; i++) {
+    const ang = (i / 4) * Math.PI * 2 + Math.PI / 4;
+    g.add(cyl(0.22, 0.26, 3.6, 6, 0xf1f5f9, Math.cos(ang) * 4.2, 2.25, Math.sin(ang) * 4.2));
+  }
+  g.add(cyl(0.4, 6.4, 1.6, 8, 0x15803d, 0, 4.85, 0));      // telhado piramidal
+  g.add(cyl(6.6, 6.6, 0.22, 8, 0x166534, 0, 4.1, 0));      // beiral
+
+  // escudo no topo
+  const escudo = box(1.5, 1.7, 0.22, 0x22c55e, 0, 6.1, 0, {
+    emissive: 0x22c55e, emissiveIntensity: 0.7
+  });
+  g.add(escudo);
+  g.add(box(0.9, 0.22, 0.06, 0xffffff, 0, 6.2, 0.15));
+  g.add(box(0.22, 0.9, 0.06, 0xffffff, 0, 6.2, 0.15));
+
+  // facho de luz visivel de longe
+  const facho = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.2, 4.5, 42, 12, 1, true),
+    new THREE.MeshBasicMaterial({
+      color: 0x22c55e,
+      transparent: true,
+      opacity: 0.13,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    })
+  );
+  facho.position.y = 21;
+  g.add(facho);
+
+  // anel pulsante no chao marcando o raio seguro
+  const anel = new THREE.Mesh(
+    new THREE.RingGeometry(6.2, 7, 40),
+    new THREE.MeshBasicMaterial({
+      color: 0x22c55e, transparent: true, opacity: 0.85, side: THREE.DoubleSide
+    })
+  );
+  anel.rotation.x = -Math.PI / 2;
+  anel.position.y = 0.08;
+  g.add(anel);
+
+  // bancos, para o abrigo parecer um ponto de encontro de verdade
+  [0, Math.PI].forEach((ang) => {
+    const b = new THREE.Group();
+    b.add(box(2.6, 0.16, 0.6, 0x8d6e63, 0, 0.75, 0));
+    b.add(box(0.16, 0.6, 0.5, 0x475569, -1.1, 0.45, 0));
+    b.add(box(0.16, 0.6, 0.5, 0x475569, 1.1, 0.45, 0));
+    b.position.set(Math.cos(ang) * 3, 0.45, Math.sin(ang) * 3);
+    b.rotation.y = -ang;
+    g.add(b);
+  });
+
+  g.userData.animar = (t) => {
+    anel.scale.setScalar(1 + Math.sin(t * 2.4) * 0.05);
+    anel.material.opacity = 0.6 + Math.sin(t * 2.4) * 0.25;
+    escudo.material.emissiveIntensity = 0.5 + Math.sin(t * 2) * 0.3;
+    facho.material.opacity = 0.1 + Math.sin(t * 1.5) * 0.04;
+  };
+  return g;
+}

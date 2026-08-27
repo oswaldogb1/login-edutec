@@ -15,7 +15,8 @@ import { criarMundo } from './world.js';
 import { Jogador } from './player.js';
 import { HUD } from './hud.js';
 import { TOTAL_PONTOS } from './zones.js';
-import { REGRAS } from './config.js';
+import { REGRAS, PERSEGUICAO } from './config.js';
+import { Perseguicao } from './perseguicao.js';
 import { salvarResultado, salvarBackupLocal } from './firebase.js';
 
 /* =========================================================================
@@ -46,7 +47,14 @@ const estado = {
   finalizado: false,
   pontoAberto: null,
   tentativas: 0,
-  respondido: false
+  respondido: false,
+
+  /** Alternativas ja marcadas como erradas nesta pergunta. */
+  erradas: new Set(),
+  /** Fuga em andamento? */
+  emFuga: false,
+  /** Pergunta que sera reaberta quando a fuga acabar. */
+  pontoPendente: null
 };
 
 /* =========================================================================
@@ -71,6 +79,8 @@ function bip(frequencia, duracao = 0.12, tipo = 'sine', volume = 0.06) {
 }
 const somAcerto = () => { bip(660, 0.1); setTimeout(() => bip(880, 0.16), 90); };
 const somErro = () => bip(180, 0.2, 'square', 0.05);
+const somPerseguicao = () => { bip(150, 0.28, 'sawtooth', 0.07); setTimeout(() => bip(120, 0.32, 'sawtooth', 0.07), 200); };
+const somSalvo = () => { bip(520, 0.1); setTimeout(() => bip(780, 0.1), 90); setTimeout(() => bip(1040, 0.25), 180); };
 const somDescoberta = () => { bip(520, 0.09); setTimeout(() => bip(700, 0.09), 80); setTimeout(() => bip(950, 0.2), 170); };
 
 /* =========================================================================
@@ -94,6 +104,9 @@ scene.add(jogador.objeto);
 jogador.posicionar(8, 42, { x: 0, z: 0 }); // chega pela avenida sul, de frente para a praça central
 
 const hud = new HUD();
+
+// mecânica de fuga: um animal persegue o jogador a cada resposta errada
+const perseguicao = new Perseguicao(scene, mundo.colisores, mundo.areasSeguras);
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -186,11 +199,23 @@ $('btn-finalizar').addEventListener('click', () => finalizar('Você encerrou a e
 const prompt = $('prompt-interacao');
 let pontoProximo = null;
 
-function abrirPainel(ponto) {
+/**
+ * Abre o painel de um ponto de interação.
+ * @param {object} ponto
+ * @param {?string} mensagemRetomada  texto mostrado quando o painel reabre
+ *        depois de uma fuga — nesse caso as tentativas anteriores são mantidas.
+ */
+function abrirPainel(ponto, mensagemRetomada = null) {
   const d = ponto.dados;
   estado.pontoAberto = ponto;
-  estado.tentativas = 0;
   estado.respondido = false;
+  if (!mensagemRetomada) {
+    estado.tentativas = 0;
+    estado.erradas.clear();
+  }
+
+  $('painel-retomada').hidden = !mensagemRetomada;
+  if (mensagemRetomada) $('painel-retomada').textContent = mensagemRetomada;
 
   $('painel-zona').textContent = `Zona ${d.zonaNumero} — ${d.zonaNome}`;
   $('painel-zona').style.background = d.corCss;
@@ -201,11 +226,12 @@ function abrirPainel(ponto) {
   $('quiz-enunciado').textContent = d.pergunta.enunciado;
   $('quiz-feedback').textContent = '';
   $('quiz-feedback').className = 'quiz-feedback';
-  $('painel-valor').textContent = `Vale ${REGRAS.pontosAcertoPrimeira} pontos`;
+  $('painel-valor').textContent = `Vale ${valorAtual()} pontos`;
   $('btn-fechar-painel').textContent = 'Responder depois';
   $('btn-fechar-painel').classList.remove('destaque');
+  $('btn-fechar-painel').disabled = false;
 
-  // monta as alternativas
+  // monta as alternativas (as já erradas voltam marcadas e desativadas)
   const caixa = $('quiz-opcoes');
   caixa.innerHTML = '';
   d.pergunta.opcoes.forEach((texto, indice) => {
@@ -213,7 +239,12 @@ function abrirPainel(ponto) {
     btn.type = 'button';
     btn.className = 'opcao';
     btn.innerHTML = `<span class="letra">${'ABCD'[indice]}</span><span>${texto}</span>`;
-    btn.addEventListener('click', () => responder(ponto, indice, btn));
+    if (estado.erradas.has(indice)) {
+      btn.classList.add('errada');
+      btn.disabled = true;
+    } else {
+      btn.addEventListener('click', () => responder(ponto, indice, btn));
+    }
     caixa.appendChild(btn);
   });
 
@@ -269,18 +300,119 @@ function responder(ponto, indice, botao) {
     return;
   }
 
-  // errou: pode tentar de novo, perdendo um pouco de pontuação
+  // errou: perde um pouco do valor da pergunta e um animal vem atrás do jogador
   estado.tentativas++;
+  estado.erradas.add(indice);
   somErro();
   botao.classList.add('errada');
   botao.disabled = true;
 
   const proximoValor = valorAtual();
-  feedback.className = 'quiz-feedback erro';
-  feedback.textContent =
-    `❌ Não é essa. Leia de novo a explicação e tente outra alternativa ` +
-    `(agora vale ${proximoValor} pontos).`;
   $('painel-valor').textContent = `Vale ${proximoValor} pontos`;
+  feedback.className = 'quiz-feedback erro';
+
+  if (!PERSEGUICAO.ativa) {
+    feedback.textContent =
+      `❌ Não é essa. Leia de novo a explicação e tente outra alternativa ` +
+      `(agora vale ${proximoValor} pontos).`;
+    return;
+  }
+
+  // trava o painel enquanto o aviso aparece: nem responder de novo, nem fechar
+  // para escapar da fuga — errou, corre.
+  estado.respondido = true;
+  [...$('quiz-opcoes').children].forEach((b) => { b.disabled = true; });
+  $('btn-fechar-painel').disabled = true;
+  $('btn-fechar-painel').textContent = 'Prepare-se para correr…';
+
+  feedback.textContent =
+    `❌ Não é essa! Um animal apareceu e vem na sua direção. ` +
+    `Corra até uma Área Segura para tentar de novo (a pergunta passa a valer ${proximoValor} pontos).`;
+
+  setTimeout(() => iniciarFuga(ponto), PERSEGUICAO.tempoAvisoMs);
+}
+
+/* =========================================================================
+ * Fuga do animal
+ * ======================================================================= */
+
+/** Fecha o painel e solta o animal atrás do jogador. */
+function iniciarFuga(ponto) {
+  if (estado.finalizado || estado.emFuga) return;
+
+  telas.painel.hidden = true;
+  estado.pontoPendente = ponto;
+  estado.emFuga = true;
+  estado.respondido = false;
+
+  camera.getWorldDirection(direcao);
+  const animal = perseguicao.iniciar(jogador.posicao, { x: direcao.x, z: direcao.z });
+
+  hud.definirFuga(animal, perseguicao.abrigoBloqueado);
+  mostrarAvisoFuga(
+    perseguicao.abrigoBloqueado
+      ? `${animal.icone} ${animal.nome} invadiu o abrigo! Este já foi usado — corra (Shift) até OUTRA 🛡️ Área Segura.`
+      : `${animal.icone} ${animal.nome} está atrás de você! Corra (Shift) até uma 🛡️ Área Segura.`,
+    'ruim', 2800
+  );
+  somPerseguicao();
+
+  jogador.ativo = true;
+  travarMouse();
+}
+
+/**
+ * Encerra a fuga e devolve o jogador à pergunta.
+ * @param {'salvo'|'capturado'} desfecho
+ */
+function terminarFuga(desfecho) {
+  if (!estado.emFuga) return;
+  estado.emFuga = false;
+  perseguicao.encerrar();
+  hud.definirFuga(null);
+
+  const ponto = estado.pontoPendente;
+  estado.pontoPendente = null;
+  let mensagem;
+
+  if (desfecho === 'salvo') {
+    somSalvo();
+    mensagem = '🛡️ Você chegou à Área Segura! Agora respire e tente a pergunta de novo.';
+    mostrarAvisoFuga('🛡️ Em segurança!', 'ok', 1400);
+  } else {
+    const perda = Math.min(PERSEGUICAO.penalidadeCaptura, estado.pontuacao);
+    estado.pontuacao -= perda;
+    hud.atualizarPontuacao(estado.pontuacao, estado.descobertos, TOTAL_PONTOS);
+
+    // o jogador "acorda" no abrigo mais perto
+    const abrigo = perseguicao.areaMaisProxima(jogador.posicao);
+    if (abrigo) jogador.posicionar(abrigo.x, abrigo.z + 3, abrigo);
+
+    somErro();
+    mensagem = perda > 0
+      ? `😱 O animal te alcançou! Foi só um susto, mas custou ${perda} pontos. Você foi levado até a Área Segura.`
+      : '😱 O animal te alcançou! Foi só um susto — você foi levado até a Área Segura.';
+    mostrarAvisoFuga('😱 Te pegou!', 'ruim', 1600);
+  }
+
+  if (!ponto || estado.finalizado) return;
+
+  // reabre a pergunta preservando as tentativas já feitas
+  setTimeout(() => {
+    if (estado.finalizado) return;
+    abrirPainel(ponto, mensagem);
+  }, 900);
+}
+
+/** Mensagem grande no centro da tela, some sozinha. */
+let timerAvisoFuga = null;
+function mostrarAvisoFuga(texto, tipo, duracaoMs) {
+  const el = $('aviso-fuga');
+  el.textContent = texto;
+  el.className = `aviso-fuga ${tipo}`;
+  el.hidden = false;
+  clearTimeout(timerAvisoFuga);
+  timerAvisoFuga = setTimeout(() => { el.hidden = true; }, duracaoMs);
 }
 
 $('btn-fechar-painel').addEventListener('click', () => {
@@ -294,6 +426,13 @@ $('btn-fechar-painel').addEventListener('click', () => {
  * ======================================================================= */
 function verificarProximidade() {
   if (!estado.rodando || !telas.painel.hidden) return;
+
+  // fugindo de um animal nao da para parar e ler um painel
+  if (estado.emFuga) {
+    pontoProximo = null;
+    prompt.hidden = true;
+    return;
+  }
 
   const pos = jogador.posicao;
   let maisProximo = null;
@@ -318,7 +457,8 @@ function verificarProximidade() {
 }
 
 document.addEventListener('keydown', (e) => {
-  if (e.code === 'KeyE' && pontoProximo && estado.rodando && telas.painel.hidden) {
+  if (e.code === 'KeyE' && pontoProximo && estado.rodando &&
+      telas.painel.hidden && !estado.emFuga) {
     abrirPainel(pontoProximo);
   }
 });
@@ -331,7 +471,7 @@ renderer.domElement.addEventListener('mousedown', () => {
     travarMouse();
     return;
   }
-  if (pontoProximo) abrirPainel(pontoProximo);
+  if (pontoProximo && !estado.emFuga) abrirPainel(pontoProximo);
 });
 
 /* =========================================================================
@@ -343,6 +483,15 @@ async function finalizar(mensagem) {
   estado.rodando = false;
   jogador.ativo = false;
   jogador.soltarTeclas();
+
+  // uma fuga em andamento é cancelada junto com a partida
+  if (estado.emFuga) {
+    estado.emFuga = false;
+    estado.pontoPendente = null;
+    perseguicao.encerrar();
+    hud.definirFuga(null);
+  }
+  $('aviso-fuga').hidden = true;
   if (jogador.controls.isLocked) jogador.controls.unlock();
 
   const duracao = (performance.now() - estado.iniciadoEm) / 1000;
@@ -409,17 +558,32 @@ const relogio = new THREE.Clock();
 const direcao = new THREE.Vector3();
 let acumuladorMapa = 0;
 
-function animar() {
-  requestAnimationFrame(animar);
-
-  const dt = Math.min(relogio.getDelta(), 0.1);
-  const t = relogio.elapsedTime;
-
+/**
+ * Um passo da simulacao. Fica separado do laco de renderizacao para poder ser
+ * chamado manualmente (ver `jogo.simular()` no modo debug).
+ */
+function passo(dt, t) {
   mundo.animar(t);
   jogador.update(dt);
 
   if (estado.rodando) {
     verificarProximidade();
+
+    // fuga do animal (congela junto com o jogador quando o jogo está pausado)
+    if (estado.emFuga && jogador.ativo) {
+      const desfecho = perseguicao.update(dt, jogador.posicao);
+
+      camera.getWorldDirection(direcao);
+      hud.atualizarFuga(
+        jogador.posicao,
+        { x: direcao.x, z: direcao.z },
+        perseguicao.posicao,
+        perseguicao.distanciaDoJogador(jogador.posicao),
+        perseguicao.areaMaisProxima(jogador.posicao)
+      );
+
+      if (desfecho !== 'nada') terminarFuga(desfecho);
+    }
 
     // tempo limite (se configurado)
     if (REGRAS.tempoLimiteSegundos > 0) {
@@ -438,7 +602,11 @@ function animar() {
       hud.atualizarMapa(jogador.posicao, { x: direcao.x, z: direcao.z }, mundo.pontos);
     }
   }
+}
 
+function animar() {
+  requestAnimationFrame(animar);
+  passo(Math.min(relogio.getDelta(), 0.1), relogio.elapsedTime);
   renderer.render(scene, camera);
 }
 
@@ -470,6 +638,13 @@ if (new URLSearchParams(location.search).has('debug')) {
     jogador,
     mundo,
     finalizar,
+    perseguicao,
+    /** Roda a simulacao manualmente, util quando a aba esta em segundo plano. */
+    simular(segundos = 1, dt = 1 / 60) {
+      const quadros = Math.round(segundos / dt);
+      for (let i = 0; i < quadros; i++) passo(dt, performance.now() / 1000);
+      return { pos: { ...jogador.posicao }, emFuga: estado.emFuga };
+    },
     irPara(idDoPonto) {
       const p = mundo.pontos.find((x) => x.dados.id === idDoPonto);
       if (!p) return `Ponto "${idDoPonto}" não encontrado.`;

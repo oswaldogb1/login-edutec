@@ -33,7 +33,7 @@ Pages sem backend próprio.
 |---|---|
 | `W` `A` `S` `D` (ou setas) | Andar |
 | Mouse | Olhar em volta |
-| `Shift` | Correr |
+| `Shift` | Correr — essencial para escapar dos animais |
 | `E` (ou clique) | Interagir com o ponto brilhante mais próximo |
 | `Esc` | Pausar / liberar o mouse |
 
@@ -58,11 +58,41 @@ da cidade, ligadas por avenidas.
 - Errar **não bloqueia**: o aluno tenta de novo até acertar — o objetivo é aprender
 - Descobrir os **12 pontos** rende um bônus de **200 pontos**
 
+### 🐕 Fuga do animal (consequência de errar)
+
+Errar não custa só pontos: **a cada resposta errada um animal aparece e sai atrás do
+aluno**. Ele precisa segurar `Shift` e correr até uma das quatro **Áreas Seguras** —
+abrigos com telhado verde e um facho de luz visível de longe.
+
+| | |
+|---|---|
+| Perseguidores | 🐕 cachorro bravo · 🐝 enxame de abelhas · 🦢 ganso furioso (sorteado a cada erro) |
+| Velocidade do animal | 6,5 m/s — **alcança quem anda** (4,4 m/s), **não alcança quem corre** (8 m/s) |
+| Áreas Seguras | 4 abrigos, nas diagonais entre as zonas; toda zona tem um a ~51 m |
+| Chegou no abrigo | a pergunta reabre para nova tentativa, sem punição extra |
+| Foi alcançado | perde 20 pontos e "acorda" no abrigo mais próximo; a pergunta reabre igual |
+
+Durante a fuga o HUD mostra o animal, a distância dele, uma seta apontando para o abrigo
+e uma vinheta vermelha que fica mais forte conforme o bicho chega perto. Não dá para
+interagir com pontos de descoberta enquanto se foge.
+
+Duas regras existem para a mecânica ser justa:
+
+- **O animal nunca nasce entre o aluno e o abrigo** — ele surge do lado oposto, para
+  ninguém correr direto para dentro do bicho.
+- **O abrigo onde o aluno já está não vale para a fuga seguinte.** Sem isso, errar de novo
+  logo depois de escapar não teria consequência nenhuma: a fuga acabaria no mesmo quadro.
+  O abrigo usado aparece apagado no minimapa e a seta aponta para outro.
+
+A mecânica inteira pode ser desligada em `src/config.js` (`PERSEGUICAO.ativa = false`),
+caso o professor prefira uma aula sem essa pressão.
+
 ### HUD
 
 Nome e turma, pontuação, barra de progresso (`6/12 descobertos`), zona atual,
-**minimapa** com as zonas e os pontos (verde = já descoberto), **bússola** e
-cronômetro (quando há tempo limite configurado).
+**minimapa** com as zonas, os pontos (verde = já descoberto) e as Áreas Seguras (`S`),
+**bússola** e cronômetro (quando há tempo limite configurado). Durante uma fuga entram
+o alerta do animal, a seta para o abrigo e a vinheta de perigo.
 
 ---
 
@@ -107,6 +137,8 @@ Abra o jogo com `?debug=1` (ex.: `index.html?debug=1`) para expor `window.jogo` 
 ```js
 jogo.irPara('parque')   // teleporta até um ponto de interação
 jogo.estado             // pontuação, descobertas etc.
+jogo.perseguicao        // estado da fuga (animal, abrigo bloqueado…)
+jogo.simular(3)         // roda 3 segundos de jogo sem depender do quadro do navegador
 jogo.finalizar('fim')   // encerra e grava no Firebase
 ```
 
@@ -320,9 +352,28 @@ export const REGRAS = {
   bonusExploradorCompleto: 200,
   distanciaInteracao: 5.5
 };
+
+export const JOGADOR = {
+  velocidade: 40,        // andando: ~4,4 m/s
+  velocidadeCorrida: 72  // correndo (Shift): ~8 m/s
+};
+
+export const PERSEGUICAO = {
+  ativa: true,               // false desliga a fuga do animal por completo
+  velocidadeAnimal: 6.5,     // entre o andar e o correr do jogador
+  distanciaSurgimento: 16,   // a que distância o animal aparece
+  raioAreaSegura: 7,
+  penalidadeCaptura: 20,     // 0 = ser alcançado não custa pontos, só o susto
+  tempoAvisoMs: 2200
+};
 ```
 
-Também estão lá a senha do professor, a velocidade do jogador e a URL do Firebase.
+> A velocidade final do jogador é `velocidade / atrito`. Se mudar `atrito`, reveja
+> `velocidadeAnimal`: o animal precisa continuar **mais rápido que o passo e mais lento
+> que a corrida**, senão a fuga fica impossível ou trivial.
+
+As posições dos quatro abrigos (`AREAS_SEGURAS`), a senha do professor e a URL do
+Firebase também ficam nesse arquivo.
 
 ### `src/zones.js` — conteúdo pedagógico
 
@@ -350,6 +401,10 @@ Todos os modelos são feitos com caixas, cilindros e esferas do Three.js, usando
 ajudantes `box()`, `cyl()`, `sph()` e `arvore()`. Nenhum arquivo `.glb`/`.obj` é
 necessário, o que mantém o projeto leve.
 
+Os perseguidores ficam na lista `ANIMAIS` no fim do arquivo. Para acrescentar outro bicho,
+escreva um `build...()` que devolva um grupo com a origem no chão e o focinho apontando
+para `+Z` (o módulo de fuga gira o grupo com `atan2`), e adicione uma entrada à lista.
+
 ---
 
 ## 📁 Estrutura de arquivos
@@ -366,8 +421,9 @@ necessário, o que mantém o projeto leve.
     ├── config.js         # ⚙️ regras, senha, Firebase, velocidade
     ├── zones.js          # 📚 conteúdo: 5 zonas, 12 pontos, explicações e perguntas
     ├── models.js         # 🧱 modelagem 3D low-poly de cada objeto
-    ├── world.js          # 🏙️ cidade: chão, ruas, prédios, zonas, colisores
+    ├── world.js          # 🏙️ cidade: chão, ruas, prédios, zonas, abrigos, colisores
     ├── player.js         # 🚶 câmera em 1ª pessoa, WASD e colisão
+    ├── perseguicao.js    # 🐕 fuga: animal perseguidor e Áreas Seguras
     ├── hud.js            # 🖥️ HUD, minimapa e bússola
     ├── main.js           # 🎮 fluxo do jogo, pontuação, laço de renderização
     ├── firebase.js       # 💾 gravação (SOMENTE push)
@@ -382,10 +438,17 @@ Verificado em Chrome, com servidor local e o banco real:
 
 - [x] Tela inicial valida nome e turma; tutorial e entrada no jogo
 - [x] Cidade 3D carrega com as 5 zonas, ruas, prédios, sombras e nuvens
-- [x] Movimento WASD e colisão contra prédios, placas e limites do mapa (146 colisores)
+- [x] Movimento WASD e colisão contra prédios, placas e limites do mapa
 - [x] Aproximação de um ponto mostra o aviso `E descobrir …`
 - [x] Painel de interação abre com explicação, pergunta e alternativas
-- [x] Resposta errada: alternativa fica vermelha, valor cai (100 → 70) e é possível tentar de novo
+- [x] Resposta errada: alternativa fica vermelha, valor cai (100 → 70) e a fuga começa
+- [x] **Fuga andando** (sem Shift): alcançado em ~6,7 s, −20 pontos, levado ao abrigo
+- [x] **Fuga correndo** (com Shift): escapa em ~4–6 s, sem perder pontos
+- [x] Ao voltar do abrigo a pergunta reabre com as alternativas já erradas marcadas e o valor preservado
+- [x] Abrigo já usado fica bloqueado na fuga seguinte (aparece apagado no minimapa)
+- [x] O animal nasce do lado oposto ao abrigo de destino
+- [x] Durante a fuga não dá para interagir com pontos nem fechar o painel para escapar
+- [x] Os três animais (cachorro, ganso, enxame) aparecem e animam corretamente
 - [x] Resposta certa: soma pontos, revela a curiosidade, trava as alternativas
 - [x] Ponto descoberto fica **verde** no mundo 3D e no minimapa; HUD atualiza (`1/12`)
 - [x] Tela de resultado com pontuação, descobertas, acertos e tempo
@@ -416,6 +479,11 @@ Você abriu o `index.html` direto do disco. Use um servidor local (veja
 O navegador só entrega o mouse ao jogo depois de um clique na página (ou recusa o pedido
 se a janela não estiver em foco). Clique na cena e a mensagem some. O jogo continua
 jogável pelo teclado enquanto isso.
+
+**Não consigo escapar do animal de jeito nenhum**
+Segure `Shift`. Andando, o animal é mais rápido que você — é proposital. Se ainda assim
+estiver difícil na sua turma, baixe `PERSEGUICAO.velocidadeAnimal` em `src/config.js`
+(ou zere `penalidadeCaptura` para o susto não custar pontos).
 
 **O jogo "congela" quando eu troco de aba**
 É o navegador economizando recursos: ele pausa a animação de abas ocultas. Ao voltar
