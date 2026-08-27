@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel do Professor — Ranking da Turma</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body class="professor">
+
+  <!-- ===================== LOGIN ===================== -->
+  <div id="prof-login" class="prof-login">
+    <div class="caixa">
+      <p class="tag">Área do professor</p>
+      <h1>🏆 Ranking da Turma</h1>
+      <p class="subtitulo">
+        Digite a senha para abrir o painel de pontuação em tempo real.
+        Este painel é <strong>somente leitura</strong>: ele nunca altera nem apaga os resultados dos alunos.
+      </p>
+
+      <form id="form-senha" autocomplete="off">
+        <label for="inp-senha">Senha</label>
+        <input id="inp-senha" type="password" inputmode="numeric" placeholder="•••••" required />
+        <p id="erro-senha" class="erro"></p>
+        <button type="submit" class="botao primario grande">Entrar no painel</button>
+      </form>
+
+      <a class="link-professor" href="index.html">← Voltar para o jogo</a>
+    </div>
+  </div>
+
+  <!-- ===================== PAINEL ===================== -->
+  <main id="prof-app" class="prof-app" hidden>
+    <header class="prof-topo">
+      <span class="marca">🌱</span>
+      <div>
+        <h1>Cidade Inteligente — Ranking</h1>
+        <div id="prof-status" class="prof-status">
+          <span class="ponto"></span><span id="prof-status-texto">Conectando ao banco de dados…</span>
+        </div>
+      </div>
+
+      <span class="espaco"></span>
+
+      <div class="prof-controles">
+        <select id="sel-turma" aria-label="Filtrar por turma">
+          <option value="__todas__">Todas as turmas</option>
+        </select>
+        <label class="prof-check">
+          <input type="checkbox" id="chk-tentativas" />
+          <span>Mostrar todas as tentativas</span>
+        </label>
+        <button id="btn-atualizar" class="botao">🔄 Atualizar</button>
+        <button id="btn-telacheia" class="botao">⛶ Tela cheia</button>
+      </div>
+    </header>
+
+    <section class="prof-cartoes">
+      <div class="prof-cartao"><span class="rotulo">Alunos</span><strong id="stat-alunos">0</strong></div>
+      <div class="prof-cartao"><span class="rotulo">Partidas jogadas</span><strong id="stat-partidas">0</strong></div>
+      <div class="prof-cartao"><span class="rotulo">Média de pontos</span><strong id="stat-media">0</strong></div>
+      <div class="prof-cartao"><span class="rotulo">Maior pontuação</span><strong id="stat-maior">0</strong></div>
+    </section>
+
+    <table class="ranking">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Aluno(a)</th>
+          <th>Turma</th>
+          <th>Descobertas</th>
+          <th>Pontos</th>
+        </tr>
+      </thead>
+      <tbody id="ranking-corpo"></tbody>
+    </table>
+
+    <p id="prof-vazio" class="prof-vazio" hidden>
+      Nenhum resultado ainda. Assim que um aluno terminar a exploração, ele aparece aqui automaticamente.
+    </p>
+
+    <footer class="prof-rodape">
+      <span class="selo">🔒 Painel somente leitura — nenhum dado é alterado ou apagado</span>
+      <p>Atualização automática em tempo real · <a class="link-professor" style="display:inline" href="index.html">voltar ao jogo</a></p>
+    </footer>
+  </main>
+
+  <script type="module" src="src/professor.js"></script>
+</body>
+</html>

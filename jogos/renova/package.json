@@ -1,0 +1,14 @@
+{
+  "name": "cidade-inteligente-sustentavel",
+  "version": "1.0.0",
+  "description": "Jogo educacional 3D em primeira pessoa sobre cidades inteligentes e sustentáveis, com ranking de turma em tempo real (Firebase).",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes serve . --listen 5173",
+    "start": "npx --yes serve . --listen 5173",
+    "dev:python": "python -m http.server 5173"
+  },
+  "keywords": ["educacional", "threejs", "sustentabilidade", "cidade-inteligente", "firebase"],
+  "license": "MIT"
+}

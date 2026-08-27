@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cidade Inteligente e Sustentável — Jogo Educacional</title>
+  <meta name="description" content="Explore uma cidade 3D em primeira pessoa e descubra tecnologias e práticas sustentáveis reais." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+
+  <!-- Three.js via CDN (import map): não precisa de build nem de npm install -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- ===================== CENA 3D ===================== -->
+  <div id="cena"></div>
+
+  <!-- ===================== HUD ===================== -->
+  <div id="hud" hidden>
+    <div class="hud-canto hud-esquerda">
+      <div class="hud-card">
+        <div class="hud-jogador">
+          <span class="avatar">🧑‍🎓</span>
+          <div>
+            <strong id="hud-nome">—</strong>
+            <span id="hud-turma" class="turma">—</span>
+          </div>
+        </div>
+        <div class="hud-pontuacao">
+          <span class="rotulo">Pontos</span>
+          <span id="hud-pontos">0</span>
+        </div>
+        <div class="hud-progresso">
+          <div class="barra"><div id="hud-barra-progresso"></div></div>
+          <span id="hud-contador">0/0 descobertos</span>
+        </div>
+      </div>
+      <div id="hud-zona" class="hud-zona">🏙️ Ruas da cidade</div>
+      <div id="hud-tempo" class="hud-tempo" hidden>⏱ 0:00</div>
+    </div>
+
+    <div class="hud-canto hud-direita">
+      <canvas id="minimapa" width="190" height="190"></canvas>
+      <div id="bussola" class="bussola">
+        <div id="bussola-agulha" class="agulha">▲</div>
+        <span id="bussola-valor">N 0°</span>
+      </div>
+    </div>
+
+    <div class="mira"></div>
+    <div id="prompt-interacao" class="prompt" hidden></div>
+    <div id="aviso-mouse" class="aviso-mouse" hidden>
+      🖱️ Clique na tela para o jogo capturar o mouse e você poder olhar em volta.
+    </div>
+  </div>
+
+  <!-- ===================== TELA DE CARREGAMENTO ===================== -->
+  <div id="tela-carregando" class="overlay">
+    <div class="caixa centro">
+      <div class="spinner"></div>
+      <h2>Construindo a cidade…</h2>
+      <p class="sutil">Carregando o ambiente 3D</p>
+    </div>
+  </div>
+
+  <!-- ===================== TELA INICIAL ===================== -->
+  <div id="tela-inicio" class="overlay" hidden>
+    <div class="caixa">
+      <p class="tag">Jogo educacional · 1ª pessoa</p>
+      <h1>🌱 Cidade Inteligente<br />e Sustentável</h1>
+      <p class="subtitulo">
+        Explore uma cidade em 3D e descubra <strong id="total-pontos-inicio">12</strong>
+        tecnologias e práticas que tornam uma cidade mais sustentável.
+        Responda aos desafios e marque pontos para a sua turma.
+      </p>
+
+      <form id="form-inicio" autocomplete="off">
+        <label for="inp-nome">Seu nome</label>
+        <input id="inp-nome" type="text" maxlength="40" placeholder="Ex.: Ana Souza" required />
+
+        <label for="inp-turma">Sua turma</label>
+        <input id="inp-turma" type="text" maxlength="12" placeholder="Ex.: 9ºA" required />
+
+        <p id="erro-inicio" class="erro"></p>
+        <button type="submit" class="botao primario grande">Começar a explorar →</button>
+      </form>
+
+      <div class="zonas-preview">
+        <span style="--c:#ffc93c">⚡ Energia Limpa</span>
+        <span style="--c:#4ade80">♻️ Lixo e Reciclagem</span>
+        <span style="--c:#38bdf8">🚲 Mobilidade</span>
+        <span style="--c:#2dd4bf">💧 Água e Verde</span>
+        <span style="--c:#a78bfa">📱 Tecnologia Social</span>
+      </div>
+
+      <a class="link-professor" href="professor.html">🔒 Sou professor — abrir painel de ranking</a>
+    </div>
+  </div>
+
+  <!-- ===================== TUTORIAL ===================== -->
+  <div id="tela-tutorial" class="overlay" hidden>
+    <div class="caixa">
+      <h2>Como jogar</h2>
+
+      <div class="controles">
+        <div class="controle"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>Andar pela cidade</span></div>
+        <div class="controle"><kbd>Mouse</kbd><span>Olhar em volta</span></div>
+        <div class="controle"><kbd>Shift</kbd><span>Correr</span></div>
+        <div class="controle"><kbd>E</kbd><span>Interagir com um ponto brilhante</span></div>
+        <div class="controle"><kbd>Esc</kbd><span>Pausar o jogo</span></div>
+      </div>
+
+      <div class="dicas">
+        <p>🔦 Procure os <strong>feixes de luz coloridos</strong>: cada um é um ponto de descoberta.</p>
+        <p>🗺️ Use o <strong>minimapa</strong> (canto superior direito) para achar as 5 zonas da cidade.</p>
+        <p>🎯 São <strong id="total-pontos-tutorial">12</strong> pontos no total. Acertar de primeira vale mais pontos —
+           mas errar não é problema: você pode tentar de novo.</p>
+      </div>
+
+      <button id="btn-jogar" class="botao primario grande">Entrar na cidade 🏙️</button>
+      <p class="sutil">Ao clicar, o mouse será capturado pelo jogo. Aperte <kbd>Esc</kbd> para liberar.</p>
+    </div>
+  </div>
+
+  <!-- ===================== PAINEL DE INTERAÇÃO ===================== -->
+  <div id="painel" class="overlay" hidden>
+    <div class="caixa painel-caixa">
+      <span id="painel-zona" class="painel-zona">Zona</span>
+      <h2 id="painel-titulo">Título</h2>
+      <p id="painel-explicacao" class="painel-explicacao"></p>
+      <p id="painel-curiosidade" class="curiosidade" hidden></p>
+
+      <div class="quiz">
+        <h3 id="quiz-enunciado"></h3>
+        <div id="quiz-opcoes" class="quiz-opcoes"></div>
+        <p id="quiz-feedback" class="quiz-feedback"></p>
+      </div>
+
+      <div class="painel-rodape">
+        <span id="painel-valor" class="valor">Vale 100 pontos</span>
+        <button id="btn-fechar-painel" class="botao">Responder depois</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PAUSA ===================== -->
+  <div id="tela-pausa" class="overlay" hidden>
+    <div class="caixa centro">
+      <h2>⏸ Jogo pausado</h2>
+      <p class="sutil">Clique em continuar para voltar a explorar a cidade.</p>
+      <button id="btn-continuar" class="botao primario grande">Continuar explorando</button>
+      <button id="btn-finalizar" class="botao secundario">Finalizar e enviar pontuação</button>
+    </div>
+  </div>
+
+  <!-- ===================== RESULTADO ===================== -->
+  <div id="tela-resultado" class="overlay" hidden>
+    <div class="caixa centro">
+      <h2 id="resultado-mensagem">Exploração concluída!</h2>
+
+      <div class="resultado-pontos">
+        <span id="resultado-pontos">0</span>
+        <small>pontos</small>
+      </div>
+      <p id="resultado-bonus" class="bonus" hidden></p>
+
+      <div class="resultado-grade">
+        <div><span class="rotulo">Aluno(a)</span><strong id="resultado-nome">—</strong></div>
+        <div><span class="rotulo">Turma</span><strong id="resultado-turma">—</strong></div>
+        <div><span class="rotulo">Pontos descobertos</span><strong id="resultado-descobertos">—</strong></div>
+        <div><span class="rotulo">Acertos de primeira</span><strong id="resultado-acertos">—</strong></div>
+        <div><span class="rotulo">Tempo de exploração</span><strong id="resultado-tempo">—</strong></div>
+      </div>
+
+      <p id="resultado-status" class="status"></p>
+
+      <button id="btn-reiniciar" class="botao primario">Jogar novamente</button>
+      <a class="link-professor" href="professor.html">Ver ranking da turma (professor)</a>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
