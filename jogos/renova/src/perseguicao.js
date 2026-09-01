@@ -2,16 +2,26 @@
  * perseguicao.js
  * -----------------------------------------------------------------------------
  * Mecânica de fuga: a cada resposta errada um animal aparece atrás do jogador
- * e o persegue. O jogador precisa CORRER (Shift) até uma das Áreas Seguras
- * espalhadas pela cidade. Chegando lá, a pergunta reabre para nova tentativa.
+ * e o persegue. O jogador tem TRÊS saídas — e é isso que dá fôlego à fuga:
+ *
+ *   1. correr (Shift) até uma Área Segura;
+ *   2. revidar a pauladas até o bicho desistir (`levarPancada`);
+ *   3. aguentar as mordidas — cada uma tira vida, mas não encerra a fuga.
+ *
+ * Ser alcançado NÃO termina mais a perseguição: o animal morde, recua um
+ * pouco e volta à carga. Quem decide o que fazer com o dano é o `main.js`.
  *
  * O animal é mais rápido que o passo normal e mais lento que a corrida —
  * ou seja, dá para escapar, mas só correndo.
+ *
+ * Todos os prazos são contados em `tempoDecorrido`, que anda com o `dt`
+ * recebido, e não no relógio do navegador: assim `jogo.simular()` reproduz
+ * atordoamentos e mordidas exatamente como o laço de renderização.
  * -----------------------------------------------------------------------------
  */
 import * as THREE from 'three';
 import { ANIMAIS } from './models.js';
-import { PERSEGUICAO, LIMITE_MUNDO } from './config.js';
+import { PERSEGUICAO, PORRETE, LIMITE_MUNDO } from './config.js';
 
 export class Perseguicao {
   /**
@@ -28,6 +38,15 @@ export class Perseguicao {
     this.animal = null;          // dados do catálogo (nome, ícone, cor…)
     this.grupo = null;           // THREE.Group do animal em cena
     this.tempoDecorrido = 0;
+
+    /** Quantas pauladas o animal já levou nesta fuga. */
+    this.golpes = 0;
+    /** Até quando (em tempoDecorrido) o animal fica parado depois de apanhar. */
+    this.atordoadoAte = 0;
+    /** Antes disso o animal não morde de novo: é o recuo pós-mordida. */
+    this.proximaMordidaEm = 0;
+    /** Quantas vezes ele já mordeu nesta fuga (só para o resumo final). */
+    this.mordidas = 0;
 
     /**
      * Abrigo que NAO vale nesta fuga.
@@ -64,6 +83,7 @@ export class Perseguicao {
     }
     this.grupo = this._modelos.get(this.animal.id);
     this.grupo.visible = true;
+    this.grupo.rotation.z = 0;
 
     // o abrigo onde o jogador ja esta nao vale para esta fuga
     this.abrigoBloqueado = this.areasSeguras.find(
@@ -77,15 +97,32 @@ export class Perseguicao {
 
     this.ativa = true;
     this.tempoDecorrido = 0;
+    this.golpes = 0;
+    this.mordidas = 0;
+    this.atordoadoAte = 0;
+    this.proximaMordidaEm = 0;
     return this.animal;
   }
 
   encerrar() {
-    if (this.grupo) this.grupo.visible = false;
+    if (this.grupo) {
+      this.grupo.visible = false;
+      this.grupo.rotation.z = 0;
+    }
     this.ativa = false;
     this.grupo = null;
     this.animal = null;
     this.abrigoBloqueado = null;
+  }
+
+  /** O animal está tonto de tanto apanhar (parado, sem morder)? */
+  get atordoado() {
+    return this.ativa && this.tempoDecorrido < this.atordoadoAte;
+  }
+
+  /** Segundos que ainda faltam para o animal se recuperar da paulada. */
+  get segundosDeAtordoamento() {
+    return Math.max(0, this.atordoadoAte - this.tempoDecorrido);
   }
 
   /* ---------------------------------------------------------------------
@@ -95,7 +132,7 @@ export class Perseguicao {
   /**
    * @param {number} dt segundos desde o último quadro
    * @param {THREE.Vector3} posJogador
-   * @returns {'nada'|'salvo'|'capturado'}
+   * @returns {'nada'|'salvo'|'mordida'}
    */
   update(dt, posJogador) {
     if (!this.ativa || !this.grupo) return 'nada';
@@ -106,15 +143,32 @@ export class Perseguicao {
     const abrigo = this.areaMaisProxima(posJogador);
     if (abrigo && abrigo.distancia <= PERSEGUICAO.raioAreaSegura) return 'salvo';
 
-    // persegue o jogador
     const pos = this.grupo.position;
     let dx = posJogador.x - pos.x;
     let dz = posJogador.z - pos.z;
     const dist = Math.hypot(dx, dz);
 
-    if (dist <= PERSEGUICAO.distanciaCaptura) return 'capturado';
+    // atordoado: fica no lugar cambaleando e não morde ninguém
+    if (this.atordoado) {
+      this.grupo.rotation.y += dt * 5.5;
+      this.grupo.rotation.z = Math.sin(this.tempoDecorrido * 12) * 0.22;
+      return 'nada';
+    }
+    this.grupo.rotation.z *= Math.max(0, 1 - dt * 6);
 
-    if (dist > 0.001) {
+    // alcançou o jogador: morde, recua e volta à carga (a fuga continua)
+    if (dist <= PERSEGUICAO.distanciaCaptura &&
+        this.tempoDecorrido >= this.proximaMordidaEm) {
+      this.mordidas++;
+      this.proximaMordidaEm = this.tempoDecorrido + PERSEGUICAO.recuoAposMordidaMs / 1000;
+      this._afastar(posJogador, PERSEGUICAO.empurraoMordida);
+      return 'mordida';
+    }
+
+    // durante o recuo o animal se mantém a alguma distância antes de atacar de novo
+    const recuando = this.tempoDecorrido < this.proximaMordidaEm;
+
+    if (dist > 0.001 && !(recuando && dist < PERSEGUICAO.distanciaCaptura * 1.6)) {
       dx /= dist;
       dz /= dist;
       const passo = PERSEGUICAO.velocidadeAnimal * dt;
@@ -134,6 +188,51 @@ export class Perseguicao {
     if (this.grupo.userData.animar) this.grupo.userData.animar(this.tempoDecorrido);
 
     return 'nada';
+  }
+
+  /* ---------------------------------------------------------------------
+   * Revide do jogador
+   * ------------------------------------------------------------------- */
+
+  /**
+   * O jogador acertou uma paulada. O animal é empurrado e fica atordoado
+   * por alguns segundos — é a janela para escapar.
+   *
+   * @param {THREE.Vector3} posJogador
+   * @returns {{golpes:number, espantou:boolean}}
+   */
+  levarPancada(posJogador) {
+    if (!this.ativa || !this.grupo) return { golpes: 0, espantou: false };
+
+    this.golpes++;
+    this._afastar(posJogador, PORRETE.empurrao);
+    this.atordoadoAte = this.tempoDecorrido + PORRETE.atordoamentoMs / 1000;
+    // apanhou: perde a vontade de morder de imediato
+    this.proximaMordidaEm = Math.max(this.proximaMordidaEm, this.atordoadoAte);
+
+    return {
+      golpes: this.golpes,
+      espantou: this.golpes >= PERSEGUICAO.golpesParaEspantar
+    };
+  }
+
+  /**
+   * O animal está no alcance do porrete e à frente do jogador?
+   * @param {THREE.Vector3} posJogador
+   * @param {{x:number,z:number}} direcaoOlhar
+   */
+  estaNoAlcance(posJogador, direcaoOlhar) {
+    if (!this.ativa || !this.grupo) return false;
+
+    const dx = this.grupo.position.x - posJogador.x;
+    const dz = this.grupo.position.z - posJogador.z;
+    const dist = Math.hypot(dx, dz);
+    if (dist > PORRETE.alcance) return false;
+
+    // ângulo entre "para onde olho" e "onde está o bicho"
+    const normaOlhar = Math.hypot(direcaoOlhar.x, direcaoOlhar.z) || 1;
+    const cos = (dx * direcaoOlhar.x + dz * direcaoOlhar.z) / (dist * normaOlhar);
+    return cos >= Math.cos((PORRETE.anguloGraus * Math.PI) / 180);
   }
 
   /* ---------------------------------------------------------------------
@@ -170,6 +269,22 @@ export class Perseguicao {
   /* ---------------------------------------------------------------------
    * Internos
    * ------------------------------------------------------------------- */
+
+  /** Empurra o animal para longe do jogador, respeitando os prédios. */
+  _afastar(posJogador, distancia) {
+    const pos = this.grupo.position;
+    let dx = pos.x - posJogador.x;
+    let dz = pos.z - posJogador.z;
+    const d = Math.hypot(dx, dz);
+    if (d < 0.001) return;
+    dx /= d;
+    dz /= d;
+
+    const novoX = THREE.MathUtils.clamp(pos.x + dx * distancia, -LIMITE_MUNDO, LIMITE_MUNDO);
+    const novoZ = THREE.MathUtils.clamp(pos.z + dz * distancia, -LIMITE_MUNDO, LIMITE_MUNDO);
+    if (!this._colide(novoX, pos.z)) pos.x = novoX;
+    if (!this._colide(pos.x, novoZ)) pos.z = novoZ;
+  }
 
   /**
    * Escolhe onde o animal aparece.

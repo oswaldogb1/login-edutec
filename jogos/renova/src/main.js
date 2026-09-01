@@ -7,6 +7,9 @@
  *   - montar cena / câmera / renderer do Three.js
  *   - controlar o fluxo de telas (início → tutorial → jogo → resultado)
  *   - detectar proximidade dos pontos de interação e abrir o painel educativo
+ *   - conduzir a SÉRIE de perguntas de cada ponto (ver `zones.js`)
+ *   - cuidar da vida do jogador, das mordidas e do revide a pauladas
+ *   - manter o aluno conectado à cidade compartilhada com a turma
  *   - somar pontos e gravar o resultado no Firebase ao final
  * -----------------------------------------------------------------------------
  */
@@ -14,9 +17,13 @@ import * as THREE from 'three';
 import { criarMundo } from './world.js';
 import { Jogador } from './player.js';
 import { HUD } from './hud.js';
-import { TOTAL_PONTOS } from './zones.js';
-import { REGRAS, PERSEGUICAO } from './config.js';
+import { TOTAL_PONTOS, TOTAL_PERGUNTAS } from './zones.js';
+import { REGRAS, PERSEGUICAO, PORRETE, VIDA, MULTIJOGADOR, AREAS_SEGURAS } from './config.js';
 import { Perseguicao } from './perseguicao.js';
+import { Porrete } from './porrete.js';
+import { Multijogador } from './multijogador.js';
+import { Colegas } from './colegas.js';
+import { criarSangue } from './models.js';
 import { salvarResultado, salvarBackupLocal } from './firebase.js';
 
 /* =========================================================================
@@ -42,20 +49,39 @@ const estado = {
   pontuacao: 0,
   descobertos: 0,
   acertosPrimeira: 0,
+  respondidas: 0,
   iniciadoEm: 0,
   rodando: false,
   finalizado: false,
   pontoAberto: null,
-  tentativas: 0,
   respondido: false,
 
-  /** Alternativas ja marcadas como erradas nesta pergunta. */
-  erradas: new Set(),
+  /** Vida do jogador. Zerou, ele desmaia e acorda num abrigo. */
+  vida: VIDA.maxima,
+  /** Instante (em segundos de jogo) até quando ele não pode ser mordido. */
+  invulneravelAte: 0,
+  /** Contadores só para o resumo final. */
+  mordidas: 0,
+  golpes: 0,
+
+  /**
+   * Avanço de cada ponto de interação:
+   *   id → { indice, tentativas, erradas:Set }
+   * `indice` é a pergunta atual da série; `tentativas` e `erradas` valem para
+   * ESSA pergunta e sobrevivem à fuga, para o valor continuar decaindo.
+   */
+  progresso: new Map(),
+
   /** Fuga em andamento? */
   emFuga: false,
   /** Pergunta que sera reaberta quando a fuga acabar. */
-  pontoPendente: null
+  pontoPendente: null,
+  /** Ponto cuja próxima pergunta abre ao clicar no botão do rodapé. */
+  proximaPergunta: null
 };
+
+/** Relógio de jogo em segundos — anda com o `dt`, então `simular()` respeita. */
+let tempoDeJogo = 0;
 
 /* =========================================================================
  * Áudio (bipes curtos gerados por WebAudio — sem arquivos externos)
@@ -82,6 +108,10 @@ const somErro = () => bip(180, 0.2, 'square', 0.05);
 const somPerseguicao = () => { bip(150, 0.28, 'sawtooth', 0.07); setTimeout(() => bip(120, 0.32, 'sawtooth', 0.07), 200); };
 const somSalvo = () => { bip(520, 0.1); setTimeout(() => bip(780, 0.1), 90); setTimeout(() => bip(1040, 0.25), 180); };
 const somDescoberta = () => { bip(520, 0.09); setTimeout(() => bip(700, 0.09), 80); setTimeout(() => bip(950, 0.2), 170); };
+const somMordida = () => { bip(90, 0.3, 'square', 0.09); setTimeout(() => bip(70, 0.35, 'sawtooth', 0.08), 80); };
+const somPancada = () => { bip(240, 0.09, 'square', 0.08); setTimeout(() => bip(120, 0.18, 'triangle', 0.07), 50); };
+const somVento = () => bip(400, 0.07, 'triangle', 0.03);
+const somChat = () => bip(880, 0.06, 'sine', 0.04);
 
 /* =========================================================================
  * Three.js: cena, câmera, renderer
@@ -107,6 +137,13 @@ const hud = new HUD();
 
 // mecânica de fuga: um animal persegue o jogador a cada resposta errada
 const perseguicao = new Perseguicao(scene, mundo.colisores, mundo.areasSeguras);
+// e o jogador não está desarmado: dá para revidar a pauladas
+const porrete = new Porrete(camera);
+const sangue = criarSangue(scene);
+
+// cidade compartilhada: os colegas da turma andando pelo mesmo mapa
+const colegas = new Colegas(scene);
+let multi = null;
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -128,6 +165,9 @@ function iniciarJogo() {
   estado.rodando = true;
   estado.iniciadoEm = performance.now();
   jogador.ativo = true;
+  porrete.mostrar(true);
+  hud.atualizarVida(estado.vida);
+  conectarNaCidade();
   travarMouse();
 }
 
@@ -137,14 +177,24 @@ function iniciarJogo() {
  * com o teclado e mostramos um aviso pedindo um clique na tela.
  */
 function travarMouse() {
+  if (hud.chatAberto) return;   // digitando: o mouse fica livre de propósito
   try {
-    jogador.controls.lock();
+    // Pedimos a captura direto no canvas em vez de chamar `controls.lock()`.
+    // O motivo é só o tratamento de erro: no Chrome atual `requestPointerLock()`
+    // devolve uma Promise, o PointerLockControls descarta esse retorno, e cada
+    // recusa do navegador vira um "unhandled rejection" vermelho no console.
+    // O controle continua funcionando igual — ele reage ao evento
+    // `pointerlockchange` do documento, não ao retorno desta chamada.
+    const pedido = renderer.domElement.requestPointerLock();
+    if (pedido && typeof pedido.catch === 'function') {
+      pedido.catch((erro) => console.warn('[Jogo] Captura do mouse recusada:', erro));
+    }
   } catch (erro) {
     console.warn('[Jogo] Não foi possível capturar o mouse agora:', erro);
   }
   setTimeout(() => {
     const precisaClique = estado.rodando && !estado.finalizado &&
-      !jogador.controls.isLocked && telas.painel.hidden;
+      !jogador.controls.isLocked && telas.painel.hidden && !hud.chatAberto;
     $('aviso-mouse').hidden = !precisaClique;
   }, 400);
 }
@@ -177,6 +227,9 @@ $('btn-jogar').addEventListener('click', iniciarJogo);
 jogador.controls.addEventListener('unlock', () => {
   if (!estado.rodando || estado.finalizado) return;
   if (!telas.painel.hidden) return; // painel aberto usa o mouse livre de propósito
+  // Esc fecha o bate-papo — e, como o navegador solta o mouse junto, o jogo
+  // também pausa. Basta clicar em "Continuar" para voltar.
+  if (hud.chatAberto) fecharChat();
   jogador.soltarTeclas();
   jogador.ativo = false;
   mostrar(telas.pausa);
@@ -194,25 +247,41 @@ $('btn-continuar').addEventListener('click', travarMouse);
 $('btn-finalizar').addEventListener('click', () => finalizar('Você encerrou a exploração.'));
 
 /* =========================================================================
- * Painel de interação (explicação + pergunta)
+ * Painel de interação (explicação + série de perguntas)
  * ======================================================================= */
 const prompt = $('prompt-interacao');
 let pontoProximo = null;
 
+/** Avanço do ponto, criado na primeira visita. */
+function progressoDe(ponto) {
+  const id = ponto.dados.id;
+  let p = estado.progresso.get(id);
+  if (!p) {
+    p = { indice: 0, tentativas: 0, erradas: new Set() };
+    estado.progresso.set(id, p);
+  }
+  return p;
+}
+
+/** Quantas perguntas ainda faltam neste ponto. */
+function faltamNoPonto(ponto) {
+  return ponto.dados.perguntas.length - progressoDe(ponto).indice;
+}
+
 /**
- * Abre o painel de um ponto de interação.
+ * Abre o painel de um ponto de interação, na pergunta em que ele parou.
  * @param {object} ponto
  * @param {?string} mensagemRetomada  texto mostrado quando o painel reabre
  *        depois de uma fuga — nesse caso as tentativas anteriores são mantidas.
  */
 function abrirPainel(ponto, mensagemRetomada = null) {
   const d = ponto.dados;
+  const prog = progressoDe(ponto);
+  const total = d.perguntas.length;
+
   estado.pontoAberto = ponto;
+  estado.proximaPergunta = null;
   estado.respondido = false;
-  if (!mensagemRetomada) {
-    estado.tentativas = 0;
-    estado.erradas.clear();
-  }
 
   $('painel-retomada').hidden = !mensagemRetomada;
   if (mensagemRetomada) $('painel-retomada').textContent = mensagemRetomada;
@@ -221,25 +290,43 @@ function abrirPainel(ponto, mensagemRetomada = null) {
   $('painel-zona').style.background = d.corCss;
   $('painel-titulo').textContent = `${d.icone} ${d.nome}`;
   $('painel-explicacao').textContent = d.explicacao;
-  $('painel-curiosidade').textContent = `💡 ${d.curiosidade}`;
-  $('painel-curiosidade').hidden = true;
-  $('quiz-enunciado').textContent = d.pergunta.enunciado;
   $('quiz-feedback').textContent = '';
   $('quiz-feedback').className = 'quiz-feedback';
-  $('painel-valor').textContent = `Vale ${valorAtual()} pontos`;
-  $('btn-fechar-painel').textContent = 'Responder depois';
   $('btn-fechar-painel').classList.remove('destaque');
   $('btn-fechar-painel').disabled = false;
 
-  // monta as alternativas (as já erradas voltam marcadas e desativadas)
   const caixa = $('quiz-opcoes');
   caixa.innerHTML = '';
-  d.pergunta.opcoes.forEach((texto, indice) => {
+
+  // série concluída: o painel vira um resumo do que foi aprendido ali
+  if (prog.indice >= total) {
+    $('painel-progresso').textContent = `✔ ${total} de ${total} perguntas`;
+    $('painel-curiosidade').textContent = `💡 ${d.curiosidade}`;
+    $('painel-curiosidade').hidden = false;
+    $('quiz-enunciado').textContent = 'Você já respondeu tudo o que este ponto tinha a ensinar.';
+    $('painel-valor').textContent = 'Ponto concluído';
+    $('btn-fechar-painel').textContent = 'Continuar explorando';
+    $('btn-fechar-painel').classList.add('destaque');
+    telas.painel.hidden = false;
+    fecharControles();
+    return;
+  }
+
+  const pergunta = d.perguntas[prog.indice];
+  $('painel-progresso').textContent = `Pergunta ${prog.indice + 1} de ${total}`;
+  $('painel-curiosidade').textContent = `💡 ${d.curiosidade}`;
+  $('painel-curiosidade').hidden = true;
+  $('quiz-enunciado').textContent = pergunta.enunciado;
+  $('painel-valor').textContent = `Vale ${valorAtual(prog)} pontos`;
+  $('btn-fechar-painel').textContent = 'Responder depois';
+
+  // monta as alternativas (as já erradas voltam marcadas e desativadas)
+  pergunta.opcoes.forEach((texto, indice) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'opcao';
     btn.innerHTML = `<span class="letra">${'ABCD'[indice]}</span><span>${texto}</span>`;
-    if (estado.erradas.has(indice)) {
+    if (prog.erradas.has(indice)) {
       btn.classList.add('errada');
       btn.disabled = true;
     } else {
@@ -249,32 +336,49 @@ function abrirPainel(ponto, mensagemRetomada = null) {
   });
 
   telas.painel.hidden = false;
+  fecharControles();
+}
+
+/** Congela o jogador enquanto o painel está aberto. */
+function fecharControles() {
   jogador.soltarTeclas();
   jogador.ativo = false;
+  porrete.mostrar(false);
+  if (hud.chatAberto) fecharChat();
   if (jogador.controls.isLocked) jogador.controls.unlock();
 }
 
-function valorAtual() {
+function valorAtual(prog) {
   return Math.max(
     REGRAS.pontosMinimos,
-    REGRAS.pontosAcertoPrimeira - estado.tentativas * REGRAS.penalidadePorErro
+    REGRAS.pontosAcertoPrimeira - prog.tentativas * REGRAS.penalidadePorErro
   );
 }
 
 function responder(ponto, indice, botao) {
   if (estado.respondido) return;
-  const pergunta = ponto.dados.pergunta;
+  const prog = progressoDe(ponto);
+  const pergunta = ponto.dados.perguntas[prog.indice];
+  const total = ponto.dados.perguntas.length;
   const feedback = $('quiz-feedback');
 
   if (indice === pergunta.correta) {
-    const ganho = valorAtual();
-    if (estado.tentativas === 0) estado.acertosPrimeira++;
+    const ganho = valorAtual(prog);
+    if (prog.tentativas === 0) estado.acertosPrimeira++;
     estado.respondido = true;
     botao.classList.add('certa');
     somAcerto();
 
     estado.pontuacao += ganho;
-    if (!ponto.descoberto) {
+    estado.respondidas++;
+
+    // essa pergunta acabou: a próxima começa com o valor cheio
+    prog.indice++;
+    prog.tentativas = 0;
+    prog.erradas.clear();
+
+    const concluiu = prog.indice >= total;
+    if (concluiu && !ponto.descoberto) {
       ponto.marcarDescoberto();
       estado.descobertos++;
       somDescoberta();
@@ -282,8 +386,14 @@ function responder(ponto, indice, botao) {
 
     feedback.className = 'quiz-feedback ok';
     feedback.textContent = `✅ Correto! +${ganho} pontos. ${pergunta.explicacaoResposta}`;
-    $('painel-curiosidade').hidden = false;
-    $('btn-fechar-painel').textContent = 'Continuar explorando';
+    $('painel-curiosidade').hidden = !concluiu;
+
+    if (concluiu) {
+      $('btn-fechar-painel').textContent = 'Continuar explorando';
+    } else {
+      $('btn-fechar-painel').textContent = `Próxima pergunta (${prog.indice + 1} de ${total}) →`;
+      estado.proximaPergunta = ponto;
+    }
     $('btn-fechar-painel').classList.add('destaque');
 
     // desabilita as demais alternativas
@@ -292,22 +402,25 @@ function responder(ponto, indice, botao) {
       b.classList.add('travada');
     });
 
-    hud.atualizarPontuacao(estado.pontuacao, estado.descobertos, TOTAL_PONTOS);
+    atualizarPlacar();
 
-    if (estado.descobertos >= TOTAL_PONTOS) {
-      setTimeout(() => finalizar('Parabéns! Você descobriu todos os pontos da cidade! 🎉'), 1200);
+    if (estado.respondidas >= TOTAL_PERGUNTAS) {
+      setTimeout(
+        () => finalizar('Parabéns! Você respondeu todas as perguntas da cidade! 🎉'),
+        1400
+      );
     }
     return;
   }
 
   // errou: perde um pouco do valor da pergunta e um animal vem atrás do jogador
-  estado.tentativas++;
-  estado.erradas.add(indice);
+  prog.tentativas++;
+  prog.erradas.add(indice);
   somErro();
   botao.classList.add('errada');
   botao.disabled = true;
 
-  const proximoValor = valorAtual();
+  const proximoValor = valorAtual(prog);
   $('painel-valor').textContent = `Vale ${proximoValor} pontos`;
   feedback.className = 'quiz-feedback erro';
 
@@ -326,10 +439,17 @@ function responder(ponto, indice, botao) {
   $('btn-fechar-painel').textContent = 'Prepare-se para correr…';
 
   feedback.textContent =
-    `❌ Não é essa! Um animal apareceu e vem na sua direção. ` +
-    `Corra até uma Área Segura para tentar de novo (a pergunta passa a valer ${proximoValor} pontos).`;
+    `❌ Não é essa! Um animal apareceu e vem na sua direção. Corra até uma Área Segura, ` +
+    `ou vire e revide a pauladas (F) — a pergunta passa a valer ${proximoValor} pontos.`;
 
   setTimeout(() => iniciarFuga(ponto), PERSEGUICAO.tempoAvisoMs);
+}
+
+function atualizarPlacar() {
+  hud.atualizarPontuacao(
+    estado.pontuacao, estado.descobertos, TOTAL_PONTOS,
+    estado.respondidas, TOTAL_PERGUNTAS
+  );
 }
 
 /* =========================================================================
@@ -351,19 +471,85 @@ function iniciarFuga(ponto) {
   hud.definirFuga(animal, perseguicao.abrigoBloqueado);
   mostrarAvisoFuga(
     perseguicao.abrigoBloqueado
-      ? `${animal.icone} ${animal.nome} invadiu o abrigo! Este já foi usado — corra (Shift) até OUTRA 🛡️ Área Segura.`
-      : `${animal.icone} ${animal.nome} está atrás de você! Corra (Shift) até uma 🛡️ Área Segura.`,
-    'ruim', 2800
+      ? `${animal.icone} ${animal.nome} invadiu o abrigo! Corra (Shift) até OUTRA 🛡️ Área Segura — ou revide com <kbd>F</kbd>.`
+      : `${animal.icone} ${animal.nome} está atrás de você! Corra (Shift) até uma 🛡️ Área Segura — ou revide com <kbd>F</kbd>.`,
+    'ruim', 3200
   );
   somPerseguicao();
 
   jogador.ativo = true;
+  porrete.mostrar(true);
   travarMouse();
 }
 
 /**
+ * O animal alcançou o jogador: mordida, sangue e vida a menos.
+ * A fuga NÃO acaba aqui — o aluno continua correndo (ou revidando).
+ */
+function levarMordida() {
+  if (tempoDeJogo < estado.invulneravelAte) return;
+  estado.invulneravelAte = tempoDeJogo + VIDA.invulneravelMs / 1000;
+  estado.mordidas++;
+
+  estado.vida = Math.max(0, estado.vida - VIDA.danoMordida);
+  const perda = Math.min(PERSEGUICAO.penalidadeMordida, estado.pontuacao);
+  estado.pontuacao -= perda;
+
+  hud.atualizarVida(estado.vida);
+  hud.respingarSangue(estado.vida <= 40 ? 10 : 7);
+  atualizarPlacar();
+  somMordida();
+
+  // sangue no mundo 3D, entre o jogador e o animal
+  // a meio caminho entre o jogador e o animal: perto o bastante para se ver,
+  // longe o bastante para nao explodir dentro da lente da camera
+  const alvo = perseguicao.posicao || jogador.posicao;
+  sangue.explodir(
+    {
+      x: jogador.posicao.x + (alvo.x - jogador.posicao.x) * 0.55,
+      y: 1.2,
+      z: jogador.posicao.z + (alvo.z - jogador.posicao.z) * 0.55
+    },
+    estado.vida <= 40 ? 1.3 : 1
+  );
+
+  if (estado.vida <= 0) {
+    terminarFuga('desmaiado');
+    return;
+  }
+  mostrarAvisoFuga(`🩸 Mordida! −${VIDA.danoMordida} de vida. Continue correndo!`, 'ruim', 1400);
+}
+
+/** O jogador girou o porrete. Só acerta o que estiver à frente e no alcance. */
+function golpear() {
+  if (!estado.emFuga || estado.finalizado || !jogador.ativo) return;
+  if (!porrete.golpear()) return;   // ainda recarregando
+
+  camera.getWorldDirection(direcao);
+  if (!perseguicao.estaNoAlcance(jogador.posicao, { x: direcao.x, z: direcao.z })) {
+    somVento();
+    return;
+  }
+
+  const resultado = perseguicao.levarPancada(jogador.posicao);
+  estado.golpes++;
+  estado.pontuacao += PORRETE.pontosPorGolpe;
+  atualizarPlacar();
+  somPancada();
+
+  if (resultado.espantou) {
+    terminarFuga('espantado');
+    return;
+  }
+  mostrarAvisoFuga(
+    `🪵 Acertou! O bicho ficou tonto por ${(PORRETE.atordoamentoMs / 1000).toFixed(0)} s — aproveite e corra!`,
+    'ok', 1600
+  );
+}
+
+/**
  * Encerra a fuga e devolve o jogador à pergunta.
- * @param {'salvo'|'capturado'} desfecho
+ * @param {'salvo'|'espantado'|'desmaiado'} desfecho
  */
 function terminarFuga(desfecho) {
   if (!estado.emFuga) return;
@@ -379,20 +565,30 @@ function terminarFuga(desfecho) {
     somSalvo();
     mensagem = '🛡️ Você chegou à Área Segura! Agora respire e tente a pergunta de novo.';
     mostrarAvisoFuga('🛡️ Em segurança!', 'ok', 1400);
+  } else if (desfecho === 'espantado') {
+    somSalvo();
+    mensagem =
+      `🪵 Depois de ${PERSEGUICAO.golpesParaEspantar} pauladas o animal desistiu e fugiu. ` +
+      'Coragem também vale pontos — volte para a pergunta.';
+    mostrarAvisoFuga('🪵 O bicho desistiu e fugiu!', 'ok', 1800);
   } else {
-    const perda = Math.min(PERSEGUICAO.penalidadeCaptura, estado.pontuacao);
+    // vida zerada: desmaia, perde pontos e acorda no abrigo mais próximo
+    const perda = Math.min(PERSEGUICAO.penalidadeDesmaio, estado.pontuacao);
     estado.pontuacao -= perda;
-    hud.atualizarPontuacao(estado.pontuacao, estado.descobertos, TOTAL_PONTOS);
+    estado.vida = VIDA.vidaAoAcordar;
+    hud.atualizarVida(estado.vida);
+    hud.limparSangue();
+    atualizarPlacar();
 
-    // o jogador "acorda" no abrigo mais perto
-    const abrigo = perseguicao.areaMaisProxima(jogador.posicao);
-    if (abrigo) jogador.posicionar(abrigo.x, abrigo.z + 3, abrigo);
+    const abrigo = perseguicao.areaMaisProxima(jogador.posicao) ||
+      { x: AREAS_SEGURAS[0].x, z: AREAS_SEGURAS[0].z };
+    jogador.posicionar(abrigo.x, abrigo.z + 3, abrigo);
 
     somErro();
     mensagem = perda > 0
-      ? `😱 O animal te alcançou! Foi só um susto, mas custou ${perda} pontos. Você foi levado até a Área Segura.`
-      : '😱 O animal te alcançou! Foi só um susto — você foi levado até a Área Segura.';
-    mostrarAvisoFuga('😱 Te pegou!', 'ruim', 1600);
+      ? `😵 Você ficou sem vida e desmaiou. Custou ${perda} pontos, mas alguém te levou até a Área Segura — e você já está de pé.`
+      : '😵 Você ficou sem vida e desmaiou. Alguém te levou até a Área Segura — e você já está de pé.';
+    mostrarAvisoFuga('😵 Você desmaiou!', 'ruim', 2000);
   }
 
   if (!ponto || estado.finalizado) return;
@@ -408,7 +604,7 @@ function terminarFuga(desfecho) {
 let timerAvisoFuga = null;
 function mostrarAvisoFuga(texto, tipo, duracaoMs) {
   const el = $('aviso-fuga');
-  el.textContent = texto;
+  el.innerHTML = texto;
   el.className = `aviso-fuga ${tipo}`;
   el.hidden = false;
   clearTimeout(timerAvisoFuga);
@@ -416,13 +612,91 @@ function mostrarAvisoFuga(texto, tipo, duracaoMs) {
 }
 
 $('btn-fechar-painel').addEventListener('click', () => {
+  const proximo = estado.proximaPergunta;
   telas.painel.hidden = true;
   estado.pontoAberto = null;
-  if (!estado.finalizado) travarMouse();
+  estado.proximaPergunta = null;
+
+  if (estado.finalizado) return;
+  porrete.mostrar(true);
+
+  // acertou e ainda há perguntas neste ponto: emenda a próxima na hora
+  if (proximo) {
+    abrirPainel(proximo);
+    return;
+  }
+  travarMouse();
 });
 
 /* =========================================================================
- * Detecção de proximidade / tecla E
+ * Cidade compartilhada (multijogador) e bate-papo
+ * ======================================================================= */
+
+function conectarNaCidade() {
+  if (!MULTIJOGADOR.ativo || multi) return;
+
+  multi = new Multijogador({ nome: estado.nome, turma: estado.turma });
+
+  multi.aoMudarColegas((lista) => {
+    colegas.sincronizar(lista);
+    hud.atualizarColegas(lista.length, multi.conectado);
+    hud.definirColegasNoMapa(lista.map((c) => ({ x: c.x, z: c.z })));
+  });
+
+  multi.aoReceberMensagem((msg) => {
+    hud.adicionarMensagem(msg);
+    if (!msg.propria) {
+      colegas.falar(msg.id, msg.texto);
+      somChat();
+    }
+  });
+
+  multi.aoMudarEstado((conectado) => {
+    hud.atualizarColegas(colegas.quantidade, conectado);
+  });
+
+  hud.atualizarColegas(0, false);
+  multi.entrar(jogador.posicao).then((entrou) => {
+    hud.avisoNoChat(entrou
+      ? '🏙️ Você entrou na cidade da turma. Aperte T para conversar.'
+      : '📴 Sem conexão com a sala: você está explorando sozinho.');
+  });
+}
+
+function abrirChat() {
+  if (!estado.rodando || estado.finalizado || !telas.painel.hidden) return;
+  hud.abrirChat();
+  // o jogador para de andar, mas o mundo continua rodando à sua volta
+  jogador.soltarTeclas();
+  jogador.bloqueado = true;
+}
+
+function fecharChat() {
+  hud.fecharChat();
+  jogador.bloqueado = false;
+}
+
+$('chat-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const texto = $('chat-entrada').value;
+  fecharChat();
+  if (!texto.trim()) return;          // Enter vazio: só fecha a caixa
+
+  if (!multi || !multi.conectado) {
+    hud.avisoNoChat('📴 Sem conexão: a mensagem não foi enviada.');
+    return;
+  }
+  multi.enviarMensagem(texto);
+});
+
+$('chat-entrada').addEventListener('keydown', (e) => {
+  // as teclas do bate-papo não podem vazar para os controles do jogo
+  e.stopPropagation();
+  if (e.code === 'Escape') fecharChat();
+});
+
+/* =========================================================================
+ * Detecção de proximidade / teclas
  * ======================================================================= */
 function verificarProximidade() {
   if (!estado.rodando || !telas.painel.hidden) return;
@@ -445,10 +719,13 @@ function verificarProximidade() {
 
   if (maisProximo && menorDist <= REGRAS.distanciaInteracao) {
     pontoProximo = maisProximo;
-    const jaVisto = maisProximo.descoberto;
+    const faltam = faltamNoPonto(maisProximo);
+    const acao = faltam === 0
+      ? 'rever'
+      : maisProximo.descoberto ? 'rever' : `responder (${faltam} pergunta${faltam > 1 ? 's' : ''})`;
     prompt.hidden = false;
     prompt.innerHTML =
-      `<kbd>E</kbd> ${jaVisto ? 'rever' : 'descobrir'} ` +
+      `<kbd>E</kbd> ${acao} ` +
       `<strong style="color:${maisProximo.dados.corCss}">${maisProximo.dados.nome}</strong>`;
   } else {
     pontoProximo = null;
@@ -457,13 +734,25 @@ function verificarProximidade() {
 }
 
 document.addEventListener('keydown', (e) => {
-  if (e.code === 'KeyE' && pontoProximo && estado.rodando &&
-      telas.painel.hidden && !estado.emFuga) {
+  if (hud.chatAberto) return;   // digitando: o jogo não escuta o teclado
+  if (!estado.rodando || estado.finalizado) return;
+
+  if (e.code === 'KeyE' && pontoProximo && telas.painel.hidden && !estado.emFuga) {
     abrirPainel(pontoProximo);
+    return;
+  }
+  if ((e.code === 'KeyF' || e.code === 'Space') && telas.painel.hidden && estado.emFuga) {
+    e.preventDefault();
+    golpear();
+    return;
+  }
+  if (e.code === 'KeyT' && telas.painel.hidden) {
+    e.preventDefault();
+    abrirChat();
   }
 });
 
-// clique na cena: recaptura o mouse ou, se já capturado, interage (igual ao E)
+// clique na cena: recaptura o mouse, revida na fuga ou interage (igual ao E)
 renderer.domElement.addEventListener('mousedown', () => {
   if (!estado.rodando || estado.finalizado || !telas.painel.hidden) return;
 
@@ -471,7 +760,8 @@ renderer.domElement.addEventListener('mousedown', () => {
     travarMouse();
     return;
   }
-  if (pontoProximo && !estado.emFuga) abrirPainel(pontoProximo);
+  if (estado.emFuga) golpear();
+  else if (pontoProximo) abrirPainel(pontoProximo);
 });
 
 /* =========================================================================
@@ -483,6 +773,8 @@ async function finalizar(mensagem) {
   estado.rodando = false;
   jogador.ativo = false;
   jogador.soltarTeclas();
+  jogador.bloqueado = false;
+  porrete.mostrar(false);
 
   // uma fuga em andamento é cancelada junto com a partida
   if (estado.emFuga) {
@@ -492,7 +784,13 @@ async function finalizar(mensagem) {
     hud.definirFuga(null);
   }
   $('aviso-fuga').hidden = true;
+  hud.limparSangue();
+  if (hud.chatAberto) fecharChat();
   if (jogador.controls.isLocked) jogador.controls.unlock();
+
+  // sai da cidade compartilhada (apaga só o próprio avatar)
+  multi?.sair();
+  colegas.limpar();
 
   const duracao = (performance.now() - estado.iniciadoEm) / 1000;
 
@@ -511,8 +809,12 @@ async function finalizar(mensagem) {
   $('resultado-turma').textContent = estado.turma;
   $('resultado-pontos').textContent = estado.pontuacao;
   $('resultado-descobertos').textContent = `${estado.descobertos} de ${TOTAL_PONTOS}`;
-  $('resultado-acertos').textContent = `${estado.acertosPrimeira} de ${TOTAL_PONTOS}`;
+  $('resultado-respondidas').textContent = `${estado.respondidas} de ${TOTAL_PERGUNTAS}`;
+  $('resultado-acertos').textContent = `${estado.acertosPrimeira} de ${TOTAL_PERGUNTAS}`;
   $('resultado-tempo').textContent = formatarTempo(duracao);
+  $('resultado-fuga').textContent =
+    `${estado.mordidas} mordida${estado.mordidas === 1 ? '' : 's'} · ` +
+    `${estado.golpes} paulada${estado.golpes === 1 ? '' : 's'}`;
   $('resultado-bonus').hidden = bonus === 0;
   $('resultado-bonus').textContent = `🏆 Bônus de explorador completo: +${bonus} pontos!`;
 
@@ -523,6 +825,10 @@ async function finalizar(mensagem) {
     pontosDescobertos: estado.descobertos,
     totalPontos: TOTAL_PONTOS,
     acertosPrimeira: estado.acertosPrimeira,
+    perguntasRespondidas: estado.respondidas,
+    totalPerguntas: TOTAL_PERGUNTAS,
+    mordidas: estado.mordidas,
+    golpes: estado.golpes,
     duracaoSegundos: duracao
   };
 
@@ -558,16 +864,47 @@ const relogio = new THREE.Clock();
 const direcao = new THREE.Vector3();
 let acumuladorMapa = 0;
 
+/** Recupera vida devagar fora da fuga — bem mais rápido dentro de um abrigo. */
+function regenerarVida(dt) {
+  if (estado.emFuga || estado.vida >= VIDA.maxima) return;
+  const pos = jogador.posicao;
+  const noAbrigo = AREAS_SEGURAS.some(
+    (a) => Math.hypot(pos.x - a.x, pos.z - a.z) <= PERSEGUICAO.raioAreaSegura
+  );
+  const taxa = noAbrigo ? VIDA.regeneracaoAbrigoPorSegundo : VIDA.regeneracaoPorSegundo;
+  estado.vida = Math.min(VIDA.maxima, estado.vida + taxa * dt);
+  hud.atualizarVida(estado.vida);
+}
+
 /**
  * Um passo da simulacao. Fica separado do laco de renderizacao para poder ser
  * chamado manualmente (ver `jogo.simular()` no modo debug).
  */
 function passo(dt, t) {
+  tempoDeJogo += dt;
   mundo.animar(t);
   jogador.update(dt);
+  sangue.atualizar(dt);
+  porrete.update(dt, Math.min(1, jogador.rapidez / 6));
 
   if (estado.rodando) {
     verificarProximidade();
+    regenerarVida(dt);
+
+    // colegas na mesma cidade
+    colegas.update(dt, t, jogador.posicao);
+    hud.definirColegaPerto(colegas.maisProximo);
+    if (multi) {
+      camera.getWorldDirection(direcao);
+      multi.atualizar({
+        x: jogador.posicao.x,
+        z: jogador.posicao.z,
+        angulo: Math.atan2(direcao.x, direcao.z),
+        vida: estado.vida,
+        pontos: estado.pontuacao,
+        emFuga: estado.emFuga
+      });
+    }
 
     // fuga do animal (congela junto com o jogador quando o jogo está pausado)
     if (estado.emFuga && jogador.ativo) {
@@ -579,10 +916,19 @@ function passo(dt, t) {
         { x: direcao.x, z: direcao.z },
         perseguicao.posicao,
         perseguicao.distanciaDoJogador(jogador.posicao),
-        perseguicao.areaMaisProxima(jogador.posicao)
+        perseguicao.areaMaisProxima(jogador.posicao),
+        {
+          golpes: perseguicao.golpes,
+          atordoado: perseguicao.atordoado,
+          segundos: perseguicao.segundosDeAtordoamento,
+          noAlcance: perseguicao.estaNoAlcance(
+            jogador.posicao, { x: direcao.x, z: direcao.z }
+          )
+        }
       );
 
-      if (desfecho !== 'nada') terminarFuga(desfecho);
+      if (desfecho === 'mordida') levarMordida();
+      else if (desfecho === 'salvo') terminarFuga('salvo');
     }
 
     // tempo limite (se configurado)
@@ -613,9 +959,15 @@ function animar() {
 /* =========================================================================
  * Boot
  * ======================================================================= */
-hud.atualizarPontuacao(0, 0, TOTAL_PONTOS);
+atualizarPlacar();
+hud.atualizarVida(estado.vida);
+hud.definirColegaPerto(null);
 $('total-pontos-tutorial').textContent = TOTAL_PONTOS;
 $('total-pontos-inicio').textContent = TOTAL_PONTOS;
+document.querySelectorAll('.total-perguntas').forEach((el) => {
+  el.textContent = TOTAL_PERGUNTAS;
+});
+$('golpes-tutorial').textContent = PERSEGUICAO.golpesParaEspantar;
 animar();
 
 // O primeiro render já aconteceu na chamada de animar() acima, então basta um
@@ -639,17 +991,35 @@ if (new URLSearchParams(location.search).has('debug')) {
     mundo,
     finalizar,
     perseguicao,
+    porrete,
+    colegas,
+    get multijogador() { return multi; },
     /** Roda a simulacao manualmente, util quando a aba esta em segundo plano. */
     simular(segundos = 1, dt = 1 / 60) {
       const quadros = Math.round(segundos / dt);
       for (let i = 0; i < quadros; i++) passo(dt, performance.now() / 1000);
-      return { pos: { ...jogador.posicao }, emFuga: estado.emFuga };
+      return { pos: { ...jogador.posicao }, emFuga: estado.emFuga, vida: estado.vida };
     },
     irPara(idDoPonto) {
       const p = mundo.pontos.find((x) => x.dados.id === idDoPonto);
       if (!p) return `Ponto "${idDoPonto}" não encontrado.`;
       jogador.posicionar(p.posicao.x, p.posicao.z + 4.5, p.posicao);
       return `Você está em ${p.dados.nome}.`;
+    },
+    /** Dá uma paulada agora (ignora a mira, útil para testar a mecânica). */
+    bater() {
+      golpear();
+      return { golpes: perseguicao.golpes, atordoado: perseguicao.atordoado };
+    },
+    /** Força uma mordida, para conferir sangue e barra de vida. */
+    morder() {
+      estado.invulneravelAte = 0;
+      levarMordida();
+      return estado.vida;
+    },
+    /** Manda uma mensagem no bate-papo da turma. */
+    dizer(texto) {
+      return multi ? multi.enviarMensagem(texto) : Promise.resolve(false);
     }
   };
   console.info('[Jogo] Modo debug ativo — use window.jogo no console.');
@@ -658,7 +1028,7 @@ if (new URLSearchParams(location.search).has('debug')) {
 // evita rolagem da página com as setas/espaço enquanto se joga
 window.addEventListener('keydown', (e) => {
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code) &&
-      estado.rodando && telas.painel.hidden) {
+      estado.rodando && telas.painel.hidden && !hud.chatAberto) {
     e.preventDefault();
   }
 });

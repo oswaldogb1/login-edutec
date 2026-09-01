@@ -30,9 +30,13 @@ Open the game with `?debug=1` to expose `window.jogo`:
 
 ```js
 jogo.irPara('parque')      // teleport to a discovery point by its zones.js id
-jogo.estado                // score, discoveries, timers, chase flags
-jogo.perseguicao           // live chase object (animal, blocked shelter)
+jogo.estado                // score, health, per-point progress, chase flags
+jogo.perseguicao           // live chase object (animal, stun, hits, blocked shelter)
 jogo.simular(3)            // run 3s of game logic without the browser's frame loop
+jogo.bater()               // swing the club now (respects aim and cooldown)
+jogo.morder()              // force a bite: health bar + blood, no waiting for the animal
+jogo.dizer('oi')           // post a message to the class chat
+jogo.multijogador          // live room object (id, colegas, conectado)
 jogo.finalizar('motivo')   // end the run and write to Firebase
 ```
 
@@ -47,13 +51,16 @@ test suite.
 Static site, no backend. Module graph (all under `src/`):
 
 ```
-main.js ── world.js ── models.js     (3D geometry builders + ANIMAIS catalogue)
+main.js ── world.js ── models.js     (3D geometry builders + ANIMAIS + porrete/avatar/sangue)
    │          └────── zones.js       (educational content + point placement)
    ├─── player.js                    (PointerLockControls, WASD, AABB collision)
-   ├─── perseguicao.js               (chase-the-player mechanic)
-   ├─── hud.js                       (minimap/compass canvas, counters, chase alert)
+   ├─── perseguicao.js               (chase-the-player mechanic: bites, stun, knockback)
+   ├─── porrete.js                   (first-person club: pose, swing, cooldown)
+   ├─── multijogador.js              (shared room over raw REST — no SDK)
+   ├─── colegas.js ── world.js       (classmate avatars, name plates, speech bubbles)
+   ├─── hud.js                       (minimap/compass canvas, counters, health, chat)
    ├─── firebase.js                  (write-only)
-   └─── config.js                    (rules, chase tuning, password, Firebase URL)
+   └─── config.js                    (rules, chase/health/club tuning, password, URLs)
 
 professor.js ── config.js            (read-only; separate page, no game code)
 ```
@@ -63,11 +70,19 @@ professor.js ── config.js            (read-only; separate page, no game code
 as does scoring, the interaction panel, and the end-of-run Firebase write.
 
 **`zones.js` is the single source of truth for content.** It exports `ZONAS` (5 themed zones,
-each 2–3 points) and derives the flat `TODOS_OS_PONTOS` plus `TOTAL_PONTOS`. Every point carries
-its `offset` from the zone center, a `build` function from `models.js`, an `explicacao`, a
-`curiosidade`, and a `pergunta` (`opcoes` array + zero-based `correta` index). Adding or removing
-a point automatically updates the HUD counter, minimap, completion bonus, and progress bar —
-nothing else needs editing. Zone `centro` coordinates must stay aligned with the road grid in
+3 points each) and derives the flat `TODOS_OS_PONTOS`, `TOTAL_PONTOS` (15) and `TOTAL_PERGUNTAS`
+(45). Every point carries its `offset` from the zone center, a `build` function from `models.js`,
+an `explicacao`, a `curiosidade`, and a **`perguntas` array** — each entry an `opcoes` array plus
+a zero-based `correta` index. A point is only marked discovered once its whole series is answered.
+
+Adding or removing a point *or a question* automatically updates the HUD counter, minimap,
+completion bonus, progress bar and result screen — nothing else needs editing. The run length is
+literally the size of those arrays, so that is the dial to turn when the teacher wants a longer
+or shorter class. `main.js` keeps per-point progress in `estado.progresso`
+(`id → {indice, tentativas, erradas}`): `indice` walks the series, while `tentativas`/`erradas`
+belong to the *current* question and survive a chase, so the question's value keeps decaying.
+
+Zone `centro` coordinates must stay aligned with the road grid in
 `world.js` (`RUAS = [-72, 0, 72]`), since zones sit at road intersections.
 
 **`world.js` builds the city and returns `{ pontos, areasSeguras, colisores, animar(t) }`.** Buildings are
@@ -77,16 +92,33 @@ identical for every student — do not randomize it, students orient themselves 
 an object with `marcarDescoberto()`, which recolors its beam/ring/label green.
 
 **The chase is the consequence for a wrong answer.** `responder()` locks the panel, waits
-`PERSEGUICAO.tempoAvisoMs`, then `iniciarFuga()` closes it and spawns an animal.
-`Perseguicao.update()` returns `'nada' | 'salvo' | 'capturado'` each frame and `main.js`
-routes that to `terminarFuga()`, which reopens the same question via
-`abrirPainel(ponto, mensagemRetomada)`. Attempt count and wrong-answer marks survive the
-chase through `estado.tentativas` / `estado.erradas`, so the question's point value keeps
-decaying across escapes.
+`PERSEGUICAO.tempoAvisoMs`, then `iniciarFuga()` closes it and spawns an animal. `main.js` ends
+the chase through `terminarFuga(desfecho)` — `'salvo'` (reached a shelter), `'espantado'` (drove
+the animal off with the club) or `'desmaiado'` (ran out of health) — and each of them reopens the
+same question via `abrirPainel(ponto, mensagemRetomada)`. Attempt count and wrong-answer marks
+live in `estado.progresso` and survive the chase, so the question's point value keeps decaying
+across escapes.
+
+**Being caught no longer ends the chase.** `Perseguicao.update()` returns
+`'nada' | 'salvo' | 'mordida'`. A `'mordida'` costs `VIDA.danoMordida`, splashes blood (CSS
+splatter in `hud.respingarSangue` + 3D particles from `criarSangue`) and shoves the animal back;
+the player keeps running. Only when `estado.vida` hits 0 does `terminarFuga('desmaiado')` fire —
+score penalty, wake up at the nearest shelter, question reopens. Health regenerates slowly while
+walking and fast inside an Área Segura.
+
+**The third way out is fighting back.** `porrete.js` hangs a club off the camera;
+`F`/`Space`/left-click calls `golpear()`, which asks `perseguicao.estaNoAlcance()` (cone of
+`PORRETE.anguloGraus` within `PORRETE.alcance`) and, on a hit, `levarPancada()` — knockback plus
+`PORRETE.atordoamentoMs` of stun, the player's window to escape. After
+`PERSEGUICAO.golpesParaEspantar` hits the animal gives up (`terminarFuga('espantado')`). All of
+this is timed off `Perseguicao.tempoDecorrido`/`tempoDeJogo`, which advance with `dt` — never
+`performance.now()` — so `jogo.simular()` reproduces stuns, bites and cooldowns exactly.
 
 **Animation is push-based:** `world.js` collects closures into an `animaveis` array and
 `mundo.animar(t)` runs them all each frame. Per-model animation is attached as
 `grupo.userData.animar = (t) => {...}` inside `models.js` builders and picked up by `world.js`.
+Classmate avatars use a separate hook, `grupo.userData.animarColega(t, rapidez)`, driven by
+`colegas.js` rather than by `world.js`.
 
 ## Non-obvious constraints
 
@@ -105,6 +137,43 @@ Both modules load the SDK via dynamic `import()` so the game still runs offline 
 `sanitizarTurma()` turns a typed class name into a Firebase key with an allow-list regex
 (`9ºA → 9ºA`, `7.C → 7-C`, empty → `SEM-TURMA`). Avoid `\uXXXX` escapes in that regex — this
 environment has rewritten them into literal control bytes in the file.
+
+### The shared city writes over REST, on purpose
+
+`multijogador.js` puts every student in one room (`MULTIJOGADOR.sala`, `'geral'`) so they see each
+other and can chat. Live presence needs repeated writes, which the Firebase rule above forbids —
+so this module **does not use the SDK at all**. It speaks raw REST (`fetch` + `EventSource`),
+which is why `set()`/`update()`/`remove()` remain unimported anywhere in the project and
+`firebase.js` stays exactly as strict as before.
+
+Its own guard rails, enforced structurally:
+
+- every URL comes from `montarCaminho()`, which forces the
+  `/{MULTIJOGADOR.raiz}/salas/{sala}` prefix and rejects anything with a dot, a leading slash or
+  a space (so `../resultados` cannot be built);
+- `DELETE` only goes through `caminhoDeExclusao(id)` → `jogadores/{id}`. Leaving the game removes
+  your own avatar; `_limparFantasmas()` removes peers untouched for minutes. Nothing can delete
+  the room, the chat, or anything outside this node;
+- an **autoteste runs at import time** and throws if either rule is loosened — the page fails
+  loudly instead of quietly writing to the wrong place.
+
+Two details that are easy to break:
+
+- **`patch` events carry only the fields that changed.** A student standing still only updates
+  `atualizadoEm`, so treating a patch like a put wipes their name and position. `_aplicarJogadores`
+  takes the event type and merges patches (`_mesclarColega`); a patch for an unknown id triggers a
+  one-off GET. This bug is invisible until someone stops walking.
+- **Staleness is measured on the local clock** (`visto`), not by comparing the server's
+  `atualizadoEm` with `Date.now()` — school machines are not clock-synced, and that comparison
+  makes classmates vanish for no reason.
+
+Chat is `POST` (= push, new key every time) and read back with
+`orderBy="$key"&limitToLast=N`, so the room stays cheap to read however long the history grows.
+The node is append-only for messages; clear it from the Firebase console if it ever needs it.
+
+Typing must not drive the player: `abrirChat()` sets `jogador.bloqueado`, and the input's own
+`keydown` calls `stopPropagation()` so WASD never reaches the document listeners. Esc closes the
+chat *and* releases the pointer lock, so the pause screen appears — that is expected, not a bug.
 
 ### CSS `hidden` vs. `display`
 

@@ -225,6 +225,50 @@ export function buildComposteira() {
   return g;
 }
 
+/** Estacao de coleta seletiva: os cinco contentores coloridos lado a lado. */
+export function buildColetaSeletiva() {
+  const g = new THREE.Group();
+  g.add(box(7.6, 0.28, 2.8, 0x94a3b8, 0, 0.14, 0));   // piso da estação
+
+  // azul = papel, vermelho = plástico, verde = vidro, amarelo = metal,
+  // marrom = orgânico — a mesma ordem das placas da coleta seletiva.
+  const cores = [0x2563eb, 0xdc2626, 0x16a34a, 0xeab308, 0x78350f];
+  const tampas = [];
+  cores.forEach((cor, i) => {
+    const x = -3.0 + i * 1.5;
+    g.add(box(1.15, 1.5, 1.15, cor, x, 1.0, 0));
+    g.add(box(1.0, 0.6, 0.06, 0xffffff, x, 1.2, 0.6, { transparent: true, opacity: 0.85 }));
+    const tampa = box(1.3, 0.16, 1.3, 0x1f2937, x, 1.83, 0);
+    tampas.push(tampa);
+    g.add(tampa);
+  });
+
+  // placa da estação, com o símbolo da reciclagem montado em três barras
+  [-3.4, 3.4].forEach((x) => g.add(cyl(0.12, 0.14, 3.4, 6, 0x64748b, x, 1.7, -1.2)));
+  const placa = box(7.4, 1.3, 0.16, 0x0f766e, 0, 3.2, -1.2, {
+    emissive: 0x0d9488, emissiveIntensity: 0.35
+  });
+  g.add(placa);
+  [0, 2.09, 4.19].forEach((ang) => {
+    const barra = box(1.0, 0.18, 0.1, 0xbbf7d0, 0, 0, -1.05, {
+      emissive: 0x4ade80, emissiveIntensity: 0.7
+    });
+    barra.position.x = Math.cos(ang) * 0.55;
+    barra.position.y = 3.2 + Math.sin(ang) * 0.55;
+    barra.rotation.z = ang + Math.PI / 2;
+    g.add(barra);
+  });
+
+  g.userData.animar = (t) => {
+    // as tampas "respiram" uma depois da outra, chamando atenção de longe
+    tampas.forEach((tp, i) => {
+      tp.position.y = 1.83 + Math.max(0, Math.sin(t * 1.4 + i * 0.9)) * 0.18;
+    });
+    placa.material.emissiveIntensity = 0.25 + Math.sin(t * 2) * 0.15;
+  };
+  return g;
+}
+
 /* =========================================================================
  * ZONA 3 — MOBILIDADE
  * ======================================================================= */
@@ -449,6 +493,51 @@ export function buildCaptacaoChuva() {
   return g;
 }
 
+/** Horta comunitária: canteiros de madeira, hortaliças e um regador. */
+export function buildHortaComunitaria() {
+  const g = new THREE.Group();
+
+  const folhas = [];
+  for (let c = 0; c < 3; c++) {
+    const canteiro = new THREE.Group();
+    canteiro.add(box(5.4, 0.7, 1.8, 0x8d6e63, 0, 0.35, 0));
+    canteiro.add(box(5.0, 0.2, 1.5, 0x4e342e, 0, 0.75, 0));      // terra
+    for (let i = 0; i < 6; i++) {
+      const pe = new THREE.Group();
+      const cor = c === 1 ? 0x84cc16 : 0x22c55e;
+      pe.add(cyl(0.05, 0.07, 0.35, 5, 0x4d7c0f, 0, 0.17, 0));
+      pe.add(sph(0.3, cor, 0, 0.5, 0));
+      pe.add(sph(0.2, cor, 0.2, 0.62, 0.15));
+      pe.position.set(-2.1 + i * 0.84, 0.85, 0);
+      folhas.push(pe);
+      canteiro.add(pe);
+    }
+    canteiro.position.z = (c - 1) * 2.6;
+    g.add(canteiro);
+  }
+
+  // regador apoiado no canto
+  const bico = cyl(0.07, 0.1, 0.7, 6, 0x0ea5e9, 0.42, 0.5, 0.1);
+  bico.rotation.z = -0.9;
+  const regador = new THREE.Group();
+  regador.add(cyl(0.3, 0.34, 0.6, 8, 0x38bdf8, 0, 0.3, 0));
+  regador.add(bico);
+  regador.position.set(3.4, 0, 2.2);
+  g.add(regador);
+
+  // placa da horta
+  g.add(cyl(0.12, 0.14, 2.2, 6, 0x7a5230, -3.4, 1.1, 2.4));
+  g.add(box(2.4, 0.9, 0.14, 0x15803d, -3.4, 2.2, 2.4, {
+    emissive: 0x16a34a, emissiveIntensity: 0.3
+  }));
+  g.add(arvore(4.2, -3.4, 0.7, 0x4ade80));
+
+  g.userData.animar = (t) => {
+    folhas.forEach((f, i) => { f.rotation.z = Math.sin(t * 1.6 + i * 0.7) * 0.13; });
+  };
+  return g;
+}
+
 /* =========================================================================
  * ZONA 5 — TECNOLOGIA SOCIAL
  * ======================================================================= */
@@ -522,6 +611,54 @@ export function buildDadosAbertos() {
       const h = 0.5 + (Math.sin(t * 1.2 + i * 0.8) * 0.5 + 0.5) * 1.9;
       b.scale.y = h;
       b.position.y = 2.4 + h / 2;
+    });
+  };
+  return g;
+}
+
+/** Praça com Wi-Fi público: antena solar com ondas pulsando e um banco. */
+export function buildWifiPublico() {
+  const g = new THREE.Group();
+
+  g.add(cyl(3.2, 3.4, 0.3, 12, 0xcbd5e1, 0, 0.15, 0));    // piso circular
+  g.add(cyl(0.22, 0.3, 5.2, 8, 0x475569, 0, 2.6, 0));      // mastro
+  g.add(box(1.0, 0.5, 1.0, 0x1e293b, 0, 5.3, 0));          // caixa da antena
+  g.add(cyl(0.06, 0.06, 1.1, 6, 0x94a3b8, 0, 6.1, 0));     // haste
+
+  // painel solar: a praça não gasta energia da rede para ficar conectada
+  const painel = box(1.8, 0.1, 1.2, 0x1d4ed8, 0, 4.5, 0.9, {
+    emissive: 0x1e40af, emissiveIntensity: 0.3
+  });
+  painel.rotation.x = -0.5;
+  g.add(painel);
+
+  // ondas de Wi-Fi: três arcos que crescem e somem, um atrás do outro
+  const ondas = [];
+  for (let i = 0; i < 3; i++) {
+    const onda = new THREE.Mesh(
+      new THREE.TorusGeometry(0.55 + i * 0.45, 0.07, 6, 20, Math.PI),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.9 })
+    );
+    onda.position.y = 6.2;
+    onda.rotation.x = Math.PI;
+    ondas.push(onda);
+    g.add(onda);
+  }
+
+  // banco para quem para para usar a rede
+  const banco = new THREE.Group();
+  banco.add(box(2.6, 0.16, 0.6, 0x8d6e63, 0, 0.75, 0));
+  banco.add(box(0.16, 0.6, 0.5, 0x475569, -1.1, 0.45, 0));
+  banco.add(box(0.16, 0.6, 0.5, 0x475569, 1.1, 0.45, 0));
+  banco.position.set(0, 0, 2.4);
+  g.add(banco);
+  g.add(arvore(-3.6, 2.6, 0.7, 0x60a5fa));
+
+  g.userData.animar = (t) => {
+    ondas.forEach((onda, i) => {
+      const fase = (t * 0.9 + i * 0.33) % 1;
+      onda.scale.setScalar(0.6 + fase * 1.5);
+      onda.material.opacity = 0.85 * (1 - fase);
     });
   };
   return g;
@@ -757,4 +894,155 @@ export function buildAreaSegura() {
     facho.material.opacity = 0.1 + Math.sin(t * 1.5) * 0.04;
   };
   return g;
+}
+
+/* =========================================================================
+ * PORRETE — a defesa do jogador, vista em primeira pessoa
+ * ======================================================================= */
+
+/**
+ * Pedaço de madeira que o jogador carrega para revidar as investidas.
+ * O grupo fica pendurado na câmera, então é modelado em coordenadas de
+ * câmera (+X à direita, −Z para a frente) com a origem no punho.
+ */
+export function buildPorrete() {
+  const g = new THREE.Group();
+
+  g.add(cyl(0.045, 0.055, 0.5, 7, 0x8d6e63, 0, 0.25, 0));   // cabo
+  g.add(cyl(0.06, 0.06, 0.14, 7, 0x334155, 0, 0.08, 0));    // fita do punho
+  g.add(cyl(0.115, 0.065, 0.62, 7, 0xa05a2c, 0, 0.8, 0));   // corpo
+  g.add(sph(0.055, 0x7a4520, 0.09, 0.72, 0.03));            // nós da madeira
+  g.add(sph(0.045, 0x7a4520, -0.08, 0.95, -0.02));
+  g.add(cyl(0.12, 0.115, 0.08, 7, 0x6b3f1d, 0, 1.09, 0));   // ponta reforçada
+
+  return g;
+}
+
+/* =========================================================================
+ * COLEGAS — avatares dos outros alunos na mesma cidade
+ * ======================================================================= */
+
+/**
+ * Avatar low-poly de um colega de turma. A origem fica no chão e o rosto
+ * aponta para +Z, como os animais, para poder ser girado com atan2.
+ * @param {number} cor cor da camiseta (uma por aluno, sorteada pelo id)
+ */
+export function buildAvatarColega(cor = 0x38bdf8) {
+  const g = new THREE.Group();
+  const pele = 0xd9a066;
+
+  const pernas = [
+    box(0.22, 0.8, 0.24, 0x334155, -0.15, 0.4, 0),
+    box(0.22, 0.8, 0.24, 0x334155, 0.15, 0.4, 0)
+  ];
+  pernas.forEach((p) => g.add(p));
+
+  g.add(box(0.6, 0.75, 0.36, cor, 0, 1.17, 0));            // camiseta da turma
+  g.add(box(0.62, 0.16, 0.38, 0x1e293b, 0, 0.83, 0));      // cintura
+
+  const bracos = [
+    box(0.16, 0.66, 0.18, cor, -0.38, 1.2, 0),
+    box(0.16, 0.66, 0.18, cor, 0.38, 1.2, 0)
+  ];
+  bracos.forEach((b) => g.add(b));
+  g.add(box(0.15, 0.16, 0.17, pele, -0.38, 0.83, 0));      // mãos
+  g.add(box(0.15, 0.16, 0.17, pele, 0.38, 0.83, 0));
+
+  const cabeca = new THREE.Group();
+  cabeca.add(box(0.42, 0.44, 0.4, pele, 0, 0, 0));
+  cabeca.add(box(0.44, 0.16, 0.42, 0x3f2a1d, 0, 0.19, 0));   // cabelo
+  cabeca.add(sph(0.045, 0x111111, -0.1, 0.02, 0.21));
+  cabeca.add(sph(0.045, 0x111111, 0.1, 0.02, 0.21));
+  cabeca.position.set(0, 1.78, 0);
+  g.add(cabeca);
+
+  // mochila: ajuda a reconhecer o colega mesmo de costas
+  g.add(box(0.42, 0.5, 0.18, 0x1d4ed8, 0, 1.2, -0.27));
+
+  /**
+   * Animação de caminhada. `rapidez` (0–1) vem da distância que o colega
+   * percorreu entre duas atualizações de rede: parado, ele só respira.
+   */
+  g.userData.animarColega = (t, rapidez = 0) => {
+    const balanco = Math.sin(t * 9) * 0.7 * rapidez;
+    pernas[0].rotation.x = balanco;
+    pernas[1].rotation.x = -balanco;
+    bracos[0].rotation.x = -balanco;
+    bracos[1].rotation.x = balanco;
+    g.position.y = Math.abs(Math.sin(t * 9)) * 0.05 * rapidez;
+    cabeca.position.y = 1.78 + Math.sin(t * 1.8) * 0.012;
+  };
+  return g;
+}
+
+/* =========================================================================
+ * SANGUE — partículas mostradas quando o animal morde o jogador
+ * ======================================================================= */
+
+/**
+ * Gotas de sangue reaproveitadas num pool: `explodir()` reposiciona todas
+ * num ponto e `atualizar(dt)` faz cada uma cair até sumir. O visual é
+ * cartoon, no mesmo estilo low-poly do resto da cidade.
+ */
+export function criarSangue(scene, quantidade = 26) {
+  // pequenas de proposito: as gotas nascem a pouco mais de um metro da
+  // camera, e qualquer coisa maior que isso vira um borrao vermelho na tela
+  const geometria = new THREE.TetrahedronGeometry(0.07, 0);
+
+  const gotas = [];
+  for (let i = 0; i < quantidade; i++) {
+    const malha = new THREE.Mesh(
+      geometria,
+      new THREE.MeshBasicMaterial({ color: 0xc81e2b, transparent: true, opacity: 1 })
+    );
+    malha.visible = false;
+    scene.add(malha);
+    gotas.push({ malha, vel: new THREE.Vector3(), vida: 0 });
+  }
+
+  return {
+    /** Espirra sangue a partir de um ponto do mundo. */
+    explodir(posicao, forca = 1) {
+      gotas.forEach((gota) => {
+        const ang = Math.random() * Math.PI * 2;
+        const alcance = (1.6 + Math.random() * 3.2) * forca;
+        gota.vel.set(
+          Math.cos(ang) * alcance,
+          2.2 + Math.random() * 3.4,
+          Math.sin(ang) * alcance
+        );
+        gota.malha.position.set(
+          posicao.x + (Math.random() - 0.5) * 0.5,
+          Math.max(0.4, posicao.y - 0.4) + Math.random() * 0.5,
+          posicao.z + (Math.random() - 0.5) * 0.5
+        );
+        gota.malha.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+        gota.malha.scale.setScalar(0.7 + Math.random() * 0.9);
+        gota.malha.material.opacity = 1;
+        gota.malha.visible = true;
+        gota.vida = 1.5 + Math.random() * 0.7;
+      });
+    },
+
+    /** Faz as gotas caírem e desbotarem. Chamada a cada quadro. */
+    atualizar(dt) {
+      for (const gota of gotas) {
+        if (gota.vida <= 0) continue;
+        gota.vida -= dt;
+        if (gota.vida <= 0) { gota.malha.visible = false; continue; }
+        gota.vel.y -= 9.8 * dt;
+        gota.malha.position.addScaledVector(gota.vel, dt);
+        if (gota.malha.position.y < 0.06) {
+          // chegou ao chão: para de quicar e vira uma mancha que desbota
+          gota.malha.position.y = 0.06;
+          gota.vel.set(0, 0, 0);
+          gota.malha.scale.y = 0.25;
+        } else {
+          gota.malha.rotation.x += dt * 6;
+          gota.malha.rotation.z += dt * 4;
+        }
+        gota.malha.material.opacity = Math.min(1, gota.vida);
+      }
+    }
+  };
 }

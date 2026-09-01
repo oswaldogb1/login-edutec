@@ -30,6 +30,12 @@ export class Jogador {
     this.ativo = false;      // só anda quando o jogo está rodando
     this.distanciaAndada = 0;
 
+    /**
+     * Ignora o teclado sem parar a simulação. É o que permite digitar no
+     * bate-papo sem sair andando pela cidade a cada letra do WASD.
+     */
+    this.bloqueado = false;
+
     this._frente = new THREE.Vector3();
     this._direita = new THREE.Vector3();
     this._cima = new THREE.Vector3(0, 1, 0);
@@ -41,6 +47,7 @@ export class Jogador {
   }
 
   _tecla(evento, pressionada) {
+    if (this.bloqueado) return;
     switch (evento.code) {
       case 'KeyW': case 'ArrowUp':    this.teclas.frente = pressionada; break;
       case 'KeyS': case 'ArrowDown':  this.teclas.tras = pressionada; break;
@@ -68,6 +75,11 @@ export class Jogador {
 
   get posicao() {
     return this.objeto.position;
+  }
+
+  /** Rapidez horizontal atual em m/s (0 parado). */
+  get rapidez() {
+    return Math.hypot(this.velocidade.x, this.velocidade.z);
   }
 
   /** Direção horizontal para onde o jogador olha (usada pela bússola/minimapa). */

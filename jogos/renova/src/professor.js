@@ -121,6 +121,8 @@ function listarRegistros(filtroTurma) {
         pontuacao: Number(r.pontuacao) || 0,
         pontosDescobertos: Number(r.pontosDescobertos) || 0,
         totalPontos: Number(r.totalPontos) || 0,
+        perguntasRespondidas: Number(r.perguntasRespondidas) || 0,
+        totalPerguntas: Number(r.totalPerguntas) || 0,
         timestamp: Number(r.timestamp) || 0
       });
     }
@@ -204,6 +206,7 @@ function renderizar() {
       <td>${escapar(r.nome)}${quando ? `<span class="detalhe">${quando}</span>` : ''}</td>
       <td>${escapar(r.turma)}</td>
       <td>${r.pontosDescobertos}${r.totalPontos ? ` / ${r.totalPontos}` : ''}</td>
+      <td>${r.totalPerguntas ? `${r.perguntasRespondidas} / ${r.totalPerguntas}` : '—'}</td>
       <td class="pontos">${r.pontuacao}</td>
     `;
     corpo.appendChild(tr);

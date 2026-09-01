@@ -26,6 +26,9 @@
   <!-- Vinheta vermelha que pulsa conforme o animal se aproxima -->
   <div id="vinheta-perigo" class="vinheta-perigo" hidden></div>
 
+  <!-- Respingos de sangue das mordidas (as gotas são criadas pelo hud.js) -->
+  <div id="sangue-tela" class="sangue-tela"></div>
+
   <!-- ===================== HUD ===================== -->
   <div id="hud" hidden>
     <div class="hud-canto hud-esquerda">
@@ -40,6 +43,11 @@
         <div class="hud-pontuacao">
           <span class="rotulo">Pontos</span>
           <span id="hud-pontos">0</span>
+        </div>
+        <div class="hud-vida">
+          <span class="rotulo">❤️ Vida</span>
+          <div class="barra vida"><div id="hud-barra-vida"></div></div>
+          <span id="hud-vida-valor">100</span>
         </div>
         <div class="hud-progresso">
           <div class="barra"><div id="hud-barra-progresso"></div></div>
@@ -56,6 +64,9 @@
         <div id="bussola-agulha" class="agulha">▲</div>
         <span id="bussola-valor">N 0°</span>
       </div>
+      <div id="hud-online" class="hud-online" hidden>
+        👥 <span id="hud-online-num">0</span> na cidade
+      </div>
     </div>
 
     <!-- Alerta da fuga: aparece quando um animal está perseguindo o jogador -->
@@ -69,6 +80,21 @@
         <span id="alerta-abrigo">Área Segura a 0 m</span>
         <kbd>Shift</kbd> correr
       </div>
+      <div id="alerta-revide" class="alerta-linha alerta-revide">
+        <kbd>F</kbd> revidar a pauladas
+        <span id="alerta-golpes">0 / 3</span>
+      </div>
+    </div>
+
+    <!-- Bate-papo com os colegas que estão na mesma cidade -->
+    <div id="chat" class="chat">
+      <div id="chat-lista" class="chat-lista"></div>
+      <form id="chat-form" class="chat-form" autocomplete="off" hidden>
+        <span class="chat-seta">💬</span>
+        <input id="chat-entrada" type="text" maxlength="120"
+               placeholder="Escreva e aperte Enter (Enter vazio fecha)…" />
+      </form>
+      <div id="chat-dica" class="chat-dica"><kbd>T</kbd> conversar com a turma</div>
     </div>
 
     <div class="mira"></div>
@@ -94,9 +120,10 @@
       <p class="tag">Jogo educacional · 1ª pessoa</p>
       <h1>🌱 Cidade Inteligente<br />e Sustentável</h1>
       <p class="subtitulo">
-        Explore uma cidade em 3D e descubra <strong id="total-pontos-inicio">12</strong>
-        tecnologias e práticas que tornam uma cidade mais sustentável.
-        Responda aos desafios e marque pontos para a sua turma.
+        Explore uma cidade em 3D com a sua turma, descubra
+        <strong id="total-pontos-inicio">15</strong> tecnologias sustentáveis e
+        responda às <strong class="total-perguntas">45</strong> perguntas
+        espalhadas por ela. Cada acerto vale pontos no ranking da classe.
       </p>
 
       <form id="form-inicio" autocomplete="off">
@@ -132,14 +159,19 @@
         <div class="controle"><kbd>Mouse</kbd><span>Olhar em volta</span></div>
         <div class="controle"><kbd>Shift</kbd><span>Correr</span></div>
         <div class="controle"><kbd>E</kbd><span>Interagir com um ponto brilhante</span></div>
+        <div class="controle"><kbd>F</kbd><span>Revidar a pauladas quando um animal ataca</span></div>
+        <div class="controle"><kbd>T</kbd><span>Conversar com os colegas pelo teclado</span></div>
         <div class="controle"><kbd>Esc</kbd><span>Pausar o jogo</span></div>
       </div>
 
       <div class="dicas">
         <p>🔦 Procure os <strong>feixes de luz coloridos</strong>: cada um é um ponto de descoberta.</p>
         <p>🗺️ Use o <strong>minimapa</strong> (canto superior direito) para achar as 5 zonas da cidade.</p>
-        <p>🎯 São <strong id="total-pontos-tutorial">12</strong> pontos no total. Acertar de primeira vale mais pontos —
-           mas errar não é problema: você pode tentar de novo.</p>
+        <p>🎯 São <strong id="total-pontos-tutorial">15</strong> pontos, cada um com uma série de
+           perguntas — <strong class="total-perguntas">45</strong> no total. Acertar de primeira vale
+           mais pontos, mas errar não é problema: você pode tentar de novo.</p>
+        <p>👥 A cidade é <strong>compartilhada</strong>: os colegas da turma aparecem andando
+           junto com você. Chegue perto de alguém e aperte <kbd>T</kbd> para conversar.</p>
       </div>
 
       <div class="dicas alerta">
@@ -147,7 +179,12 @@
            e sai atrás de você.</p>
         <p>🛡️ Segure <kbd>Shift</kbd> e corra até uma <strong>Área Segura</strong> — os quatro
            abrigos com feixe de luz verde. Chegando lá, a pergunta reabre para você tentar de novo.</p>
-        <p>😱 Se o animal te alcançar, é só um susto: você perde alguns pontos e acorda no abrigo.</p>
+        <p>🪵 Ou vire e <strong>revide</strong>: aperte <kbd>F</kbd> (ou clique) para acertar o
+           bicho com o porrete. Cada paulada deixa ele tonto por 2 segundos — sua chance de fugir.
+           Depois de <strong id="golpes-tutorial">3</strong> pauladas ele desiste e vai embora.</p>
+        <p>🩸 Se ele te alcançar, você é mordido: perde parte da <strong>barra de vida</strong> e
+           sangra, mas a fuga continua. Só quando a vida zera você desmaia e acorda no abrigo.
+           Parado, a vida volta sozinha — dentro de uma Área Segura, bem mais rápido.</p>
       </div>
 
       <button id="btn-jogar" class="botao primario grande">Entrar na cidade 🏙️</button>
@@ -165,6 +202,7 @@
 
       <div class="quiz">
         <p id="painel-retomada" class="retomada" hidden></p>
+        <span id="painel-progresso" class="painel-progresso">Pergunta 1 de 3</span>
         <h3 id="quiz-enunciado"></h3>
         <div id="quiz-opcoes" class="quiz-opcoes"></div>
         <p id="quiz-feedback" class="quiz-feedback"></p>
@@ -202,8 +240,10 @@
         <div><span class="rotulo">Aluno(a)</span><strong id="resultado-nome">—</strong></div>
         <div><span class="rotulo">Turma</span><strong id="resultado-turma">—</strong></div>
         <div><span class="rotulo">Pontos descobertos</span><strong id="resultado-descobertos">—</strong></div>
+        <div><span class="rotulo">Perguntas respondidas</span><strong id="resultado-respondidas">—</strong></div>
         <div><span class="rotulo">Acertos de primeira</span><strong id="resultado-acertos">—</strong></div>
         <div><span class="rotulo">Tempo de exploração</span><strong id="resultado-tempo">—</strong></div>
+        <div><span class="rotulo">Enfrentamentos</span><strong id="resultado-fuga">—</strong></div>
       </div>
 
       <p id="resultado-status" class="status"></p>

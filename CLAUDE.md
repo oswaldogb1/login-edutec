@@ -49,6 +49,8 @@ The database is **shared across school projects**, so every writer confines itse
 | `/bingoCidade` | `jogos/Bingo` | Both copies of the bingo share this node — see the Bingo warning below. |
 | `/cidade_inteligente/salas/{CODIGO}` | `jogos/Cidade` | Namespace enforced in code — see below. |
 | `/cidade_desperta/salas/{SALA}` | `jogos/quebra` | Namespace enforced by `NUVEM.raiz` + `urlSala()`. |
+| `/renova_cidade/salas/geral` | `jogos/renova` | Shared 3D city: live player positions + class chat, over raw REST. Namespace enforced by `montarCaminho()`; `DELETE` limited to `jogadores/{id}`. |
+| `/resultados/{turma}` | `jogos/renova` | Scores. Written with `push()` only — see that game's `CLAUDE.md`. |
 
 `jogos/Cidade/js/firebase.js` has a single URL builder (`montarCaminho`) that forces its prefix, refuses `PUT`, and self-tests on load. Never add a raw Firebase `fetch()` there, and never widen its `DELETE`.
 

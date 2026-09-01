@@ -81,6 +81,10 @@ export async function salvarResultado(resultado) {
     pontosDescobertos: Number(resultado.pontosDescobertos) || 0,
     totalPontos: Number(resultado.totalPontos) || 0,
     acertosPrimeira: Number(resultado.acertosPrimeira) || 0,
+    perguntasRespondidas: Number(resultado.perguntasRespondidas) || 0,
+    totalPerguntas: Number(resultado.totalPerguntas) || 0,
+    mordidas: Number(resultado.mordidas) || 0,
+    golpes: Number(resultado.golpes) || 0,
     duracaoSegundos: Math.round(Number(resultado.duracaoSegundos) || 0),
     timestamp: Date.now(),
     dataLocal: new Date().toLocaleString('pt-BR')

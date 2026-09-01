@@ -1,10 +1,14 @@
 # 🌱 Cidade Inteligente e Sustentável
 
 Jogo educacional **3D em primeira pessoa** para navegador. O aluno explora uma cidade
-low-poly e descobre **12 tecnologias e práticas sustentáveis reais**, distribuídas em
-**5 zonas temáticas**. Cada descoberta traz uma explicação curta e um desafio de múltipla
-escolha. Ao final, a pontuação vai automaticamente para um **ranking da turma em tempo real**,
-que o professor projeta na TV ou no telão.
+low-poly e descobre **15 tecnologias e práticas sustentáveis reais**, distribuídas em
+**5 zonas temáticas**. Cada descoberta traz uma explicação curta e uma **série de 3 perguntas**
+de múltipla escolha — **45 perguntas** na partida inteira. Ao final, a pontuação vai
+automaticamente para um **ranking da turma em tempo real**, que o professor projeta na TV ou
+no telão.
+
+A cidade é **compartilhada**: todos os alunos da escola entram na mesma sala, se veem andando
+pelo mapa e conversam pelo teclado enquanto exploram.
 
 Feito para sala de aula (ensino fundamental II / médio). **100% estático** — roda no GitHub
 Pages sem backend próprio.
@@ -34,18 +38,23 @@ Pages sem backend próprio.
 | `W` `A` `S` `D` (ou setas) | Andar |
 | Mouse | Olhar em volta |
 | `Shift` | Correr — essencial para escapar dos animais |
-| `E` (ou clique) | Interagir com o ponto brilhante mais próximo |
+| `E` | Interagir com o ponto brilhante mais próximo |
+| `F` (ou clique) | Revidar a pauladas durante uma perseguição |
+| `T` | Abrir o bate-papo da turma (`Enter` envia; `Enter` vazio fecha) |
 | `Esc` | Pausar / liberar o mouse |
 
-### As 5 zonas e os 12 pontos de descoberta
+### As 5 zonas e os 15 pontos de descoberta
+
+Cada ponto tem **3 perguntas em sequência** — o local só é dado por descoberto quando o aluno
+responde todas.
 
 | Zona | Cor | Pontos |
 |---|---|---|
 | 1. ⚡ Energia Limpa | amarelo | Painéis solares · Turbina eólica · Poste inteligente |
-| 2. ♻️ Lixo e Reciclagem | verde | Lixeira inteligente · Composteira |
+| 2. ♻️ Lixo e Reciclagem | verde | Lixeira inteligente · Composteira · **Estação de coleta seletiva** |
 | 3. 🚲 Mobilidade | azul | Ciclovia · Carro elétrico e eletroposto · Ponto de ônibus conectado |
-| 4. 💧 Água e Verde | turquesa | Parque urbano · Captação de água da chuva |
-| 5. 📱 Tecnologia Social | roxo | Totem do app cidadão · Painel de dados abertos |
+| 4. 💧 Água e Verde | turquesa | Parque urbano · Captação de água da chuva · **Horta comunitária** |
+| 5. 📱 Tecnologia Social | roxo | Totem do app cidadão · Painel de dados abertos · **Praça conectada (Wi-Fi público)** |
 
 Cada zona tem chão colorido, iluminação e placa próprios, para o aluno se orientar.
 A zona 5 fica na praça central (onde o jogo começa) e as outras quatro nos quatro cantos
@@ -56,7 +65,9 @@ da cidade, ligadas por avenidas.
 - Acerto na 1ª tentativa: **100 pontos**
 - Cada erro tira **30 pontos** do valor daquela pergunta (mínimo garantido: **20**)
 - Errar **não bloqueia**: o aluno tenta de novo até acertar — o objetivo é aprender
-- Descobrir os **12 pontos** rende um bônus de **200 pontos**
+- Descobrir os **15 pontos** rende um bônus de **200 pontos**
+- Cada paulada certeira no animal vale **5 pontos** (coragem conta)
+- Uma partida completa leva bem mais tempo que a versão anterior: são 45 perguntas
 
 ### 🐕 Fuga do animal (consequência de errar)
 
@@ -70,11 +81,47 @@ abrigos com telhado verde e um facho de luz visível de longe.
 | Velocidade do animal | 6,5 m/s — **alcança quem anda** (4,4 m/s), **não alcança quem corre** (8 m/s) |
 | Áreas Seguras | 4 abrigos, nas diagonais entre as zonas; toda zona tem um a ~51 m |
 | Chegou no abrigo | a pergunta reabre para nova tentativa, sem punição extra |
-| Foi alcançado | perde 20 pontos e "acorda" no abrigo mais próximo; a pergunta reabre igual |
+| Foi alcançado | **não acaba a fuga**: leva uma mordida, perde 20 de vida e 8 pontos, e continua correndo |
+| Ficou sem vida | desmaia, perde 25 pontos e acorda no abrigo com 60 de vida; a pergunta reabre |
 
-Durante a fuga o HUD mostra o animal, a distância dele, uma seta apontando para o abrigo
-e uma vinheta vermelha que fica mais forte conforme o bicho chega perto. Não dá para
-interagir com pontos de descoberta enquanto se foge.
+Durante a fuga o HUD mostra o animal, a distância dele, uma seta apontando para o abrigo,
+o contador de pauladas e uma vinheta vermelha que fica mais forte conforme o bicho chega
+perto. Não dá para interagir com pontos de descoberta enquanto se foge.
+
+### 🩸 Barra de vida e mordidas
+
+O aluno tem **100 de vida**. Cada mordida tira **20** e espirra sangue na tela — ou seja,
+ele aguenta **cinco** antes de desmaiar, e mesmo desmaiar não custa a pergunta: ele acorda
+no abrigo e tenta de novo. Parado, a vida volta devagar; **dentro de uma Área Segura, bem
+mais rápido**, o que dá aos abrigos uma segunda utilidade.
+
+O sangue é estilizado (manchas translúcidas no vidro da tela, no mesmo traço low-poly do
+resto do jogo). Se preferir uma versão sem isso para a sua turma, `PERSEGUICAO.ativa: false`
+desliga perseguição, mordidas e sangue de uma vez só.
+
+### 🪵 Revidar a pauladas
+
+O aluno não está desarmado: ele carrega um porrete. Com `F` (ou clique) ele acerta o animal
+que estiver **à frente e a até 3,6 m**. Cada acerto empurra o bicho e o deixa **tonto por
+2 segundos** — é a janela para correr até o abrigo. Depois de **3 pauladas** o animal
+desiste e vai embora, e a pergunta reabre como se ele tivesse chegado ao abrigo.
+
+São, portanto, três saídas para cada erro: **correr**, **revidar** ou **aguentar as
+mordidas** — e cada uma delas devolve o aluno à mesma pergunta.
+
+### 👥 Cidade compartilhada e bate-papo
+
+Todos os alunos entram na **mesma sala** automaticamente — não há código de sala para
+digitar. Cada um vê os colegas andando pelo mapa, com nome e turma sobre a cabeça, e
+também como pontinhos no minimapa. O contador no canto direito mostra quantos estão online.
+
+Chegando perto de alguém, o rodapé mostra *"T conversar com Fulano"*. `T` abre a caixa de
+texto, `Enter` envia (e a mensagem aparece como um balão de fala sobre a cabeça de quem
+falou, além do histórico no canto), `Enter` vazio fecha sem enviar. Enquanto se digita, o
+personagem não anda.
+
+> Se o bate-papo atrapalhar a aula, `MULTIJOGADOR.ativo: false` em `src/config.js` desliga
+> a parte compartilhada por completo — o jogo volta a ser individual.
 
 Duas regras existem para a mecânica ser justa:
 
@@ -279,10 +326,20 @@ Como não há autenticação, o banco pode ficar com regras públicas. No consol
     "resultados": {
       ".read": true,
       ".write": true
+    },
+    "renova_cidade": {
+      ".read": true,
+      ".write": true
     }
   }
 }
 ```
+
+> `renova_cidade` é o nó da **cidade compartilhada** (posições dos alunos e bate-papo).
+> Ele é separado de `resultados` de propósito: o jogo nunca escreve fora dele, e a única
+> exclusão que o código sabe fazer é a do próprio avatar do aluno ao sair da partida.
+> Se quiser limpar o histórico do bate-papo, apague `renova_cidade` no console —
+> ele se recria sozinho na próxima partida.
 
 Se quiser um passo a mais de proteção **no lado do servidor** (recomendado), estas regras
 permitem criar registros novos mas **proíbem alterar ou apagar** os já existentes:
@@ -363,10 +420,40 @@ export const PERSEGUICAO = {
   velocidadeAnimal: 6.5,     // entre o andar e o correr do jogador
   distanciaSurgimento: 16,   // a que distância o animal aparece
   raioAreaSegura: 7,
-  penalidadeCaptura: 20,     // 0 = ser alcançado não custa pontos, só o susto
+  penalidadeMordida: 8,      // 0 = ser mordido não custa pontos, só vida
+  golpesParaEspantar: 3,     // pauladas para o animal desistir e ir embora
+  penalidadeDesmaio: 25,     // custo de ficar sem vida
   tempoAvisoMs: 2200
 };
+
+export const VIDA = {
+  maxima: 100,
+  danoMordida: 20,           // 20 = o aluno aguenta 5 mordidas
+  invulneravelMs: 1400,      // respiro entre uma mordida e outra
+  regeneracaoPorSegundo: 3,          // andando pela cidade
+  regeneracaoAbrigoPorSegundo: 14,   // dentro de uma Área Segura
+  vidaAoAcordar: 60          // com quanto ele volta depois de desmaiar
+};
+
+export const PORRETE = {
+  alcance: 3.6,              // metros
+  anguloGraus: 75,           // abertura da mira
+  recargaMs: 650,            // intervalo entre pauladas
+  atordoamentoMs: 2000,      // 2 s de bicho tonto = janela para fugir
+  empurrao: 4.5,
+  pontosPorGolpe: 5
+};
+
+export const MULTIJOGADOR = {
+  ativo: true,               // false = cada aluno joga sozinho
+  sala: 'geral',             // todo mundo na mesma cidade
+  intervaloEnvioMs: 260,     // de quanto em quanto tempo a posição é publicada
+  distanciaConversa: 14      // distância para o colega aparecer como "por perto"
+};
 ```
+
+> Para uma turma que se dispersa com o bate-papo, basta `MULTIJOGADOR.ativo: false` —
+> o jogo volta a ser individual e nada mais muda.
 
 > A velocidade final do jogador é `velocidade / atrito`. Se mudar `atrito`, reveja
 > `velocidadeAnimal`: o animal precisa continuar **mais rápido que o passo e mais lento
@@ -419,7 +506,7 @@ para `+Z` (o módulo de fuga gira o grupo com `atan2`), e adicione uma entrada �
 │   └── css/style.css     # estilos do jogo e do painel do professor
 └── src/
     ├── config.js         # ⚙️ regras, senha, Firebase, velocidade
-    ├── zones.js          # 📚 conteúdo: 5 zonas, 12 pontos, explicações e perguntas
+    ├── zones.js          # 📚 conteúdo: 5 zonas, 15 pontos, 45 perguntas
     ├── models.js         # 🧱 modelagem 3D low-poly de cada objeto
     ├── world.js          # 🏙️ cidade: chão, ruas, prédios, zonas, abrigos, colisores
     ├── player.js         # 🚶 câmera em 1ª pessoa, WASD e colisão
@@ -442,24 +529,34 @@ Verificado em Chrome, com servidor local e o banco real:
 - [x] Aproximação de um ponto mostra o aviso `E descobrir …`
 - [x] Painel de interação abre com explicação, pergunta e alternativas
 - [x] Resposta errada: alternativa fica vermelha, valor cai (100 → 70) e a fuga começa
-- [x] **Fuga andando** (sem Shift): alcançado em ~6,7 s, −20 pontos, levado ao abrigo
+- [x] **Fuga andando** (sem Shift): mordido em ~7 s; cinco mordidas → desmaio, −25 pontos, acorda no abrigo
 - [x] **Fuga correndo** (com Shift): escapa em ~4–6 s, sem perder pontos
+- [x] **Revide**: 3 pauladas espantam o animal; cada acerto atordoa por 2 s e vale 5 pontos
+- [x] Golpe fora do alcance/da mira erra (só o som do vento) e respeita a recarga de 650 ms
+- [x] Barra de vida cai a cada mordida, muda de cor e regenera (rápido dentro do abrigo)
 - [x] Ao voltar do abrigo a pergunta reabre com as alternativas já erradas marcadas e o valor preservado
 - [x] Abrigo já usado fica bloqueado na fuga seguinte (aparece apagado no minimapa)
 - [x] O animal nasce do lado oposto ao abrigo de destino
 - [x] Durante a fuga não dá para interagir com pontos nem fechar o painel para escapar
 - [x] Os três animais (cachorro, ganso, enxame) aparecem e animam corretamente
 - [x] Resposta certa: soma pontos, revela a curiosidade, trava as alternativas
-- [x] Ponto descoberto fica **verde** no mundo 3D e no minimapa; HUD atualiza (`1/12`)
-- [x] Tela de resultado com pontuação, descobertas, acertos e tempo
+- [x] Série de perguntas: acertar emenda a próxima (`Pergunta 2 de 3`) e o ponto só fecha na última
+- [x] Ponto descoberto fica **verde** no mundo 3D e no minimapa; HUD atualiza (`1/15 locais · 3/45 perguntas`)
+- [x] **Multijogador com duas abas**: cada uma vê o avatar da outra, com nome, turma e posição corretos
+- [x] **Bate-papo**: mensagem enviada numa aba chega na outra, com balão de fala sobre o avatar
+- [x] Colega parado continua com nome e posição certos (o `patch` do Firebase traz só o que mudou)
+- [x] Ao fechar a aba, o avatar some da cidade dos outros
+- [x] Tela de resultado com pontuação, descobertas, perguntas, acertos, tempo e enfrentamentos
 - [x] **Gravação no Firebase** confirmada no banco real (`resultados/TESTE/...`)
 - [x] Fallback: sem internet, o resultado é salvo no `localStorage` e o jogo avisa
 - [x] **Professor com senha errada (`12345`) → acesso negado**
 - [x] **Professor com senha `54321` → entra e carrega o ranking**
 - [x] **Ranking em tempo real**: resultado gravado em outra aba apareceu sozinho, sem recarregar
 - [x] Ordenação, medalhas, filtro de turma e cartões de estatística
-- [x] Auditoria de código: nenhum `set()`, `update()` ou `remove()` do Firebase no projeto
-- [x] Validação do conteúdo: 12 pontos, 2–3 por zona, todas as perguntas com índice correto válido
+- [x] Auditoria de código: nenhum `set()`, `update()` ou `remove()` do SDK do Firebase no projeto
+- [x] Autoteste do multijogador recusa caminhos como `../resultados` e exclusões fora de `jogadores/`
+- [x] Dados de teste da cidade compartilhada apagados do banco depois dos testes
+- [x] Validação do conteúdo: 15 pontos (3 por zona), 45 perguntas, todas com índice correto válido
 - [x] Nomes de turma normalizados: `9ºA → 9ºA`, `7.C → 7-C`, `Turma/X → TURMA-X`, vazio → `SEM-TURMA`
 
 > Durante os testes foram gravados dois registros na turma **`TESTE`**
@@ -481,9 +578,19 @@ se a janela não estiver em foco). Clique na cena e a mensagem some. O jogo cont
 jogável pelo teclado enquanto isso.
 
 **Não consigo escapar do animal de jeito nenhum**
-Segure `Shift`. Andando, o animal é mais rápido que você — é proposital. Se ainda assim
-estiver difícil na sua turma, baixe `PERSEGUICAO.velocidadeAnimal` em `src/config.js`
-(ou zere `penalidadeCaptura` para o susto não custar pontos).
+Segure `Shift` — andando, o animal é mais rápido que você, e isso é proposital. Ou vire e
+aperte `F`: cada paulada deixa o bicho tonto por 2 segundos, e três o espantam de vez. Se
+ainda assim estiver difícil na sua turma, baixe `PERSEGUICAO.velocidadeAnimal`, aumente
+`PORRETE.atordoamentoMs` ou zere `PERSEGUICAO.penalidadeMordida` em `src/config.js`.
+
+**Não vejo nenhum colega na cidade**
+Confira se `MULTIJOGADOR.ativo` está `true` e se as regras do banco liberam `.read`/`.write`
+em `renova_cidade`. Sem internet o jogo avisa no bate-papo (*"você está explorando sozinho"*)
+e continua funcionando normalmente — só sem os colegas.
+
+**Apertei `Esc` para fechar o bate-papo e o jogo pausou**
+É o navegador: `Esc` sempre devolve o mouse à página, e isso pausa o jogo. Clique em
+"Continuar explorando". Para fechar a caixa de texto sem pausar, dê `Enter` com ela vazia.
 
 **O jogo "congela" quando eu troco de aba**
 É o navegador economizando recursos: ele pausa a animação de abas ocultas. Ao voltar
