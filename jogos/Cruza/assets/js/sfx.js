@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CRUZA! — Efeitos sonoros sinteticos (WebAudio, sem arquivos externos)
+   Batalha das Cruzadinhas! — Efeitos sonoros sinteticos (WebAudio, sem arquivos externos)
    ========================================================================== */
 (function (global) {
   'use strict';

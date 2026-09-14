@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CRUZA! — Painel do professor: ranking ao vivo para projeção
+   Batalha das Cruzadinhas! — Painel do professor: ranking ao vivo para projeção
    ========================================================================== */
 (function () {
   'use strict';
@@ -337,7 +337,7 @@
     var blob = new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'cruza-ranking-' + P.sala + '.csv';
+    a.download = 'batalha-das-cruzadinhas-ranking-' + P.sala + '.csv';
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
   }

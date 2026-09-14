@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CRUZA! — Camada de dados (Firebase Realtime Database via REST)
+   Batalha das Cruzadinhas! — Camada de dados (Firebase Realtime Database via REST)
    REGRA DE OURO: este modulo NUNCA apaga nada no servidor.
    Escreve apenas com PATCH (merge) dentro do namespace /cruzada_cidades.
    ========================================================================== */

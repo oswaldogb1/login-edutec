@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CRUZA! — Cidades Inteligentes e Sustentáveis
+   Batalha das Cruzadinhas! — Cidades Inteligentes e Sustentáveis
    Definicao do tabuleiro: palavras, dicas e posicoes (layout 17x17 fixo,
    gerado com 21 cruzamentos para que todas as 15 palavras se conectem).
    ========================================================================== */

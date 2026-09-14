@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CRUZA! — Painel do professor (otimizado para projeção)
+   Batalha das Cruzadinhas! — Painel do professor (otimizado para projeção)
    ========================================================================== */
 
 /* -------------------------------------------------------------- acesso  */
@@ -75,7 +75,7 @@
   padding: 0.7rem 1.1rem;
   border-radius: var(--r-md);
 }
-.barra .marca { font-size: 1.6rem; }
+.barra .marca { font-size: 1.6rem; white-space: nowrap; }
 .barra .sep { flex: 1 1 auto; }
 .ferramentas-prof { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 

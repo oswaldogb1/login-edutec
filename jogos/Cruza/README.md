@@ -1,4 +1,4 @@
-# 🧩 CRUZA! — Cidades Inteligentes e Sustentáveis
+# 🧩 Batalha das Cruzadinhas! — Cidades Inteligentes e Sustentáveis
 
 Cruzadinha animada em ambiente 3D + painel do professor com **ranking ao vivo**
 para projetar na sala de aula.

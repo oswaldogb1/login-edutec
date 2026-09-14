@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CRUZA! — Logica do jogo (tela do aluno)
+   Batalha das Cruzadinhas! — Logica do jogo (tela do aluno)
    ========================================================================== */
 (function () {
   'use strict';

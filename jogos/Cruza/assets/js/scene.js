@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CRUZA! — Cenario 3D (Three.js r128)
+   Batalha das Cruzadinhas! — Cenario 3D (Three.js r128)
    Cidade inteligente low-poly animada, usada como ambiente das duas telas.
    Degrada com elegancia: se WebGL/Three falhar, a pagina fica so com o
    gradiente do CSS e o jogo continua funcionando normalmente.
