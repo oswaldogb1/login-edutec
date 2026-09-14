@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CRUZA! — Painel do Professor</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/teacher.css">
+</head>
+<body>
+
+<canvas id="cena3d"></canvas>
+<div class="veu"></div>
+
+<!-- ============================================================= ACESSO -->
+<section id="telaAcesso" class="camada acesso">
+  <div class="cartao-acesso painel" id="cartaoAcesso">
+    <div class="cadeado">🔐</div>
+    <h1 class="marca" style="font-size:2rem">Área do Professor</h1>
+    <p class="subtitulo" style="color:var(--texto-suave);margin:.4rem 0 0">Digite a senha para abrir o ranking ao vivo</p>
+
+    <div class="pontos-senha" id="pontosSenha">
+      <div class="ponto-senha"></div><div class="ponto-senha"></div><div class="ponto-senha"></div>
+      <div class="ponto-senha"></div><div class="ponto-senha"></div>
+    </div>
+    <p class="aviso-erro" id="avisoAcesso" style="color:var(--vermelho);font-size:.85rem;min-height:1.2em"></p>
+
+    <div class="teclado-senha" id="tecladoSenha">
+      <button class="tecla" data-t="1">1</button><button class="tecla" data-t="2">2</button><button class="tecla" data-t="3">3</button>
+      <button class="tecla" data-t="4">4</button><button class="tecla" data-t="5">5</button><button class="tecla" data-t="6">6</button>
+      <button class="tecla" data-t="7">7</button><button class="tecla" data-t="8">8</button><button class="tecla" data-t="9">9</button>
+      <button class="tecla" data-t="limpar">✕</button><button class="tecla" data-t="0">0</button><button class="tecla" data-t="ok">✓</button>
+    </div>
+
+    <p style="margin-top:1.4rem"><a href="index.html" style="color:var(--azul);font-size:.85rem;text-decoration:none">← Voltar para o jogo</a></p>
+  </div>
+</section>
+
+<!-- ============================================================= PAINEL -->
+<section id="telaPainel" class="camada painel-prof oculto">
+
+  <header class="barra painel">
+    <div class="marca">CRUZA!</div>
+    <span class="pilula"><i class="led off" id="ledStatus"></i><span id="txtStatus">conectando…</span></span>
+    <div class="sala-atual" id="salaAtual">GERAL</div>
+    <div class="sep"></div>
+    <div class="ferramentas-prof">
+      <button class="btn fantasma" id="btnTrocarSala">🏫 Trocar sala</button>
+      <button class="btn fantasma" id="btnOrdenar">↕ Ordenar: pontos</button>
+      <button class="btn fantasma" id="btnProjecao">📺 Projeção</button>
+      <button class="btn fantasma" id="btnTela">⛶ Tela cheia</button>
+      <button class="btn fantasma" id="btnCSV">⬇ CSV</button>
+    </div>
+  </header>
+
+  <div class="cartoes-stat">
+    <div class="stat a"><b id="stJogadores">0</b><span>jogando agora</span></div>
+    <div class="stat b"><b id="stConcluiram">0</b><span>concluíram</span></div>
+    <div class="stat c"><b id="stMedia">0</b><span>média de pontos</span></div>
+    <div class="stat d"><b id="stPalavras">0</b><span>palavras acertadas</span></div>
+  </div>
+
+  <div class="conteudo">
+    <div style="display:grid;gap:.8rem">
+      <section class="bloco painel">
+        <h2>🏆 Pódio ao vivo</h2>
+        <div class="podio" id="podio"></div>
+      </section>
+
+      <section class="bloco painel convite-bloco">
+        <h2>📱 Como os alunos entram</h2>
+        <div class="convite">
+          <div class="qr" id="qr"></div>
+          <div style="flex:1 1 200px">
+            <p style="margin:0 0 .5rem;font-size:.9rem;color:var(--texto-suave)">
+              Abra o link no dispositivo do aluno e use o código da sala
+              <strong style="color:var(--ouro)" id="codigoConvite">GERAL</strong>.
+            </p>
+            <div class="link-aluno" id="linkAluno">—</div>
+            <button class="btn fantasma" id="btnCopiar" style="margin-top:.7rem;padding:.5rem 1rem;font-size:.85rem">📋 Copiar link</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div style="display:grid;gap:.8rem">
+      <section class="bloco painel">
+        <h2>📋 Classificação da turma</h2>
+        <div class="lista" id="lista"></div>
+      </section>
+
+      <section class="bloco painel">
+        <h2>🧠 Desempenho por palavra</h2>
+        <div class="grade-palavras" id="gradePalavras"></div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<dialog class="modal" id="modalSala">
+  <h2 class="marca" style="font-size:1.5rem">Sala da aula</h2>
+  <p style="color:var(--texto-suave);font-size:.88rem;line-height:1.45">
+    Cada turma pode ter seu próprio código. Para começar uma rodada limpa, basta criar um código novo —
+    nada é apagado do servidor.
+  </p>
+  <label class="rotulo" for="campoNovaSala">Código da sala</label>
+  <input class="campo" id="campoNovaSala" maxlength="12" style="text-transform:uppercase" placeholder="Ex.: 8B-TARDE">
+  <div id="salasConhecidas" style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.7rem"></div>
+  <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.4rem">
+    <button class="btn fantasma" id="btnCancelarSala">Cancelar</button>
+    <button class="btn" id="btnConfirmarSala">Usar esta sala</button>
+  </div>
+</dialog>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="assets/js/puzzle.js"></script>
+<script src="assets/js/db.js"></script>
+<script src="assets/js/sfx.js"></script>
+<script src="assets/js/scene.js"></script>
+<script src="assets/js/teacher.js"></script>
+</body>
+</html>

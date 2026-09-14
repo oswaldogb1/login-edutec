@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CRUZA! — Cidades Inteligentes e Sustentáveis</title>
+<meta name="description" content="Cruzadinha 3D sobre cidades inteligentes e sustentáveis, com ranking em tempo real para a sala de aula.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/game.css">
+</head>
+<body>
+
+<canvas id="cena3d"></canvas>
+<div class="veu"></div>
+
+<!-- Atalho para a area do professor: canto superior direito, visivel apenas
+     na tela de entrada (durante a partida esse espaco e do placar). -->
+<a class="btn-professor" id="btnProfessor" href="professor.html">👩‍🏫 Tela do professor</a>
+
+<!-- ===================================================== TELA DE ENTRADA -->
+<section id="telaEntrada" class="camada entrada">
+  <div class="cartao-entrada painel">
+    <div class="logo-grande"><span>C</span><span>R</span><span>U</span><span>Z</span><span>A</span><span>!</span></div>
+    <p class="subtitulo">Cruzadinha 3D das <strong>Cidades Inteligentes e Sustentáveis</strong></p>
+
+    <form class="form-entrada" id="formEntrada" autocomplete="off">
+      <div>
+        <label class="rotulo" for="campoNome">Seu nome</label>
+        <input class="campo" id="campoNome" maxlength="28" placeholder="Ex.: Ana Beatriz" required>
+      </div>
+      <div class="linha-2">
+        <div>
+          <label class="rotulo" for="campoTurma">Turma</label>
+          <input class="campo" id="campoTurma" maxlength="14" placeholder="Ex.: 8º B">
+        </div>
+        <div>
+          <label class="rotulo" for="campoSala">Código da sala</label>
+          <input class="campo" id="campoSala" maxlength="12" placeholder="GERAL" style="text-transform:uppercase">
+        </div>
+      </div>
+      <p class="aviso-erro" id="avisoEntrada"></p>
+      <button class="btn" type="submit" style="width:100%;font-size:1.15rem;padding:0.95rem">🚀 Começar a jogar</button>
+    </form>
+
+    <div class="rodape-entrada">
+      <span>15 palavras · 21 cruzamentos · ranking ao vivo</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ O JOGO -->
+<section id="telaJogo" class="camada jogo oculto">
+
+  <header class="hud painel">
+    <div class="marca">CRUZA!</div>
+    <div class="hud-jogador">
+      <strong id="hudNome">—</strong>
+      <small id="hudTurma">—</small>
+    </div>
+    <div class="hud-espaco"></div>
+
+    <div class="placar">
+      <div class="metrica pontos" id="mPontos"><b>0</b><span>pontos</span></div>
+      <div class="metrica acertos" id="mAcertos"><b>0/15</b><span>palavras</span></div>
+      <div class="metrica" id="mTempo"><b>00:00</b><span>tempo</span></div>
+    </div>
+
+    <div class="ferramentas">
+      <button class="icone-btn" id="btnDica" title="Revelar uma letra (-40 pontos)">💡</button>
+      <button class="icone-btn" id="btnPlano" title="Alternar visão 3D / plana">🧊</button>
+      <button class="icone-btn" id="btnSom" title="Ligar/desligar som">🔊</button>
+      <button class="icone-btn" id="btnSair" title="Sair">🚪</button>
+    </div>
+  </header>
+
+  <div class="faixa-dica painel" id="faixaDica">
+    <div class="n-atual" id="faixaNum">1</div>
+    <div class="faixa-corpo">
+      <div class="dir" id="faixaDir">Vertical · 16 letras</div>
+      <div class="txt" id="faixaTexto">Escolha uma dica para começar.</div>
+      <div class="ajuda oculto" id="faixaAjuda"></div>
+    </div>
+    <button class="btn-ajuda" id="btnAjudaFaixa" type="button">💡 Dica</button>
+  </div>
+
+  <div class="arena">
+    <div class="palco" id="palco">
+      <div class="tabuleiro-wrap">
+        <div class="tabuleiro" id="tabuleiro"></div>
+      </div>
+    </div>
+
+    <aside class="dicas painel" id="painelDicas"></aside>
+  </div>
+</section>
+
+<!-- ======================================================== TELA FINAL -->
+<section id="telaFinal" class="final oculto">
+  <div class="cartao-final painel">
+    <div class="trofeu">🏆</div>
+    <h2 class="marca">Cruzadinha completa!</h2>
+    <p class="subtitulo" id="fraseFinal">Parabéns, você construiu uma cidade inteligente!</p>
+
+    <div class="resumo">
+      <div><b id="fPontos">0</b><span>pontos</span></div>
+      <div><b id="fTempo">00:00</b><span>tempo</span></div>
+      <div><b id="fDicas">0</b><span>dicas</span></div>
+      <div><b id="fPos">—</b><span>posição</span></div>
+    </div>
+
+    <div class="mini-ranking" id="miniRanking"></div>
+
+    <div style="display:flex;gap:0.7rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap">
+      <button class="btn ouro" id="btnJogarDeNovo">🔁 Jogar de novo</button>
+      <a class="btn fantasma" href="professor.html" target="_blank" rel="noopener">📊 Ver ranking</a>
+    </div>
+  </div>
+</section>
+
+<div class="toasts" id="toasts"></div>
+<input id="entradaOculta" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" tabindex="-1" aria-label="Digitar letra na cruzadinha">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="assets/js/puzzle.js"></script>
+<script src="assets/js/db.js"></script>
+<script src="assets/js/sfx.js"></script>
+<script src="assets/js/scene.js"></script>
+<script src="assets/js/game.js"></script>
+</body>
+</html>

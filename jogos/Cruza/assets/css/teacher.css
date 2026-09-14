@@ -1,0 +1,324 @@
+/* ==========================================================================
+   CRUZA! — Painel do professor (otimizado para projeção)
+   ========================================================================== */
+
+/* -------------------------------------------------------------- acesso  */
+
+.acesso {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.cartao-acesso {
+  width: min(430px, 100%);
+  padding: 2.4rem 2rem 2rem;
+  text-align: center;
+  animation: surgir 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.cadeado { font-size: 3.4rem; animation: flutuar 3s ease-in-out infinite; }
+
+.teclado-senha {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin: 1.2rem 0 0.4rem;
+}
+.tecla {
+  font-family: var(--fonte-titulo);
+  font-size: 1.5rem;
+  padding: 0.8rem 0;
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--borda);
+  color: var(--texto);
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.2s ease;
+}
+.tecla:hover { background: rgba(56, 242, 196, 0.18); transform: translateY(-2px); }
+.tecla:active { transform: scale(0.95); }
+
+.pontos-senha { display: flex; justify-content: center; gap: 0.7rem; margin: 1.2rem 0 0.2rem; }
+.ponto-senha {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--borda);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.ponto-senha.on { background: var(--ciano); border-color: var(--ciano); transform: scale(1.15); box-shadow: var(--brilho-ciano); }
+.cartao-acesso.negado { animation: tremer 0.45s; }
+@keyframes tremer {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-9px); }
+  40% { transform: translateX(9px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+/* -------------------------------------------------------------- painel  */
+
+.painel-prof {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 0.8rem;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  padding: 0.7rem 1.1rem;
+  border-radius: var(--r-md);
+}
+.barra .marca { font-size: 1.6rem; }
+.barra .sep { flex: 1 1 auto; }
+.ferramentas-prof { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+.sala-atual {
+  font-family: var(--fonte-titulo);
+  font-size: 1.5rem;
+  color: var(--ouro);
+  padding: 0.1rem 0.9rem;
+  border-radius: 12px;
+  background: rgba(255, 200, 61, 0.12);
+  border: 1px solid rgba(255, 200, 61, 0.35);
+}
+
+.cartoes-stat {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.7rem;
+}
+.stat {
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--r-md);
+  background: var(--vidro);
+  border: 1px solid var(--borda);
+  backdrop-filter: blur(12px);
+}
+.stat b {
+  display: block;
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  line-height: 1.05;
+}
+.stat span {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+.stat.a b { color: var(--ciano); }
+.stat.b b { color: var(--ouro); }
+.stat.c b { color: var(--azul); }
+.stat.d b { color: var(--rosa); }
+
+/* -------------------------------------------------------------- podio   */
+
+.conteudo {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: start;
+}
+@media (max-width: 1100px) { .conteudo { grid-template-columns: 1fr; } }
+
+.bloco { padding: 1rem 1.1rem; border-radius: var(--r-lg); }
+.bloco > h2 {
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ciano);
+  margin-bottom: 0.9rem;
+}
+
+.podio {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  align-items: end;
+  perspective: 900px;
+  min-height: 300px;
+}
+
+.degrau {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.6rem 1.2rem;
+  border-radius: var(--r-lg) var(--r-lg) 8px 8px;
+  transform-style: preserve-3d;
+  transform: rotateX(9deg);
+  transition: transform 0.6s cubic-bezier(0.2, 1.3, 0.4, 1), box-shadow 0.4s ease;
+  animation: surgir 0.6s backwards;
+}
+.degrau.p1 {
+  order: 2;
+  min-height: 250px;
+  background: linear-gradient(170deg, rgba(255, 200, 61, 0.28), rgba(255, 157, 61, 0.1));
+  border: 1.5px solid rgba(255, 200, 61, 0.6);
+  box-shadow: 0 24px 60px rgba(255, 170, 40, 0.3);
+  animation-delay: 0.1s;
+}
+.degrau.p2 {
+  order: 1;
+  min-height: 200px;
+  background: linear-gradient(170deg, rgba(200, 220, 255, 0.22), rgba(120, 150, 200, 0.08));
+  border: 1.5px solid rgba(200, 220, 255, 0.45);
+  animation-delay: 0.2s;
+}
+.degrau.p3 {
+  order: 3;
+  min-height: 170px;
+  background: linear-gradient(170deg, rgba(255, 150, 90, 0.22), rgba(180, 100, 60, 0.08));
+  border: 1.5px solid rgba(255, 160, 100, 0.45);
+  animation-delay: 0.3s;
+}
+.degrau:hover { transform: rotateX(0) translateY(-6px); }
+
+.degrau .medalha { font-size: clamp(2.2rem, 4vw, 3.2rem); animation: flutuar 3s ease-in-out infinite; }
+.degrau .nome-p {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.05rem, 2.1vw, 1.6rem);
+  text-align: center;
+  line-height: 1.15;
+  word-break: break-word;
+}
+.degrau .turma-p { font-size: 0.78rem; color: var(--texto-suave); }
+.degrau .pts-p {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.6rem, 3.6vw, 2.8rem);
+  color: var(--ouro);
+  line-height: 1;
+}
+.degrau .det-p { font-size: 0.76rem; color: var(--texto-suave); }
+.degrau.vazio { opacity: 0.32; }
+
+.coroa-nova { animation: coroar 1.1s ease; }
+@keyframes coroar {
+  0% { transform: rotateX(9deg) scale(1); }
+  35% { transform: rotateX(0) scale(1.09); box-shadow: 0 0 70px rgba(255, 200, 61, 0.85); }
+  100% { transform: rotateX(9deg) scale(1); }
+}
+
+/* ------------------------------------------------------------ listagem  */
+
+.lista { display: grid; gap: 0.4rem; max-height: 62vh; overflow: auto; }
+
+.linha {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 110px 96px 78px;
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid transparent;
+  transition: background 0.3s ease, transform 0.35s ease, border-color 0.3s ease;
+}
+.linha:hover { background: rgba(255, 255, 255, 0.09); }
+.linha.subiu { border-color: var(--ciano); background: rgba(56, 242, 196, 0.14); }
+.linha.concluiu { border-color: rgba(255, 200, 61, 0.45); }
+
+.linha .col-pos { font-family: var(--fonte-titulo); font-size: 1.25rem; color: var(--ouro); text-align: center; }
+.linha .col-nome { font-size: 1.05rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.linha .col-nome small { display: block; font-size: 0.72rem; font-weight: 400; color: var(--texto-suave); }
+.linha .col-pts { font-family: var(--fonte-titulo); font-size: 1.35rem; color: var(--ciano); text-align: right; }
+.linha .col-tempo { font-size: 0.85rem; color: var(--texto-suave); text-align: right; font-variant-numeric: tabular-nums; }
+
+.barra-prog {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.barra-prog i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--ciano), var(--azul));
+  transition: width 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.barra-prog.cheia i { background: linear-gradient(90deg, var(--ouro), #ff9d3d); }
+
+.vazio-msg { text-align: center; padding: 2.5rem 1rem; color: var(--texto-suave); }
+.vazio-msg .grande { font-size: 3rem; display: block; margin-bottom: 0.6rem; animation: flutuar 3s ease-in-out infinite; }
+
+/* ------------------------------------------------------- palavras/QR    */
+
+.grade-palavras {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.45rem;
+}
+.chip-palavra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--borda);
+}
+.chip-palavra b { font-family: var(--fonte-titulo); color: var(--ciano); }
+.chip-palavra.dificil { border-color: rgba(255, 92, 114, 0.5); }
+.chip-palavra.dificil b { color: var(--vermelho); }
+
+.convite {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.qr {
+  width: 132px; height: 132px;
+  padding: 8px;
+  border-radius: 14px;
+  background: #fff;
+  display: grid;
+  place-items: center;
+}
+.qr img, .qr canvas { display: block; max-width: 100%; height: auto; }
+.link-aluno {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 0.85rem;
+  color: var(--ciano);
+  word-break: break-all;
+}
+
+dialog.modal {
+  border: 1px solid var(--borda);
+  border-radius: var(--r-lg);
+  background: #0a1130;
+  color: var(--texto);
+  padding: 1.6rem;
+  width: min(420px, 92vw);
+  box-shadow: var(--sombra);
+}
+dialog.modal::backdrop { background: rgba(3, 6, 18, 0.7); backdrop-filter: blur(4px); }
+
+/* --------------------------------------------------- modo projecao (TV) */
+
+/* A barra continua visivel: e por ela que o professor sai do modo projecao. */
+body.projecao .bloco.convite-bloco { display: none; }
+body.projecao .barra { padding: 0.45rem 0.9rem; }
+body.projecao .barra .btn { padding: 0.45rem 0.9rem; font-size: 0.85rem; }
+body.projecao .stat b { font-size: clamp(2.1rem, 4vw, 3.2rem); }
+body.projecao .degrau.p1 { min-height: 300px; }
+body.projecao .degrau.p2 { min-height: 250px; }
+body.projecao .degrau.p3 { min-height: 215px; }
+body.projecao .linha { grid-template-columns: 58px minmax(0, 1fr) 130px 110px 90px; padding: 0.75rem 0.9rem; }
+body.projecao .linha .col-nome { font-size: 1.3rem; }
+body.projecao .linha .col-pts { font-size: 1.7rem; }
+body.projecao .lista { max-height: 68vh; }
