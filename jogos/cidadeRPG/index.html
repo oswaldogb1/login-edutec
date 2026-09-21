@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monte a Cidade do Futuro — RPG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#0f1b3d; --bg2:#1d3a6e; --panel:#fdf6e3; --ink:#2b2118; --gold:#f4c542;
+    --gold-dark:#b8860b; --green:#3fae5a; --red:#d9534f; --blue:#3b82f6; --sky:#6ec6ff; --shadow:#0b1330;
+    --pixel:'Press Start 2P','Courier New',monospace;
+    --text:'Nunito','Segoe UI',Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;font-family:var(--text);color:var(--ink);padding:16px;
+    background:radial-gradient(circle at 20% 10%,#2e5aa8 0,transparent 40%),radial-gradient(circle at 80% 90%,#1f7a5a 0,transparent 40%),linear-gradient(160deg,var(--bg1),var(--bg2));
+    background-attachment:fixed}
+  .stars{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:radial-gradient(2px 2px at 10% 20%,#fff8,transparent),radial-gradient(2px 2px at 30% 70%,#fff6,transparent),
+    radial-gradient(1px 1px at 55% 30%,#fff9,transparent),radial-gradient(2px 2px at 75% 15%,#fff7,transparent),
+    radial-gradient(1px 1px at 90% 60%,#fff8,transparent),radial-gradient(2px 2px at 45% 88%,#fff5,transparent)}
+  .wrap{position:relative;z-index:1;max-width:1150px;margin:0 auto}
+  h1,h2,h3,.pixel{font-family:var(--pixel);letter-spacing:.5px;line-height:1.5}
+  .title{color:var(--gold);text-align:center;font-size:clamp(15px,3vw,26px);text-shadow:3px 3px 0 var(--shadow),0 0 18px #f4c54255;margin:6px 0 2px}
+  .subtitle{color:#dfe8ff;text-align:center;margin:0 0 14px;font-weight:700}
+  .hidden{display:none!important}
+  .panel{background:var(--panel);border:4px solid var(--ink);border-radius:10px;box-shadow:6px 6px 0 var(--shadow),inset 0 0 0 4px #e8dcb8;padding:18px}
+  .dark{background:#10204ae6;border:3px solid var(--gold);border-radius:10px;padding:12px;color:#fff}
+  .small{font-size:10px}
+  .btn{font-family:var(--pixel);font-size:11px;line-height:1.4;cursor:pointer;border:3px solid var(--ink);background:var(--gold);color:var(--ink);
+    padding:12px 16px;border-radius:8px;box-shadow:4px 4px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+  .btn:hover:not(:disabled){transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink)}
+  .btn:active:not(:disabled){transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.blue{background:#cfe3ff}.btn.green{background:#aee8bd}.btn.red{background:#f7b9b7}
+  .btn.sm{font-size:9px;padding:8px 10px;box-shadow:3px 3px 0 var(--ink)}
+  button:focus-visible,.cell:focus-visible{outline:4px solid var(--sky);outline-offset:3px}
+  .center{text-align:center}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+  /* ---------- Início ---------- */
+  #sc-start .panel{max-width:820px;margin:0 auto}
+  .story{font-size:17px;line-height:1.6}
+  details.guide{background:#fff;border:3px dashed var(--gold-dark);border-radius:8px;padding:10px 14px;margin:12px 0;line-height:1.55}
+  details.guide summary{cursor:pointer;font-weight:900}
+  details.guide li{margin:3px 0}
+  .field-label{font-family:var(--pixel);display:block;font-size:10px;margin:16px 0 8px;line-height:1.5}
+  input[type=text]{width:100%;font-family:var(--text);font-size:18px;padding:12px;border:3px solid var(--ink);border-radius:8px;background:#fff}
+  .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+  .choice{border:3px solid var(--ink);border-radius:10px;padding:10px;background:#fff;cursor:pointer;text-align:center;font-family:var(--text);font-size:15px;font-weight:900;color:var(--ink);transition:transform .1s}
+  .choice .ico{font-size:36px;display:block}
+  .choice small{display:block;font-weight:400;font-size:13px;margin-top:4px;line-height:1.35}
+  .choice[aria-checked=true]{background:#fff3c4;box-shadow:0 0 0 4px var(--gold);transform:translateY(-3px)}
+  .opts2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+  .savebox{background:#e3f8e8;border:3px solid #1f7a3a;border-radius:10px;padding:12px;margin-bottom:12px}
+
+  /* ---------- HUD ---------- */
+  .hud{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin-bottom:14px}
+  @media (max-width:900px){.hud{grid-template-columns:1fr}}
+  .hero{display:flex;align-items:center;gap:10px}
+  .avatar{font-size:32px;background:#fff2;border-radius:8px;width:54px;height:54px;display:grid;place-items:center;border:2px solid var(--gold);flex:none}
+  .hname{font-family:var(--pixel);font-size:10px;color:var(--gold)}
+  .hcls{font-size:13px}
+  .bars{display:grid;gap:5px;min-width:0}
+  .barline{display:grid;grid-template-columns:22px 1fr 70px;gap:6px;align-items:center;font-size:12px;font-weight:700}
+  .bar{height:14px;border:2px solid #fff;border-radius:4px;background:#0006;overflow:hidden}
+  .bar>div{height:100%;width:0;transition:width .4s}
+  .bar.hp>div{background:linear-gradient(90deg,#e0443e,#ff7b6b)}
+  .bar.en>div{background:linear-gradient(90deg,#2d8cf0,#7cc4ff)}
+  .bar.xp>div{background:linear-gradient(90deg,#b07cff,#e0c3ff)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .chip{background:#0005;border:2px solid #fff5;border-radius:8px;padding:5px 8px;font-weight:900;font-size:14px;white-space:nowrap}
+  .nav{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-top:6px}
+  .navbtn{background:#fff1;border:2px solid #fff6;color:#fff;border-radius:8px;font-size:13px;font-weight:900;padding:6px 9px;cursor:pointer;font-family:var(--text)}
+  .navbtn:hover:not(:disabled){background:#fff3}
+  .navbtn:disabled{opacity:.35;cursor:not-allowed}
+
+  /* ---------- Mapa ---------- */
+  .map-layout{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+  @media (max-width:900px){.map-layout{grid-template-columns:1fr}}
+  .world{position:relative;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:14px;padding:16px;
+    border:4px solid var(--ink);border-radius:14px;box-shadow:6px 6px 0 var(--shadow);
+    background:radial-gradient(circle at 50% 50%,#6d7c8c 0,#8fb996 45%,#6fae7a 100%);aspect-ratio:1/1}
+  .world svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .dnode{position:relative;z-index:1;border:4px solid var(--ink);border-radius:14px;background:#fffdf3;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px;text-align:center;color:var(--ink);
+    box-shadow:4px 4px 0 var(--ink);font-family:var(--text);transition:transform .1s}
+  .dnode:hover:not(:disabled){transform:translateY(-3px)}
+  .dnode .dico{font-size:clamp(26px,5vw,44px)}
+  .dnode .dname{font-family:var(--pixel);font-size:clamp(7px,1.1vw,10px);margin-top:4px}
+  .dnode .dsub{font-size:clamp(10px,1.3vw,13px);font-weight:700;margin-top:3px}
+  .dnode.open{background:linear-gradient(#fffdf3,var(--c));animation:pulse 1.6s infinite}
+  .dnode.done{background:#c9f2d3}
+  .dnode.locked{background:repeating-linear-gradient(45deg,#6b7a8f 0 10px,#5d6b7f 10px 20px);color:#fff;cursor:not-allowed;box-shadow:none}
+  .dnode.tower{background:#3a2a4a;color:#f4c542}
+  .dnode.tower.ready{background:linear-gradient(#5b2a86,#1a0b2e);animation:pulse 1.2s infinite}
+  @keyframes pulse{50%{box-shadow:4px 4px 0 var(--ink),0 0 0 6px #f4c54288}}
+  .quests h3{font-size:11px;color:var(--gold);margin:0 0 8px}
+  .quests ul{list-style:none;padding:0;margin:0 0 12px}
+  .quests li{padding:4px 0;font-size:15px}
+  .log{font-size:13px;max-height:190px;overflow:auto}
+  .log div{padding:3px 0;border-bottom:1px dashed #fff2}
+
+  /* ---------- Distrito ---------- */
+  .dhead{display:flex;gap:14px;align-items:center}
+  .dhead .big{font-size:60px}
+  .dhead h2{font-size:14px;margin:0 0 6px}
+  .path{display:flex;gap:10px;align-items:stretch;justify-content:center;flex-wrap:wrap;margin:18px 0}
+  .pnode{width:150px;border:4px solid var(--ink);border-radius:12px;background:#fff;padding:12px 8px;text-align:center;cursor:pointer;box-shadow:4px 4px 0 var(--ink);font-family:var(--text);color:var(--ink)}
+  .pnode .pi{font-size:40px;display:block}
+  .pnode b{display:block;font-family:var(--pixel);font-size:9px;margin:6px 0 4px}
+  .pnode small{display:block;font-size:13px}
+  .pnode.cur{background:#fff3c4;animation:pulse 1.4s infinite}
+  .pnode.done{background:#c9f2d3;cursor:default}
+  .pnode.lock{background:#ddd;opacity:.6;cursor:not-allowed;box-shadow:none}
+  .arrow{align-self:center;font-size:24px;color:#fff}
+
+  /* ---------- Batalha ---------- */
+  .arena{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;border:4px solid var(--ink);border-radius:14px;padding:14px;box-shadow:6px 6px 0 var(--shadow);
+    background:linear-gradient(#9fd8ff 0 55%,#7dbf6e 55% 100%)}
+  .arena.boss{background:linear-gradient(#5b3a7a 0 55%,#4b5563 55% 100%)}
+  .fighter{text-align:center;position:relative}
+  .sprite{font-size:clamp(56px,9vw,92px);display:inline-block;position:relative;filter:drop-shadow(4px 6px 0 #0004)}
+  .sprite.mon{animation:bob 2s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-8px)}}
+  .sprite.hit{animation:hit .45s}
+  @keyframes hit{20%{transform:translateX(10px) rotate(8deg);filter:brightness(2)}60%{transform:translateX(-8px)}}
+  .fname{font-family:var(--pixel);font-size:10px;background:#fffdf3;border:3px solid var(--ink);border-radius:6px;padding:6px;display:inline-block;margin-top:4px;max-width:100%}
+  .fighter .bar{max-width:260px;margin:6px auto 0;height:16px;border-color:var(--ink);background:#fff}
+  .fighter .bar.mhp>div{background:linear-gradient(90deg,#8e44ad,#d980fa)}
+  .hptxt{font-weight:900;font-size:13px;margin-top:3px}
+  .status{min-height:22px;font-size:13px;font-weight:900;margin-top:4px}
+  .status span{background:#fff;border:2px solid var(--ink);border-radius:6px;padding:1px 6px;margin:2px;display:inline-block}
+  .vs{font-family:var(--pixel);font-size:18px;color:#fff;text-shadow:3px 3px 0 var(--ink);align-self:center}
+  .float{position:absolute;left:50%;top:0;transform:translateX(-50%);font-family:var(--pixel);font-size:18px;pointer-events:none;
+    text-shadow:2px 2px 0 #000;animation:floatUp 1.1s ease-out forwards;white-space:nowrap;z-index:5}
+  .float.dmg{color:#ffd23f}.float.hurt{color:#ff6b6b}.float.heal{color:#6bff95}.float.info{color:#fff;font-size:12px}
+  @keyframes floatUp{to{transform:translate(-50%,-70px);opacity:0}}
+  .speech{background:#fffdf3;border:3px solid var(--ink);border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:700;font-size:16px}
+  .battle-grid{display:grid;grid-template-columns:1fr 250px;gap:14px}
+  @media (max-width:860px){.battle-grid{grid-template-columns:1fr}}
+  .actions h3{font-size:10px;color:var(--gold);margin:0 0 8px}
+  .skill{width:100%;text-align:left;background:#b07cff;color:#fff;border:3px solid #fff;border-radius:10px;padding:10px;cursor:pointer;font-family:var(--text);font-weight:900;font-size:14px}
+  .skill small{display:block;font-weight:400;font-size:12px}
+  .skill:disabled{opacity:.4;cursor:not-allowed}
+  .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;margin-top:10px}
+  .ibtn{background:#fff;border:2px solid var(--ink);border-radius:8px;padding:6px 2px;cursor:pointer;font-size:22px;position:relative;color:var(--ink)}
+  .ibtn span{position:absolute;right:3px;bottom:1px;font-size:11px;font-weight:900}
+  .ibtn:disabled{opacity:.3;cursor:not-allowed}
+  .combo{margin-top:10px;font-family:var(--pixel);font-size:10px;color:#ffb347;min-height:16px}
+  .tip{font-size:12px;opacity:.85;margin-top:8px;line-height:1.4}
+
+  /* ---------- Carta ---------- */
+  .card{position:relative;background:linear-gradient(#fffaf0,#f6e9c8);border:4px solid var(--ink);border-radius:14px;box-shadow:6px 6px 0 var(--shadow);padding:18px;animation:flipIn .45s ease}
+  .card.key{background:linear-gradient(#fff6d6,#ffd97a);border-color:#8a5a00}
+  @keyframes flipIn{from{transform:rotateY(90deg);opacity:0}to{transform:none;opacity:1}}
+  .card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:3px dotted var(--gold-dark);padding-bottom:8px;margin-bottom:10px}
+  .card-tag{display:inline-block;font-family:var(--pixel);font-size:10px;background:var(--ink);color:var(--gold);padding:7px 9px;border-radius:6px;margin-top:6px}
+  .card-emoji{font-size:40px}
+  .quest-label{font-family:var(--pixel);font-size:9px;color:#7a5a1c;line-height:1.6}
+  .timer{height:12px;border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:#fff;margin-bottom:10px}
+  .timer>div{height:100%;width:100%;background:linear-gradient(90deg,#3fae5a,#f4c542)}
+  .timer.low>div{background:#d9534f}
+  .question{font-size:clamp(18px,2.2vw,22px);font-weight:900;margin:6px 0 14px;line-height:1.35}
+  .opts{display:grid;gap:9px}
+  .opt{display:flex;gap:12px;align-items:center;text-align:left;width:100%;font-family:var(--text);font-size:16px;font-weight:700;color:var(--ink);
+    background:#fff;border:3px solid var(--ink);border-radius:10px;padding:10px 12px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);transition:transform .08s,background .15s}
+  .opt:hover:not(:disabled){background:#fff3c4;transform:translateX(4px)}
+  .opt .letter{font-family:var(--pixel);font-size:11px;background:var(--gold);border:2px solid var(--ink);border-radius:6px;min-width:32px;height:32px;display:grid;place-items:center;flex:none}
+  .opt:disabled{cursor:default}
+  .opt.correct{background:#c9f2d3;border-color:#1f7a3a}.opt.correct .letter{background:var(--green);color:#fff}
+  .opt.wrong{background:#f8d0cf;border-color:#8e1f1c;animation:shake .4s}.opt.wrong .letter{background:var(--red);color:#fff}
+  .opt.dim{opacity:.5}
+  .opt.removed{opacity:.25;text-decoration:line-through}
+  @keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+  .feedback{margin-top:12px;border-radius:10px;padding:12px;border:3px solid var(--ink);font-size:15px;line-height:1.5;animation:pop .3s}
+  .feedback.ok{background:#e3f8e8}.feedback.no{background:#fdeceb}
+  .feedback h3{font-size:11px;margin:0 0 6px}
+  .feedback .btn{margin-top:10px}
+  @keyframes pop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+
+  /* ---------- Evento / Loja ---------- */
+  .scene{max-width:760px;margin:0 auto}
+  .scene .big{font-size:80px;text-align:center;display:block}
+  .scene h2{font-size:14px;text-align:center}
+  .scene p{font-size:17px;line-height:1.6}
+  .evchoices{display:grid;gap:10px;margin-top:12px}
+  .evchoices .btn{text-align:left;font-family:var(--text);font-size:16px;font-weight:900}
+  .shopgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:14px 0}
+  .sitem{background:#fff;border:3px solid var(--ink);border-radius:10px;padding:12px;text-align:center}
+  .sitem .ico{font-size:40px}
+  .sitem b{display:block;margin:4px 0}
+  .sitem p{font-size:14px;margin:4px 0 10px;line-height:1.35}
+
+  /* ---------- Cidade ---------- */
+  .city-layout{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+  @media (max-width:900px){.city-layout{grid-template-columns:1fr}}
+  .board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px;border:4px solid var(--ink);border-radius:14px;box-shadow:6px 6px 0 var(--shadow);
+    background:linear-gradient(#a8e6a1,#8fcf88);max-width:560px;width:100%;margin:0 auto}
+  .cell{aspect-ratio:1/1;border-radius:10px;border:3px dashed #2b211866;background:#ffffff55;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;cursor:pointer;font-family:var(--text);color:var(--ink);padding:3px;position:relative}
+  .cell .e{font-size:clamp(26px,5vw,42px)}
+  .cell .lbl{font-size:clamp(9px,1.2vw,11px);font-weight:900;line-height:1.1;margin-top:2px}
+  .cell.piece{background:#fffdf3;border:3px solid var(--ink)}
+  .cell.piece.fresh{animation:build .7s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes build{0%{transform:scale(0) rotate(-20deg)}100%{transform:none}}
+  .cell.river{background:repeating-linear-gradient(135deg,#4aa3df 0 12px,#5cb6f0 12px 24px);border:3px solid #1d5f8a;cursor:not-allowed;color:#fff}
+  .cell.ruin{background:repeating-linear-gradient(45deg,#7d6e5d 0 10px,#6b5d4e 10px 20px);border:3px solid #3d3228;color:#fff}
+  .cell.target{background:#fff3c4;border-color:var(--gold-dark)}
+  .cell.target:hover{background:#ffe27a}
+  .hand{font-size:16px;font-weight:900;margin-bottom:10px}
+  .hand .e{font-size:30px;vertical-align:middle}
+  .ind{display:grid;grid-template-columns:120px 1fr 40px;gap:6px;align-items:center;margin:6px 0;font-weight:900;font-size:14px}
+  .ind .bar{border-color:var(--ink);background:#fff}
+  .ind .bar>div{background:linear-gradient(90deg,#3fae5a,#9be15d)}
+  .synlist{font-size:14px;line-height:1.5;max-height:200px;overflow:auto}
+  .synlist .neg{color:#b3261e}
+  .syntable{font-size:13px;line-height:1.5}
+  .cityhint{min-height:22px;font-weight:900;color:#1f7a3a;margin-top:8px}
+
+  /* ---------- Modal / toast ---------- */
+  .overlay{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:50;padding:16px}
+  .overlay .panel{max-width:520px;width:100%;text-align:center;animation:pop .3s;max-height:90vh;overflow:auto}
+  .overlay .mico{font-size:74px;display:block;animation:float 1.6s ease-in-out infinite}
+  @keyframes float{50%{transform:translateY(-8px)}}
+  .overlay h2{font-size:13px;color:var(--gold-dark)}
+  .mbody{font-size:16px;line-height:1.55}
+  .mbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .toasts{position:fixed;top:12px;right:12px;z-index:70;display:grid;gap:8px;max-width:320px}
+  .toast{background:#10204a;color:#fff;border:3px solid var(--gold);border-radius:10px;padding:10px 12px;font-weight:700;box-shadow:4px 4px 0 #0008;animation:slideIn .3s}
+  @keyframes slideIn{from{transform:translateX(120%)}to{transform:none}}
+  .achgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;text-align:center}
+  .ach{border:3px solid var(--ink);border-radius:10px;padding:8px;background:#fff;font-size:13px}
+  .ach .i{font-size:30px;display:block}
+  .ach.off{filter:grayscale(1);opacity:.45}
+  .invlist{text-align:left}
+  .invlist .it{display:flex;gap:10px;align-items:center;border-bottom:1px dashed #0003;padding:8px 0}
+  .invlist .it .i{font-size:28px}
+  .invlist .it div{flex:1}
+
+  /* ---------- Final ---------- */
+  #sc-end .panel{max-width:900px;margin:0 auto;text-align:center}
+  .medal{font-size:70px}
+  .message{font-size:19px;line-height:1.6;background:#e3f8e8;border:3px solid #1f7a3a;border-radius:10px;padding:14px}
+  .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:16px 0}
+  .summary div{background:#fff;border:3px solid var(--ink);border-radius:10px;padding:10px;font-weight:700}
+  .summary b{display:block;font-family:var(--pixel);font-size:14px;margin-top:6px;color:#1d3a6e;line-height:1.5}
+  .breakdown{max-width:460px;margin:0 auto;text-align:left;background:#fff;border:3px solid var(--ink);border-radius:10px;padding:10px 16px}
+  .breakdown div{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed #0002}
+  .breakdown .tot{font-weight:900;font-size:18px;border:none}
+  .miniboard{max-width:320px;margin:14px auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#8fcf88;border:3px solid var(--ink);border-radius:10px;padding:6px}
+  .miniboard div{aspect-ratio:1/1;display:grid;place-items:center;font-size:28px;background:#fff8;border-radius:6px}
+  .reflect{text-align:left;background:#fff;border:3px dashed var(--gold-dark);border-radius:10px;padding:12px 18px;margin-top:14px;line-height:1.5}
+  .confetti{position:fixed;top:-30px;font-size:22px;z-index:60;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  footer{color:#c9d6f5;text-align:center;font-size:13px;margin-top:22px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="wrap">
+  <h1 class="title">🏙️ Monte a Cidade do Futuro 🌱</h1>
+  <p class="subtitle">Um RPG para libertar Nova Esperança e construir uma cidade inteligente e sustentável</p>
+
+  <!-- ================= HUD ================= -->
+  <div class="hud dark hidden" id="hud">
+    <div class="hero">
+      <div class="avatar" id="hAvatar">🧙</div>
+      <div><div class="hname" id="hName">HERÓI</div><div class="hcls" id="hCls">Classe</div></div>
+    </div>
+    <div class="bars">
+      <div class="barline"><span>❤️</span><div class="bar hp"><div id="hHp"></div></div><span id="hHpT">100/100</span></div>
+      <div class="barline"><span>⚡</span><div class="bar en"><div id="hEn"></div></div><span id="hEnT">5/10</span></div>
+      <div class="barline"><span>✨</span><div class="bar xp"><div id="hXp"></div></div><span id="hXpT">Nv 1</span></div>
+    </div>
+    <div>
+      <div class="chips">
+        <span class="chip" title="Pontos">⭐ <span id="hPts">0</span></span>
+        <span class="chip" title="Moedas">🪙 <span id="hCoins">0</span></span>
+        <span class="chip" title="Peças da cidade">🧩 <span id="hPieces">0/8</span></span>
+        <span class="chip" title="Acertos seguidos">🔥 <span id="hCombo">0</span></span>
+      </div>
+      <div class="nav">
+        <button class="navbtn" id="nMap" onclick="goMap()">🗺️ Mapa</button>
+        <button class="navbtn" id="nCity" onclick="openCity()">🏙️ Cidade</button>
+        <button class="navbtn" id="nBag" onclick="openBag()">🎒 Mochila</button>
+        <button class="navbtn" id="nAch" onclick="openAch()">🏅 Conquistas</button>
+        <button class="navbtn" id="nSound" onclick="toggleSound()" aria-label="Ligar ou desligar som">🔊</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= INÍCIO ================= -->
+  <section id="sc-start">
+    <div class="panel">
+      <div id="saveBox" class="savebox hidden"></div>
+      <div class="story">
+        <p>📜 <b>A Lenda de Nova Esperança:</b> No ano de <b>2050</b>, a <b>Névoa Cinzenta</b> cobriu a cidade. Oito monstros-chefes tomaram os distritos: desperdício de energia, poluição, lixo, falta de água, de árvores e de transporte...</p>
+        <p>O Conselho dos Sábios convocou você! Liberte os <b>8 distritos</b>, conquiste as <b>8 peças mágicas</b>, monte a cidade no <b>tabuleiro</b> e enfrente o <b>Imperador da Névoa</b> na torre central! ✨</p>
+      </div>
+      <details class="guide">
+        <summary>📖 Guia do aventureiro (clique para abrir)</summary>
+        <ul>
+          <li>🗺️ <b>Mapa:</b> comece pelos distritos liberados. Cada distrito vencido libera os vizinhos.</li>
+          <li>🛤️ <b>Distrito:</b> siga a trilha: ⚔️ monstro → ❓ evento / 🏪 loja / 🎁 baú / 🏕️ acampamento → 💀 monstro elite → 👑 chefe.</li>
+          <li>⚔️ <b>Batalha:</b> cada resposta certa vale <b>+10 pontos</b> e causa dano no monstro. Se errar, o monstro ataca e aparece a explicação da resposta certa.</li>
+          <li>🗝️ <b>Chefes:</b> só são derrotados quando você acerta a <b>Carta-Chave</b> do distrito. Se errar, ela volta depois!</li>
+          <li>🔥 <b>Combo:</b> acertos seguidos dão mais dano e pontos extras.</li>
+          <li>✨ <b>Habilidade:</b> cada classe tem um poder especial que gasta ⚡ energia (ganhe energia acertando).</li>
+          <li>🎒 <b>Itens:</b> compre na loja com 🪙 moedas e use nas batalhas.</li>
+          <li>🧩 <b>Cidade:</b> ao vencer um chefe você ganha uma peça. Posicione no tabuleiro: peças vizinhas que combinam criam <b>conexões</b> e dão bônus!</li>
+          <li>💾 O jogo é salvo automaticamente neste navegador.</li>
+        </ul>
+      </details>
+
+      <label class="field-label" for="heroName">1. NOME DO PERSONAGEM</label>
+      <input type="text" id="heroName" maxlength="20" placeholder="Digite seu nome ou apelido" autocomplete="off">
+
+      <span class="field-label">2. ESCOLHA SUA CLASSE</span>
+      <div class="choices" role="radiogroup" aria-label="Classe" id="classChoices"></div>
+
+      <div class="center" style="margin-top:18px"><button class="btn" id="newBtn" onclick="tryNewGame()">▶ NOVA AVENTURA</button></div>
+    </div>
+  </section>
+
+  <!-- ================= MAPA ================= -->
+  <section id="sc-map" class="hidden">
+    <div class="map-layout">
+      <div>
+        <div class="world" id="world"></div>
+      </div>
+      <div class="dark quests">
+        <h3>📜 MISSÕES</h3>
+        <ul id="questList"></ul>
+        <h3>📔 DIÁRIO DA AVENTURA</h3>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DISTRITO ================= -->
+  <section id="sc-district" class="hidden">
+    <div class="panel">
+      <div class="dhead"><span class="big" id="dIco"></span><div><h2 id="dName"></h2><div id="dStory" style="font-size:16px;line-height:1.5"></div></div></div>
+      <div class="path" id="dPath"></div>
+      <div class="center"><button class="btn blue" onclick="goMap()">⬅ VOLTAR AO MAPA</button></div>
+    </div>
+  </section>
+
+  <!-- ================= BATALHA ================= -->
+  <section id="sc-battle" class="hidden">
+    <div class="arena" id="arena">
+      <div class="fighter">
+        <div class="sprite" id="pSprite">🧙</div><br>
+        <div class="fname" id="pName">HERÓI</div>
+        <div class="bar hp"><div id="pHp"></div></div>
+        <div class="hptxt" id="pHpT"></div>
+        <div class="status" id="pStatus"></div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="fighter">
+        <div class="sprite mon" id="mSprite">👾</div><br>
+        <div class="fname" id="mName">MONSTRO</div>
+        <div class="bar mhp"><div id="mHp"></div></div>
+        <div class="hptxt" id="mHpT"></div>
+        <div class="status" id="mStatus"></div>
+      </div>
+    </div>
+    <div class="speech" id="speech"></div>
+    <div class="battle-grid">
+      <div id="bq"></div>
+      <div class="dark actions">
+        <h3>✨ HABILIDADE</h3>
+        <button class="skill" id="skillBtn" onclick="useSkill()"></button>
+        <h3 style="margin-top:12px">🎒 ITENS</h3>
+        <div class="items" id="itemBtns"></div>
+        <div class="combo" id="comboBox"></div>
+        <div class="tip">Dica: use as teclas <b>A, B, C, D</b> para responder.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EVENTO ================= -->
+  <section id="sc-event" class="hidden">
+    <div class="panel scene" id="eventBox"></div>
+  </section>
+
+  <!-- ================= LOJA ================= -->
+  <section id="sc-shop" class="hidden">
+    <div class="panel scene" style="max-width:900px">
+      <span class="big">🏪</span>
+      <h2>LOJA DO SEU ZÉ RECICLADOR</h2>
+      <p class="center">"Tudo aqui foi feito com materiais reaproveitados! O que vai levar, aventureiro?"</p>
+      <p class="center"><b>Suas moedas: 🪙 <span id="shopCoins">0</span></b></p>
+      <div class="shopgrid" id="shopGrid"></div>
+      <div class="center"><button class="btn blue" onclick="leaveShop()">SAIR DA LOJA ▶</button></div>
+    </div>
+  </section>
+
+  <!-- ================= CIDADE ================= -->
+  <section id="sc-city" class="hidden">
+    <div class="city-layout">
+      <div>
+        <div class="dark hand" id="handBox"></div>
+        <div class="board" id="board"></div>
+        <div class="center dark cityhint" id="cityHint" style="margin-top:10px">Passe o mouse sobre um espaço para ver as conexões.</div>
+      </div>
+      <div class="panel">
+        <h3 style="font-size:11px;margin-top:0">📊 INDICADORES DA CIDADE</h3>
+        <div id="indicators"></div>
+        <h3 style="font-size:11px">🔗 CONEXÕES ATIVAS</h3>
+        <div class="synlist" id="synList"></div>
+        <details class="guide">
+          <summary>💡 Tabela de conexões (peças vizinhas)</summary>
+          <div class="syntable" id="synTable"></div>
+        </details>
+        <p style="font-size:14px;line-height:1.45">🖱️ Clique em uma peça para <b>pegá-la</b> e clique em outro espaço para <b>movê-la</b>. 🏚️ Terrenos poluídos podem ser limpos por 🪙 30.</p>
+        <div class="center"><button class="btn blue" id="cityBack" onclick="goMap()">⬅ VOLTAR AO MAPA</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FINAL ================= -->
+  <section id="sc-end" class="hidden">
+    <div class="panel">
+      <div class="medal" id="medal">🏆</div>
+      <h2 style="font-size:15px">🎉 Parabéns! Você construiu uma<br>Cidade Inteligente e Sustentável!</h2>
+      <p class="message">Sua cidade utiliza tecnologia, preserva o meio ambiente e busca melhorar a qualidade de vida das pessoas.</p>
+      <div class="miniboard" id="endBoard" aria-label="Sua cidade"></div>
+      <p id="endMsg" style="font-size:17px"></p>
+      <div class="breakdown" id="breakdown"></div>
+      <div class="summary" id="endSummary"></div>
+      <h3 style="font-size:11px">🏅 CONQUISTAS</h3>
+      <div class="achgrid" id="endAch"></div>
+      <div class="reflect">
+        <b>💬 Para conversar com a turma:</b>
+        <ol>
+          <li>Qual peça da cidade você acha mais importante para o lugar onde você mora? Por quê?</li>
+          <li>Por que algumas peças funcionam melhor quando ficam perto de outras (as conexões)?</li>
+          <li>Que atitude sustentável você pode começar a praticar ainda hoje, em casa ou na escola?</li>
+          <li>Se você fosse prefeito(a), qual tecnologia usaria para melhorar sua cidade?</li>
+        </ol>
+      </div>
+      <div class="center" style="margin-top:16px"><button class="btn" onclick="restart()">↻ NOVA AVENTURA</button></div>
+    </div>
+  </section>
+
+  <footer>Atividade para o 6º ano do Ensino Fundamental · Tema: Cidades Inteligentes e Sustentáveis 🌍</footer>
+</div>
+
+<!-- Modal genérico -->
+<div class="overlay hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="panel">
+    <span class="mico" id="mIco"></span>
+    <h2 id="mTitle"></h2>
+    <div class="mbody" id="mBody"></div>
+    <div class="mbtns" id="mBtns"></div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   DADOS DO JOGO
+   ===================================================================== */
+const L = ['A','B','C','D'];
+const EN_MAX = 10;
+const SAVE_KEY = 'cidadeFuturoRPG_v2';
+
+const CLASSES = {
+  guardiao:{ico:'🧝', nome:'Guardião da Natureza', hp:120, dmg:11,
+    passive:'Vida máxima maior e recupera 5 ❤️ a cada acerto.',
+    skill:{n:'Cura da Floresta', ico:'🌿', cost:4, d:'Recupera 40% da vida.'}},
+  engenheira:{ico:'👩‍🔧', nome:'Engenheira Solar', hp:100, dmg:12,
+    passive:'Ganha +1 ⚡ extra a cada acerto.',
+    skill:{n:'Raio Solar', ico:'☀️', cost:4, d:'Elimina 2 alternativas erradas.'}},
+  mago:{ico:'🧙', nome:'Mago da Tecnologia', hp:100, dmg:12,
+    passive:'Recebe 25% menos dano dos monstros.',
+    skill:{n:'Escudo Digital', ico:'🛡️', cost:3, d:'Bloqueia o próximo dano e elimina 1 alternativa errada.'}},
+  ciclista:{ico:'🚴', nome:'Exploradora Ciclista', hp:100, dmg:13,
+    passive:'25% de chance de golpe crítico (dano x2).',
+    skill:{n:'Pedalada Turbo', ico:'💨', cost:3, d:'O próximo acerto causa dano triplo.'}}
+};
+
+const ITEMS = {
+  pocao:{ico:'🧪', n:'Poção Verde', d:'Recupera 40 de vida.', price:15, field:true},
+  lupa:{ico:'🔍', n:'Lupa da Verdade', d:'Elimina 1 alternativa errada.', price:10},
+  escudo:{ico:'🛡️', n:'Escudo Reciclado', d:'Bloqueia o próximo dano.', price:12},
+  maca:{ico:'🍎', n:'Maçã Orgânica', d:'Recupera 20 de vida e 2 de energia.', price:8, field:true},
+  bateria:{ico:'🔋', n:'Bateria Recarregável', d:'Recupera 5 de energia.', price:12, field:true}
+};
+
+/* Distritos em volta do mapa (sentido horário). qs[0] é a Carta-Chave (carta original do jogo). */
+const THEMES = [
+ { tema:'Energia', ico:'💡', cor:'#ffe58a',
+   historia:'As luzes ficam acesas dia e noite e os aparelhos nunca são desligados. O <b>Lorde do Apagão</b> suga toda a eletricidade da cidade!',
+   mon:{n:'Vampiro de Tomada', e:'🔌'}, elite:{n:'Lâmpada Gulosa', e:'🕯️'},
+   boss:{n:'Lorde do Apagão', e:'👾', fala:'Hahaha! Luzes acesas para sempre! Ninguém vai economizar energia aqui!'},
+   piece:{e:'☀️', nome:'Painéis solares', txt:'Os telhados agora captam a luz do Sol e geram energia limpa!'},
+   qs:[
+    {q:'Qual atitude contribui para uma cidade sustentável?', o:['Deixar as luzes acesas sem necessidade.','Utilizar energia solar e economizar energia.','Aumentar o consumo de energia.','Desperdiçar eletricidade.'], c:1, ex:'A energia solar é uma fonte <b>limpa e renovável</b>: vem do Sol e não polui o ar. Economizar energia também preserva recursos naturais.'},
+    {q:'O que é uma fonte de energia renovável?', o:['Uma energia que se renova na natureza, como a solar e a do vento.','Uma energia que nunca pode ser usada.','Uma energia que vem só do petróleo.','Uma energia que acaba muito rápido.'], c:0, ex:'Fontes <b>renováveis</b> não se esgotam: o Sol, o vento e a água em movimento estão sempre disponíveis.'},
+    {q:'Ao sair de um cômodo vazio, o que devemos fazer?', o:['Deixar a TV ligada.','Acender mais lâmpadas.','Apagar a luz.','Abrir a geladeira.'], c:2, ex:'Apagar a luz ao sair é um gesto simples que <b>economiza energia</b> todos os dias.'},
+    {q:'Qual lâmpada gasta MENOS energia?', o:['Lâmpada acesa durante o dia.','Lâmpada incandescente antiga.','Várias lâmpadas acesas ao mesmo tempo.','Lâmpada de LED.'], c:3, ex:'A lâmpada de <b>LED</b> ilumina bem gastando muito menos energia e dura muito mais.'},
+    {q:'A energia eólica é produzida pela força do:', o:['Vento.','Fogo.','Lixo.','Petróleo.'], c:0, ex:'Os grandes cata-ventos (aerogeradores) transformam a força do <b>vento</b> em eletricidade.'},
+    {q:'Tirar da tomada os aparelhos que não estão sendo usados ajuda a:', o:['Gastar mais energia.','Economizar energia.','Estragar a casa.','Aumentar a conta de luz.'], c:1, ex:'Muitos aparelhos gastam energia mesmo desligados (em "modo de espera"). Tirar da tomada <b>economiza</b>.'}
+   ]},
+ { tema:'Tecnologia', ico:'📱', cor:'#bfe3ff',
+   historia:'Os semáforos enlouqueceram e os sensores pararam de funcionar. A <b>Aranha Vírus</b> teceu uma teia de bugs nos computadores da cidade!',
+   mon:{n:'Bug Travesso', e:'🐛'}, elite:{n:'Robô Desgovernado', e:'🤖'},
+   boss:{n:'Aranha Vírus', e:'🕷️', fala:'Minha teia de bugs vai travar tudo! Nada de tecnologia ajudando as pessoas!'},
+   piece:{e:'🏙️', nome:'Centro da cidade', txt:'O centro agora tem sensores inteligentes que cuidam do trânsito e da energia!'},
+   qs:[
+    {q:'Como a tecnologia pode ajudar uma cidade?', o:['Monitorando o trânsito e o consumo de energia.','Aumentando o desperdício.','Produzindo mais lixo.','Eliminando áreas verdes.'], c:0, ex:'Sensores e aplicativos controlam semáforos, avisam sobre congestionamentos e mostram onde a energia é gasta. Isso torna a cidade <b>inteligente</b>!'},
+    {q:'Semáforos inteligentes ajudam a:', o:['Causar mais congestionamento.','Organizar o trânsito conforme o movimento dos veículos.','Deixar os carros parados sem motivo.','Apagar as luzes da rua.'], c:1, ex:'Eles percebem onde há mais carros e ajustam o tempo do sinal, <b>diminuindo engarrafamentos</b>.'},
+    {q:'Um sensor em uma lixeira inteligente pode:', o:['Produzir mais lixo.','Espalhar o lixo na rua.','Avisar quando a lixeira está cheia.','Esconder a lixeira.'], c:2, ex:'Com o aviso, o caminhão de coleta vai <b>só onde precisa</b>, economizando combustível.'},
+    {q:'Aplicativos de transporte público ajudam as pessoas a:', o:['Perder o ônibus.','Saber a hora em que o ônibus vai passar.','Usar mais carros.','Ficar mais tempo no ponto.'], c:1, ex:'Sabendo o horário, as pessoas esperam menos e <b>usam mais o transporte coletivo</b>.'},
+    {q:'Postes de luz inteligentes economizam energia porque:', o:['Ficam acesos o dia inteiro.','Nunca acendem.','Iluminam mais forte só quando há pessoas passando.','Gastam mais eletricidade.'], c:2, ex:'Eles têm <b>sensores de presença</b>: iluminam quando alguém passa e economizam no resto do tempo.'},
+    {q:'Um painel que mostra o consumo de energia da casa ajuda a família a:', o:['Perceber os gastos e economizar.','Gastar sem perceber.','Esconder a conta de luz.','Deixar tudo ligado.'], c:0, ex:'Quando a família <b>vê quanto gasta</b>, fica mais fácil mudar hábitos e economizar.'}
+   ]},
+ { tema:'Água', ico:'💧', cor:'#b5ecff',
+   historia:'Torneiras pingando, canos furados e mangueiras abertas por horas... O <b>Polvo do Desperdício</b> espalha vazamentos por todos os bairros!',
+   mon:{n:'Gotejador', e:'🚿'}, elite:{n:'Tubarão do Esgoto', e:'🦈'},
+   boss:{n:'Polvo do Desperdício', e:'🐙', fala:'Com meus oito tentáculos abro todas as torneiras! Água para o ralo!'},
+   piece:{e:'💧', nome:'Sistema de economia de água', txt:'A cidade agora capta água da chuva e evita desperdícios!'},
+   qs:[
+    {q:'Qual atitude ajuda a economizar água?', o:['Deixar a torneira aberta.','Consertar vazamentos e evitar desperdícios.','Lavar calçadas com mangueira por muito tempo.','Desperdiçar água potável.'], c:1, ex:'Um pequeno vazamento pode desperdiçar <b>milhares de litros</b> por mês! A água potável é preciosa e limitada.'},
+    {q:'Quanto tempo é o ideal para um banho econômico?', o:['Uma hora.','Trinta minutos.','Cerca de cinco minutos.','O dia inteiro.'], c:2, ex:'Um banho de <b>cerca de 5 minutos</b> limpa bem e economiza muita água.'},
+    {q:'Enquanto escovamos os dentes, devemos:', o:['Fechar a torneira.','Deixar a torneira aberta.','Abrir o chuveiro também.','Encher a banheira.'], c:0, ex:'Fechar a torneira durante a escovação pode <b>economizar vários litros</b> de água por dia.'},
+    {q:'A água da chuva pode ser reaproveitada para:', o:['Nada, deve ser desperdiçada.','Jogar lixo no rio.','Regar plantas e lavar o quintal.','Encher o bueiro.'], c:2, ex:'Guardada em cisternas, a água da chuva serve para <b>regar plantas, lavar o quintal e a descarga</b>.'},
+    {q:'Por que devemos proteger rios e nascentes?', o:['Porque são lugares para jogar lixo.','Porque são fontes de água para pessoas, plantas e animais.','Porque não servem para nada.','Porque atrapalham a cidade.'], c:1, ex:'Rios e nascentes são a <b>origem da água</b> que chega às nossas casas e mantêm a vida na natureza.'},
+    {q:'Lavar o carro com balde em vez de mangueira:', o:['Gasta mais água.','Suja o carro.','Economiza muita água.','Não faz diferença.'], c:2, ex:'A mangueira aberta gasta muito mais água. O <b>balde</b> usa só o necessário.'}
+   ]},
+ { tema:'Áreas verdes', ico:'🌳', cor:'#c8f7c5',
+   historia:'As árvores foram cortadas e o concreto cobriu tudo. O <b>Titã do Concreto</b> quer transformar todos os parques em cinza!',
+   mon:{n:'Machado Cinzento', e:'🪓'}, elite:{n:'Trator Derrubador', e:'🚜'},
+   boss:{n:'Titã do Concreto', e:'🗿', fala:'Árvores? Parques? Só quero concreto e cimento por todo lado!'},
+   piece:{e:'🌳', nome:'Parque e área verde', txt:'Um grande parque cheio de árvores agora refresca a cidade!'},
+   qs:[
+    {q:'Por que parques e árvores são importantes para as cidades?', o:['Porque aumentam a poluição.','Porque ajudam na qualidade do ar e proporcionam espaços de lazer.','Porque ocupam espaços que poderiam ser estacionamentos.','Porque aumentam o desperdício de água.'], c:1, ex:'As árvores <b>absorvem gás carbônico</b>, liberam oxigênio e deixam a cidade mais fresca. Os parques são ótimos para brincar e praticar esportes.'},
+    {q:'As árvores ajudam a cidade a ficar:', o:['Mais quente.','Mais poluída.','Mais barulhenta.','Mais fresca e com o ar mais limpo.'], c:3, ex:'A <b>sombra</b> e a transpiração das árvores diminuem o calor e as folhas ajudam a filtrar o ar.'},
+    {q:'Uma horta comunitária é:', o:['Um espaço onde os moradores plantam alimentos juntos.','Um estacionamento.','Um depósito de lixo.','Uma fábrica.'], c:0, ex:'Na horta comunitária os vizinhos <b>plantam e dividem alimentos</b> saudáveis e aproveitam espaços vazios.'},
+    {q:'Telhados verdes são:', o:['Telhados pintados de verde.','Telhados cobertos com plantas.','Telhados quebrados.','Telhados de plástico.'], c:1, ex:'Telhados com plantas <b>refrescam os prédios</b>, seguram a água da chuva e atraem passarinhos.'},
+    {q:'O que devemos fazer em um parque?', o:['Arrancar as flores.','Jogar lixo na grama.','Cuidar das plantas e jogar o lixo na lixeira.','Quebrar os brinquedos.'], c:2, ex:'O parque é de todos: <b>cuidar dele</b> garante que continue bonito para todo mundo.'},
+    {q:'Plantar árvores nas calçadas ajuda a:', o:['Fazer sombra e diminuir o calor.','Aumentar a poluição.','Deixar a rua mais quente.','Diminuir o oxigênio.'], c:0, ex:'Ruas arborizadas são <b>mais frescas e agradáveis</b> para caminhar.'}
+   ]},
+ { tema:'Reciclagem', ico:'🗑️', cor:'#ffd6a5',
+   historia:'Pilhas, restos de comida, vidro e plástico estão todos misturados. O <b>Rei do E-lixo</b> espalha resíduos tóxicos pelas casas!',
+   mon:{n:'Pilha Venenosa', e:'🔋'}, elite:{n:'TV Zumbi', e:'📺'},
+   boss:{n:'Rei do E-lixo', e:'☢️', fala:'Misturem tudo! Eletrônicos no lixo comum! Quanto mais bagunça, melhor!'},
+   piece:{e:'🏡', nome:'Casas inteligentes', txt:'As casas agora separam o lixo e usam energia de forma inteligente!'},
+   qs:[
+    {q:'Qual atitude é correta?', o:['Separar os resíduos de acordo com seu tipo.','Misturar todos os resíduos.','Jogar lixo nas ruas.','Jogar eletrônicos no lixo comum.'], c:0, ex:'Cada resíduo tem seu destino: as lixeiras coloridas ajudam na separação. Eletrônicos vão para <b>pontos de coleta especiais</b>, pois contêm substâncias tóxicas.'},
+    {q:'Na coleta seletiva, a lixeira AZUL é para:', o:['Vidro.','Papel.','Metal.','Restos de comida.'], c:1, ex:'<b>Azul = papel</b>, vermelho = plástico, verde = vidro e amarelo = metal.'},
+    {q:'Na coleta seletiva, a lixeira VERDE é para:', o:['Papel.','Plástico.','Vidro.','Metal.'], c:2, ex:'<b>Verde = vidro</b>. Garrafas e potes de vidro podem ser reciclados muitas vezes!'},
+    {q:'Na coleta seletiva, a lixeira AMARELA é para:', o:['Metal.','Papel.','Vidro.','Plástico.'], c:0, ex:'<b>Amarelo = metal</b>, como latinhas de refrigerante e de alimentos.'},
+    {q:'Pilhas e baterias usadas devem ser:', o:['Jogadas no rio.','Enterradas no quintal.','Levadas a pontos de coleta especiais.','Jogadas no lixo comum.'], c:2, ex:'Pilhas têm metais pesados que <b>contaminam o solo e a água</b>. Por isso vão para coleta especial.'},
+    {q:'Usar um pote de vidro vazio para guardar objetos é um exemplo de:', o:['Desperdício.','Reutilização.','Poluição.','Queimada.'], c:1, ex:'<b>Reutilizar</b> é dar um novo uso a algo, sem precisar jogá-lo fora.'}
+   ]},
+ { tema:'Lixo', ico:'♻️', cor:'#d9f99d',
+   historia:'Montanhas de lixo bloqueiam as ruas e entopem os bueiros. O <b>Monstro do Chorume</b> cresce a cada saco de lixo jogado no chão!',
+   mon:{n:'Lixeira Raivosa', e:'🗑️'}, elite:{n:'Ratazana do Lixão', e:'🐀'},
+   boss:{n:'Monstro do Chorume', e:'🦠', fala:'Joguem tudo no rio! Queimem tudo! Eu fico mais forte a cada lixo no chão!'},
+   piece:{e:'♻️', nome:'Centro de reciclagem', txt:'O lixo reciclável agora ganha uma nova vida!'},
+   qs:[
+    {q:'O que devemos fazer com materiais recicláveis?', o:['Jogá-los no rio.','Queimá-los.','Separá-los para a reciclagem.','Jogá-los em qualquer lugar.'], c:2, ex:'Papel, plástico, metal e vidro viram <b>novos produtos</b> quando reciclados. Jogar no rio polui a água e queimar solta gases tóxicos.'},
+    {q:'Qual destes materiais pode ser reciclado?', o:['Papel higiênico usado.','Garrafa PET.','Fralda usada.','Guardanapo sujo de gordura.'], c:1, ex:'A <b>garrafa PET</b> pode virar tecido, vassoura e até novas garrafas!'},
+    {q:'Restos de frutas e verduras podem virar adubo por meio da:', o:['Compostagem.','Queimada.','Poluição.','Enchente.'], c:0, ex:'Na <b>compostagem</b>, restos de alimentos se transformam em adubo para as plantas.'},
+    {q:'O que significa "reduzir" nos 3 Rs (Reduzir, Reutilizar e Reciclar)?', o:['Comprar mais coisas.','Jogar tudo fora.','Usar tudo só uma vez.','Diminuir o consumo e o desperdício.'], c:3, ex:'<b>Reduzir</b> é consumir só o necessário, gerando menos lixo.'},
+    {q:'Lixo jogado na rua pode:', o:['Entupir bueiros e causar enchentes.','Deixar a cidade mais limpa.','Ajudar as plantas.','Diminuir as doenças.'], c:0, ex:'O lixo <b>entope os bueiros</b>: quando chove, a água não escoa e a rua alaga.'},
+    {q:'Onde devemos jogar a embalagem do lanche?', o:['No chão do pátio.','Na lixeira correta.','No rio.','Atrás do muro.'], c:1, ex:'Na <b>lixeira correta</b> a embalagem pode ser reciclada e a escola fica limpa.'}
+   ]},
+ { tema:'Mobilidade', ico:'🚲', cor:'#fbcfe8',
+   historia:'Não há calçadas, rampas nem ciclovias. O <b>Colosso do Trânsito</b> trancou todo mundo dentro de engarrafamentos gigantes!',
+   mon:{n:'Barreira Teimosa', e:'🚧'}, elite:{n:'Buraco Faminto', e:'🕳️'},
+   boss:{n:'Colosso do Trânsito', e:'🚛', fala:'Buzinas! Filas! Ninguém vai andar de bicicleta ou a pé enquanto eu existir!'},
+   piece:{e:'🚲', nome:'Ciclovia', txt:'Ciclovias seguras agora ligam todos os bairros!'},
+   qs:[
+    {q:'Uma cidade inteligente deve incentivar:', o:['Apenas o uso de carros.','Transporte sustentável e acessível.','Mais congestionamentos.','A redução das ciclovias.'], c:1, ex:'Mobilidade <b>sustentável e acessível</b> permite que todos — inclusive idosos e pessoas com deficiência — se desloquem com segurança e sem poluir.'},
+    {q:'Rampas e calçadas largas são importantes porque:', o:['Atrapalham quem caminha.','Servem só para carros.','Ajudam pessoas com deficiência, idosos e carrinhos de bebê.','Deixam a rua mais perigosa.'], c:2, ex:'Uma cidade <b>acessível</b> é aquela em que todas as pessoas conseguem circular.'},
+    {q:'A ciclovia é:', o:['Um caminho separado e seguro para bicicletas.','Um estacionamento de carros.','Uma pista de caminhões.','Um lugar para jogar lixo.'], c:0, ex:'A <b>ciclovia</b> protege quem pedala e incentiva um transporte que não polui.'},
+    {q:'A faixa de pedestres serve para:', o:['Estacionar o carro.','Atravessar a rua com segurança.','Enfeitar a rua.','Os carros correrem mais.'], c:1, ex:'Na <b>faixa de pedestres</b> os motoristas devem parar para as pessoas atravessarem.'},
+    {q:'Morar perto da escola e do trabalho ajuda porque:', o:['As pessoas precisam de mais carros.','O trânsito aumenta.','As pessoas podem ir a pé ou de bicicleta.','Gasta mais combustível.'], c:2, ex:'Distâncias curtas permitem <b>caminhar ou pedalar</b>, sem poluir.'},
+    {q:'Uma cidade acessível é aquela em que:', o:['Só os carros circulam.','Todas as pessoas conseguem circular com segurança.','As calçadas têm muitos buracos.','Não existem rampas.'], c:1, ex:'Acessibilidade é garantir que <b>todos</b> possam ir e vir com autonomia.'}
+   ]},
+ { tema:'Transporte', ico:'🚌', cor:'#fde68a',
+   historia:'Uma fumaça escura sai dos escapamentos e cobre o céu. O <b>Barão da Fumaça</b> quer um carro para cada pessoa e nenhum ônibus!',
+   mon:{n:'Fumacinha', e:'💨'}, elite:{n:'Carro Fumacento', e:'🚗'},
+   boss:{n:'Barão da Fumaça', e:'🏭', fala:'Cof, cof! Mais carros, mais fumaça! Ônibus e bicicletas são proibidos!'},
+   piece:{e:'🚌', nome:'Transporte coletivo', txt:'Ônibus elétricos agora levam as pessoas por toda a cidade!'},
+   qs:[
+    {q:'Qual opção ajuda a diminuir a poluição nas cidades?', o:['Utilizar mais carros individuais.','Usar transporte coletivo, bicicleta ou caminhar.','Deixar os veículos ligados parados.','Aumentar o número de carros nas ruas.'], c:1, ex:'Um ônibus leva dezenas de pessoas de uma vez. Bicicleta e caminhada <b>não soltam fumaça</b> e fazem bem à saúde!'},
+    {q:'Qual meio de transporte NÃO solta fumaça?', o:['Caminhão a diesel.','Moto a gasolina.','Bicicleta.','Carro a gasolina.'], c:2, ex:'A <b>bicicleta</b> funciona com a força das pernas: zero poluição!'},
+    {q:'Por que o ônibus polui menos do que muitos carros?', o:['Porque leva muitas pessoas de uma só vez.','Porque é mais barulhento.','Porque é maior.','Porque gasta mais combustível.'], c:0, ex:'Um ônibus cheio <b>substitui dezenas de carros</b> nas ruas.'},
+    {q:'Carona solidária significa:', o:['Cada pessoa ir no seu próprio carro.','Andar de carro sem destino.','Deixar o carro ligado.','Pessoas que vão ao mesmo lugar dividirem o mesmo carro.'], c:3, ex:'Na carona, <b>menos carros</b> circulam e a poluição diminui.'},
+    {q:'Ônibus elétricos ajudam a cidade porque:', o:['Não soltam fumaça pelo escapamento.','Fazem mais barulho.','Gastam mais gasolina.','Poluem mais o ar.'], c:0, ex:'Movidos a eletricidade, eles <b>não soltam fumaça</b> e são mais silenciosos.'},
+    {q:'Qual destas atitudes polui MENOS?', o:['Ir de carro sozinho para um lugar pertinho.','Ir a pé para a escola quando ela é perto.','Deixar o motor ligado esperando.','Passear de carro sem destino.'], c:1, ex:'Para distâncias curtas, <b>ir a pé</b> não polui e ainda é um exercício.'}
+   ]}
+];
+
+// posição de cada distrito na grade 3x3 do mapa (linha, coluna)
+const POS = [[0,0],[0,1],[0,2],[1,2],[2,2],[2,1],[2,0],[1,0]];
+
+const FINAL_BOSS = {n:'Imperador da Névoa', e:'😈', fala:'Então você reconstruiu minha cidade cinzenta?! Prove que conhece TODOS os segredos da sustentabilidade!'};
+
+const NODE_INFO = {
+  battle:{ico:'⚔️', n:'Monstro'}, elite:{ico:'💀', n:'Monstro Elite'}, boss:{ico:'👑', n:'Chefe'},
+  event:{ico:'❓', n:'Evento'}, shop:{ico:'🏪', n:'Loja'}, chest:{ico:'🎁', n:'Baú'}, rest:{ico:'🏕️', n:'Acampamento'}
+};
+const MIDDLE_NODES = ['event','shop','event','chest','event','rest','event','shop'];
+
+/* ---------- Cidade: tabuleiro 4x4 ---------- */
+const PIECE_NAMES = {'☀️':'Painéis solares','🏙️':'Centro da cidade','🌳':'Parque','🚲':'Ciclovia','🚌':'Transporte coletivo','♻️':'Reciclagem','💧':'Economia de água','🏡':'Casas inteligentes'};
+const PIECE_BASE = {'☀️':{s:2,t:1,v:0},'🏙️':{s:0,t:2,v:1},'🌳':{s:2,t:0,v:1},'🚲':{s:1,t:0,v:2},'🚌':{s:1,t:0,v:2},'♻️':{s:2,t:1,v:0},'💧':{s:2,t:1,v:0},'🏡':{s:0,t:1,v:2}};
+const SYN = [
+  {a:'☀️',b:'🏡', n:'Casas com energia solar', fx:{s:2,t:1,v:1}},
+  {a:'☀️',b:'🏙️', n:'Centro movido a energia limpa', fx:{s:2,t:2,v:0}},
+  {a:'🚌',b:'🏙️', n:'Terminal de ônibus no centro', fx:{s:1,t:1,v:2}},
+  {a:'🚲',b:'🌳', n:'Ciclovia arborizada', fx:{s:2,t:0,v:2}},
+  {a:'🚲',b:'🚌', n:'Integração bicicleta + ônibus', fx:{s:1,t:1,v:2}},
+  {a:'♻️',b:'🏡', n:'Coleta seletiva nos bairros', fx:{s:2,t:1,v:1}},
+  {a:'💧',b:'🌊', n:'Tratamento da água do rio', fx:{s:2,t:2,v:0}},
+  {a:'🌳',b:'🌊', n:'Mata ciliar protege o rio', fx:{s:3,t:0,v:1}},
+  {a:'💧',b:'🏡', n:'Casas com reúso de água', fx:{s:2,t:1,v:1}},
+  {a:'🏙️',b:'🌳', n:'Praça verde no centro', fx:{s:1,t:0,v:3}},
+  {a:'♻️',b:'🌊', n:'Reciclagem perto do rio: risco de contaminação!', fx:{s:-3,t:0,v:-1}, neg:true}
+];
+const TERRAIN = {3:'river',7:'river',5:'ruin',14:'ruin'};
+const RUIN_COST = 30;
+
+const ACH = [
+  {id:'win1', i:'⚔️', n:'Primeira Vitória', d:'Derrote seu primeiro monstro'},
+  {id:'boss1', i:'👑', n:'Caçador de Chefes', d:'Derrote o primeiro chefe'},
+  {id:'combo3', i:'🔥', n:'Em Chamas', d:'Acerte 3 seguidas'},
+  {id:'combo5', i:'☄️', n:'Imparável', d:'Acerte 5 seguidas'},
+  {id:'combo10', i:'🌟', n:'Lendário', d:'Acerte 10 seguidas'},
+  {id:'fast', i:'⚡', n:'Relâmpago', d:'Acerte em menos de 5 segundos'},
+  {id:'flawless', i:'🛡️', n:'Intocável', d:'Derrote um chefe sem perder vida'},
+  {id:'rich', i:'💰', n:'Poupador', d:'Junte 100 moedas'},
+  {id:'items5', i:'🎒', n:'Estrategista', d:'Use 5 itens'},
+  {id:'skill5', i:'✨', n:'Mestre dos Poderes', d:'Use sua habilidade 5 vezes'},
+  {id:'lvl5', i:'📈', n:'Veterano', d:'Alcance o nível 5'},
+  {id:'syn3', i:'🏗️', n:'Urbanista', d:'Tenha 3 conexões na cidade'},
+  {id:'syn6', i:'🏙️', n:'Mestre Urbanista', d:'Tenha 6 conexões na cidade'},
+  {id:'kind', i:'💚', n:'Bom Cidadão', d:'Faça 3 escolhas cidadãs nos eventos'},
+  {id:'phoenix', i:'🔁', n:'Persistente', d:'Vença uma batalha depois de desmaiar'},
+  {id:'final', i:'🏆', n:'Herói de Nova Esperança', d:'Derrote o Imperador da Névoa'}
+];
+
+/* ---------- Eventos ---------- */
+const EVENTS = [
+  {ico:'👵', t:'Dona Cida precisa de ajuda', txt:'Uma senhora está tentando atravessar uma avenida movimentada, mas os carros não param.', ch:[
+    {t:'🦺 Ajudá-la a atravessar pela faixa de pedestres', kind:true, fx:()=>{gainXP(20); addCoins(10); return 'Dona Cida agradece e te dá um presente: <b>+10 🪙 e +20 ✨ XP</b>!';}},
+    {t:'🏃 Seguir em frente, estou com pressa', fx:()=>'Você seguiu seu caminho... Um bom cidadão sempre ajuda quem precisa.'}]},
+  {ico:'🍾', t:'Garrafas no rio', txt:'Você encontra dezenas de garrafas plásticas boiando no rio. Os peixes estão sofrendo!', ch:[
+    {t:'♻️ Recolher as garrafas e levar para a reciclagem', kind:true, fx:()=>{gainXP(25); S.items.lupa++; return 'O rio agradece! Você ganhou <b>+25 ✨ XP</b> e uma <b>🔍 Lupa da Verdade</b>.';}},
+    {t:'🙈 Deixar para lá', fx:()=>{S.buff+=15; return 'A poluição aumentou... <b>o próximo monstro terá +15 de vida!</b>';}}]},
+  {ico:'🧕', t:'A Mercadora Misteriosa', txt:'"Psiu, aventureiro! Tenho itens raros feitos de materiais reciclados. Quer trocar?"', ch:[
+    {t:'🧪 Trocar 20 moedas por 2 Poções Verdes', need:()=>S.coins>=20, fx:()=>{S.coins-=20; S.items.pocao+=2; return 'Você recebeu <b>2 🧪 Poções</b>!';}},
+    {t:'🛡️ Trocar 20 moedas por 1 Escudo e 1 Maçã Orgânica', need:()=>S.coins>=20, fx:()=>{S.coins-=20; S.items.escudo++; S.items.maca++; return 'Você recebeu <b>1 🛡️ Escudo e 1 🍎 Maçã Orgânica</b>!';}},
+    {t:'👋 Não, obrigado', fx:()=>'"Que pena! Até a próxima..." A mercadora some na névoa.'}]},
+  {ico:'🌫️', t:'Nuvem de fumaça!', txt:'Uma nuvem escura de poluição se aproxima rapidamente. Onde você vai se proteger?', ch:[
+    {t:'🌳 Se abrigar entre as árvores do parque', fx:()=>{heal(25); return 'As árvores filtram o ar! Você respira aliviado: <b>+25 ❤️</b>.';}},
+    {t:'🚗 Correr pela avenida cheia de carros', fx:()=>{S.hp=Math.max(1,S.hp-15); return 'Cof, cof! Mais fumaça dos carros... <b>-15 ❤️</b>.';}}]},
+  {ico:'💡', t:'Poste apagado', txt:'Uma rua está totalmente escura e as crianças têm medo de passar por ali à noite.', ch:[
+    {t:'🔧 Consertar usando peças recicladas', kind:true, fx:()=>{S.en=Math.min(EN_MAX,S.en+3); gainXP(20); return 'A luz voltou! <b>+3 ⚡ energia e +20 ✨ XP</b>.';}},
+    {t:'📱 Avisar a prefeitura pelo aplicativo da cidade', kind:true, fx:()=>{addCoins(12); gainXP(10); return 'A prefeitura conserta rapidinho e te agradece: <b>+12 🪙 e +10 ✨ XP</b>.';}}]},
+  {ico:'🐶', t:'Cachorro perdido', txt:'Um cachorrinho com coleira está sozinho e assustado no meio da praça.', ch:[
+    {t:'🏷️ Procurar o dono pelo telefone da coleira', kind:true, fx:()=>{addCoins(15); gainXP(15); return 'O dono fica muito feliz: <b>+15 🪙 e +15 ✨ XP</b>!';}},
+    {t:'🏠 Levá-lo a um abrigo de animais', kind:true, fx:()=>{S.items.escudo++; gainXP(15); return 'O abrigo cuida dele e te dá um <b>🛡️ Escudo Reciclado</b> e <b>+15 ✨ XP</b>.';}}]},
+  {ico:'🧙‍♂️', t:'O Desafio do Sábio', txt:'Um velho sábio bloqueia o caminho: "Responda à minha pergunta e ganhará um tesouro!"', ch:[
+    {t:'📜 Aceitar o desafio', quiz:true},
+    {t:'🙇 Recusar educadamente', fx:()=>'"A sabedoria espera por quem tem coragem..." diz o sábio, abrindo passagem.'}]},
+  {ico:'🏗️', t:'Terreno abandonado', txt:'Há um terreno vazio cheio de mato e entulho. Os moradores pedem sua opinião sobre o que fazer.', ch:[
+    {t:'🥕 Criar uma horta comunitária', kind:true, fx:()=>{heal(30); gainXP(20); return 'Os vizinhos plantam juntos e te oferecem uma salada fresquinha: <b>+30 ❤️ e +20 ✨ XP</b>.';}},
+    {t:'🅿️ Fazer um estacionamento', fx:()=>{addCoins(20); S.buff+=10; return 'Você ganhou <b>+20 🪙</b>, mas mais carros trazem mais poluição... <b>o próximo monstro terá +10 de vida</b>.';}}]},
+  {ico:'🚰', t:'Cano vazando', txt:'Um cano estourou na calçada e a água limpa está escorrendo para o bueiro.', ch:[
+    {t:'📞 Avisar a companhia de água', kind:true, fx:()=>{gainXP(20); S.items.maca++; return 'O vazamento foi consertado! Os vizinhos te dão <b>+20 ✨ XP e uma 🍎 Maçã Orgânica</b>.';}},
+    {t:'💦 Aproveitar para brincar na água', fx:()=>{S.en=Math.max(0,S.en-2); return 'Foi divertido, mas muita água potável foi desperdiçada... <b>-2 ⚡</b>.';}}]},
+  {ico:'🎤', t:'Assembleia dos moradores', txt:'Os moradores estão votando o que construir no bairro. Qual é a sua proposta?', ch:[
+    {t:'🚲 Mais ciclovias e calçadas acessíveis', kind:true, fx:()=>{gainXP(20); S.items.bateria++; return 'Proposta aprovada! <b>+20 ✨ XP e uma 🔋 Bateria</b>.';}},
+    {t:'🛣️ Mais viadutos só para carros', fx:()=>{gainXP(5); return 'Os moradores preferem transporte sustentável... <b>+5 ✨ XP</b> pela participação.';}}]}
+];
+
+/* =====================================================================
+   ESTADO
+   ===================================================================== */
+let S = null;       // estado salvo
+let B = null;       // batalha atual
+let Q = null;       // pergunta atual
+let timerId = null;
+let soundOn = true;
+let lastTick = Date.now();
+let freshCell = -1;
+const setup = {cls:'guardiao', fast:false, timer:false}; // duração padrão (~40 min), sem cronômetro
+
+const $ = id => document.getElementById(id);
+const rnd = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function newState(name){
+  const c = CLASSES[setup.cls];
+  const mids = shuffle(MIDDLE_NODES.slice());
+  const city = Array(16).fill(null);
+  Object.entries(TERRAIN).forEach(([k,v])=>city[k]=v);
+  return {
+    v:2, name, cls:setup.cls, opts:{fast:setup.fast, timer:setup.timer},
+    lvl:1, xp:0, maxHp:c.hp, hp:c.hp, en:5, coins:20, pts:0, dmgBonus:0,
+    items:{pocao:1, lupa:1, escudo:0, maca:1, bateria:0},
+    districts: THEMES.map((_,i)=>({unlocked:i===0||i===4, step:0, done:false, nodes:['battle',mids[i],'elite','boss']})),
+    pieces:[], city, hand:null, cur:0, screen:'map',
+    qUsed:{}, evUsed:[], buff:0, combo:0, fainted:false, shopUp:[],
+    stats:{correct:0, wrong:0, maxCombo:0, kills:0, bosses:0, itemsUsed:0, skillsUsed:0, kind:0, faints:0,
+           ansPts:0, comboPts:0, bossPts:0, achPts:0, playMs:0},
+    ach:[], log:[]
+  };
+}
+
+/* ---------- salvar / carregar ---------- */
+function save(){
+  if(!S) return;
+  const now = Date.now(); S.stats.playMs += now - lastTick; lastTick = now;
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){}
+}
+function loadSave(){ try{ const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return s && s.v===2 ? s : null; }catch(e){ return null; } }
+function clearSave(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+
+/* =====================================================================
+   SOM (Web Audio, sem arquivos)
+   ===================================================================== */
+let actx;
+function beep(notes){
+  if(!soundOn) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    let t = actx.currentTime;
+    notes.forEach(([f,d,type='square'])=>{
+      const o=actx.createOscillator(), g=actx.createGain();
+      o.type=type; o.frequency.value=f;
+      g.gain.setValueAtTime(.07,t); g.gain.exponentialRampToValueAtTime(.001,t+d);
+      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d); t+=d*.9;
+    });
+  }catch(e){}
+}
+const sfx = {
+  ok:()=>beep([[523,.09],[659,.09],[784,.15]]),
+  no:()=>beep([[220,.16,'sawtooth'],[165,.22,'sawtooth']]),
+  hit:()=>beep([[180,.08,'square'],[120,.1,'square']]),
+  loot:()=>beep([[784,.07],[988,.07],[1175,.07],[1568,.22]]),
+  lvl:()=>beep([[523,.08],[784,.08],[1047,.08],[1319,.25]]),
+  coin:()=>beep([[988,.06],[1319,.12]]),
+  win:()=>beep([[523,.12],[659,.12],[784,.12],[1047,.2],[784,.1],[1047,.4]]),
+  tick:()=>beep([[880,.03,'sine']])
+};
+function toggleSound(){ soundOn=!soundOn; $('nSound').textContent = soundOn?'🔊':'🔇'; }
+
+/* =====================================================================
+   INTERFACE GERAL
+   ===================================================================== */
+const SCREENS = ['start','map','district','battle','event','shop','city','end'];
+function show(n){
+  SCREENS.forEach(s=>$('sc-'+s).classList.toggle('hidden', s!==n));
+  if(S) S.screen = n;
+  $('hud').classList.toggle('hidden', n==='start'||n==='end');
+  if(S) updateHUD();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toast(msg){
+  const t=document.createElement('div'); t.className='toast'; t.innerHTML=msg;
+  $('toasts').appendChild(t); setTimeout(()=>t.remove(),3200);
+}
+
+function modal({ico='',title='',html='',buttons=[{t:'OK'}]}){
+  $('mIco').textContent=ico; $('mTitle').textContent=title; $('mBody').innerHTML=html;
+  $('mBtns').innerHTML='';
+  buttons.forEach(b=>{
+    const x=document.createElement('button');
+    x.className='btn '+(b.cls||''); x.textContent=b.t; x.disabled=!!b.disabled;
+    x.onclick=()=>{ if(!b.keep) closeModal(); if(b.fn) b.fn(); };
+    $('mBtns').appendChild(x);
+  });
+  $('modal').classList.remove('hidden');
+  const f=$('mBtns').querySelector('button:not(:disabled)'); if(f) f.focus();
+}
+function closeModal(){ $('modal').classList.add('hidden'); }
+const modalOpen = () => !$('modal').classList.contains('hidden');
+
+function log(msg){ S.log.unshift(msg); S.log = S.log.slice(0,40); }
+
+function xpNeed(l){ return 40 + l*20; }
+
+function updateHUD(){
+  if(!S) return;
+  const c=CLASSES[S.cls];
+  $('hAvatar').textContent=c.ico; $('hName').textContent=S.name.toUpperCase();
+  $('hCls').textContent=`Nv ${S.lvl} · ${c.nome}`;
+  $('hHp').style.width=(S.hp/S.maxHp*100)+'%'; $('hHpT').textContent=`${S.hp}/${S.maxHp}`;
+  $('hEn').style.width=(S.en/EN_MAX*100)+'%'; $('hEnT').textContent=`${S.en}/${EN_MAX}`;
+  $('hXp').style.width=(S.xp/xpNeed(S.lvl)*100)+'%'; $('hXpT').textContent=`Nv ${S.lvl}`;
+  $('hPts').textContent=S.pts; $('hCoins').textContent=S.coins;
+  $('hPieces').textContent=`${S.pieces.length}/8`; $('hCombo').textContent=S.combo;
+  const locked = ['battle','event','shop'].includes(S.screen) || !!S.hand;
+  $('nMap').disabled = locked; $('nCity').disabled = locked && !S.hand;
+  $('nBag').disabled = S.screen==='battle'; $('nAch').disabled = S.screen==='battle';
+  if(S.coins>=100) unlock('rich');
+}
+
+/* ---------- recursos ---------- */
+function heal(n){ const before=S.hp; S.hp=Math.min(S.maxHp,S.hp+n); return S.hp-before; }
+function addCoins(n){ S.coins+=n; sfx.coin(); }
+function gainXP(n){
+  S.xp+=n;
+  while(S.xp>=xpNeed(S.lvl)){
+    S.xp-=xpNeed(S.lvl); S.lvl++; S.maxHp+=10; heal(30);
+    sfx.lvl(); toast(`📈 <b>SUBIU DE NÍVEL!</b> Agora você está no nível ${S.lvl}. Vida máxima +10 e dano +2!`);
+    log(`📈 Alcançou o nível ${S.lvl}`);
+    if(S.lvl>=5) unlock('lvl5');
+  }
+}
+function unlock(id){
+  if(!S || S.ach.includes(id)) return;
+  const a=ACH.find(x=>x.id===id); if(!a) return;
+  S.ach.push(id); S.pts+=15; S.stats.achPts+=15;
+  toast(`🏅 <b>Conquista:</b> ${a.i} ${a.n} <small>(+15 ⭐)</small>`);
+  log(`🏅 Conquista: ${a.n}`);
+}
+
+/* =====================================================================
+   TELA INICIAL
+   ===================================================================== */
+function renderStart(){
+  $('classChoices').innerHTML = Object.entries(CLASSES).map(([id,c])=>`
+    <button class="choice" role="radio" aria-checked="${id===setup.cls}" data-v="${id}">
+      <span class="ico">${c.ico}</span>${c.nome}
+      <small>❤️ ${c.hp} · ⚔️ ${c.dmg}<br><b>${c.skill.ico} ${c.skill.n}</b> (${c.skill.cost}⚡): ${c.skill.d}<br><i>${c.passive}</i></small>
+    </button>`).join('');
+  bindRadio('classChoices', v=>setup.cls=v);
+  const sv = loadSave();
+  if(sv){
+    $('saveBox').classList.remove('hidden');
+    $('saveBox').innerHTML = `<b>💾 Aventura salva encontrada!</b><br>${CLASSES[sv.cls].ico} <b>${esc(sv.name)}</b> · Nível ${sv.lvl} · 🧩 ${sv.pieces.length}/8 peças · ⭐ ${sv.pts} pontos
+      <div style="margin-top:10px"><button class="btn green" onclick="continueGame()">▶ CONTINUAR AVENTURA</button></div>`;
+  } else $('saveBox').classList.add('hidden');
+}
+function bindRadio(id, cb){
+  const els=[...$(id).querySelectorAll('.choice')];
+  els.forEach(el=>el.onclick=()=>{ els.forEach(x=>x.setAttribute('aria-checked','false')); el.setAttribute('aria-checked','true'); cb(el.dataset.v); });
+}
+
+function tryNewGame(){
+  if(loadSave()){
+    modal({ico:'⚠️', title:'COMEÇAR DO ZERO?', html:'Já existe uma aventura salva. Se começar uma nova, o progresso anterior será apagado.',
+      buttons:[{t:'Sim, nova aventura', cls:'red', fn:newGame},{t:'Cancelar', cls:'blue'}]});
+  } else newGame();
+}
+function newGame(){
+  const name = $('heroName').value.trim() || 'Herói Sem Nome';
+  S = newState(name); lastTick = Date.now();
+  log(`⚔️ ${esc(name)} aceitou a missão do Conselho dos Sábios!`);
+  save(); goMap();
+  modal({ico:'📜', title:'O CONSELHO DOS SÁBIOS', html:`Bem-vindo(a), <b>${esc(name)}</b>!<br><br>Os distritos da <b>Energia</b> 💡 e da <b>Reciclagem</b> 🗑️ já estão liberados. Vença o chefe de um distrito para liberar os vizinhos.<br><br>Boa sorte, herói!`,
+    buttons:[{t:'VAMOS LÁ! ▶'}]});
+}
+function continueGame(){
+  S = loadSave(); if(!S) return;
+  if(S.items.maca==null){ S.items.maca = S.items.ampulheta||0; delete S.items.ampulheta; } // saves antigos
+  S.opts = {fast:false, timer:false};
+  lastTick = Date.now();
+  if(S.hand) openCity(); else goMap();
+  toast(`💾 Bem-vindo(a) de volta, ${esc(S.name)}!`);
+}
+function restart(){ clearSave(); S=null; show('start'); renderStart(); }
+
+/* =====================================================================
+   MAPA
+   ===================================================================== */
+function goMap(){
+  if(S.hand){ toast('🧩 Coloque a peça no tabuleiro antes de sair!'); return; }
+  show('map'); renderMap();
+}
+function allPlaced(){ return S.pieces.length===8 && S.pieces.every(p=>S.city.includes(p)); }
+
+function renderMap(){
+  const pct=v=>(v*100/3+100/6)+'%';
+  let svg = '<svg aria-hidden="true">';
+  for(let i=0;i<8;i++){
+    const [r1,c1]=POS[i], [r2,c2]=POS[(i+1)%8];
+    svg+=`<line x1="${pct(c1)}" y1="${pct(r1)}" x2="${pct(c2)}" y2="${pct(r2)}" stroke="#fffdf3" stroke-width="8" stroke-dasharray="14 10" stroke-linecap="round"/>`;
+  }
+  [1,3,5,7].forEach(i=>{ const [r,c]=POS[i]; svg+=`<line x1="${pct(c)}" y1="${pct(r)}" x2="50%" y2="50%" stroke="#5b2a86" stroke-width="6" stroke-dasharray="4 8"/>`; });
+  svg+='</svg>';
+  let html = svg;
+  THEMES.forEach((t,i)=>{
+    const d=S.districts[i], [r,c]=POS[i];
+    const st = d.done?'done':d.unlocked?'open':'locked';
+    html+=`<button class="dnode ${st}" style="grid-row:${r+1};grid-column:${c+1};--c:${t.cor}" ${st==='locked'?'disabled':''} onclick="enterDistrict(${i})" aria-label="Distrito ${t.tema}">
+      <span class="dico">${d.done?t.piece.e:st==='locked'?'🔒':t.ico}</span>
+      <span class="dname">${t.tema.toUpperCase()}</span>
+      <span class="dsub">${d.done?'✅ Libertado':st==='locked'?'Bloqueado':`Etapa ${d.step+1}/4`}</span>
+    </button>`;
+  });
+  const ready = allPlaced();
+  html+=`<button class="dnode tower ${ready?'ready':''}" style="grid-row:2;grid-column:2" onclick="enterTower()" aria-label="Torre da Névoa">
+      <span class="dico">${ready?'🏰':'🌫️'}</span><span class="dname">TORRE DA NÉVOA</span>
+      <span class="dsub">${ready?'⚠️ Chefe final!':`Precisa das 8 peças`}</span></button>`;
+  $('world').innerHTML = html;
+
+  const done=S.districts.filter(d=>d.done).length;
+  const q = [
+    [done>=1, `Liberte o primeiro distrito`],
+    [S.pieces.length===8, `Conquiste as 8 peças da cidade (${S.pieces.length}/8)`],
+    [allPlaced(), `Monte todas as peças no tabuleiro da cidade`],
+    [cityEval().found.filter(s=>!s.neg).length>=4, `Crie 4 conexões na cidade (${cityEval().found.filter(s=>!s.neg).length}/4)`],
+    [S.ach.includes('final'), `Derrote o Imperador da Névoa na torre`]
+  ];
+  $('questList').innerHTML = q.map(([ok,t])=>`<li>${ok?'✅':'⬜'} ${t}</li>`).join('') +
+    `<li style="opacity:.85">🏅 Conquistas: ${S.ach.length}/${ACH.length}</li>`;
+  $('log').innerHTML = S.log.map(l=>`<div>${l}</div>`).join('');
+}
+
+function enterTower(){
+  if(!allPlaced()){
+    modal({ico:'🌫️', title:'TORRE DA NÉVOA', html:'Uma névoa espessa bloqueia a entrada. Você precisa <b>conquistar as 8 peças</b> e colocá-las no <b>tabuleiro da cidade</b> para dissipar a névoa.', buttons:[{t:'Entendi'}]});
+    return;
+  }
+  modal({ico:'😈', title:'O CHEFE FINAL', html:`O <b>Imperador da Névoa</b> espera no topo da torre. Ele fará perguntas de <b>todos os temas</b> e fica furioso quando está fraco!<br><br>❤️ Sua vida: ${S.hp}/${S.maxHp}<br><br>Deseja enfrentá-lo agora?`,
+    buttons:[{t:'⚔️ ENFRENTAR!', fn:()=>{S.cur=-1; startBattle('final');}},{t:'Ainda não', cls:'blue'}]});
+}
+
+/* =====================================================================
+   DISTRITO
+   ===================================================================== */
+function enterDistrict(i){ S.cur=i; show('district'); renderDistrict(); }
+function renderDistrict(){
+  const i=S.cur, t=THEMES[i], d=S.districts[i];
+  $('dIco').textContent = d.done ? t.piece.e : t.ico;
+  $('dName').textContent = `DISTRITO: ${t.tema.toUpperCase()}`;
+  $('dStory').innerHTML = d.done ? `✅ <b>Distrito libertado!</b> Você conquistou a peça <b>${t.piece.e} ${t.piece.nome}</b>.` : t.historia;
+  $('dPath').innerHTML = d.nodes.map((n,k)=>{
+    const info=NODE_INFO[n];
+    const st = d.done||k<d.step ? 'done' : k===d.step ? 'cur' : 'lock';
+    let sub = info.n;
+    if(n==='battle') sub=t.mon.n; if(n==='elite') sub=t.elite.n; if(n==='boss') sub=t.boss.n;
+    const ico = st==='done' ? '✅' : n==='battle'?t.mon.e : n==='elite'?t.elite.e : n==='boss'?t.boss.e : info.ico;
+    return (k?'<span class="arrow">➜</span>':'') + `<button class="pnode ${st}" ${st!=='cur'?'disabled':''} onclick="playNode()">
+      <span class="pi">${ico}</span><b>${k+1}. ${info.n.toUpperCase()}</b><small>${sub}</small></button>`;
+  }).join('');
+}
+function playNode(){
+  const d=S.districts[S.cur], n=d.nodes[d.step];
+  if(n==='battle'||n==='elite'||n==='boss') startBattle(n);
+  else if(n==='event') startEvent();
+  else if(n==='shop') openShop();
+  else if(n==='chest') openChest();
+  else if(n==='rest') openRest();
+}
+function completeNode(){
+  const d=S.districts[S.cur]; d.step++;
+  save(); show('district'); renderDistrict();
+}
+
+/* =====================================================================
+   PERGUNTAS (componente usado na batalha e no evento do sábio)
+   ===================================================================== */
+function pickQ(t){
+  const qs=THEMES[t].qs; const used = S.qUsed[t] || (S.qUsed[t]=[]);
+  let pool=[]; for(let k=1;k<qs.length;k++) if(!used.includes(k)) pool.push(k);
+  if(!pool.length){ used.length=0; for(let k=1;k<qs.length;k++) pool.push(k); }
+  const k=pick(pool); used.push(k); return qs[k];
+}
+
+function renderQuiz(el, q, o){
+  const order = shuffle([0,1,2,3]);
+  Q = {q, order, correct:order.indexOf(q.c), answered:false, removed:[], onAnswer:o.onAnswer, start:Date.now(), el,
+       max:o.time||0, time:o.time||0, frozen:false};
+  el.innerHTML = `
+    <div class="card ${o.key?'key':''}">
+      <div class="card-head">
+        <div><div class="quest-label">${o.label}</div><div class="card-tag">${o.tag.toUpperCase()}</div></div>
+        <div class="card-emoji" aria-hidden="true">${o.emoji}</div>
+      </div>
+      <div class="timer ${Q.max?'':'hidden'}" id="timer"><div id="timerBar"></div></div>
+      <div class="question">${q.q}</div>
+      <div class="opts">${order.map((oi,p)=>`<button class="opt" data-p="${p}"><span class="letter">${L[p]}</span><span>${q.o[oi]}</span></button>`).join('')}</div>
+      <div id="fb" aria-live="polite"></div>
+    </div>`;
+  el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(+b.dataset.p));
+  startTimer();
+}
+
+function startTimer(){
+  stopTimer();
+  if(!Q || !Q.max) return;
+  let lastSec = Math.ceil(Q.time);
+  timerId = setInterval(()=>{
+    if(!Q || Q.answered || Q.frozen || modalOpen()) return;
+    Q.time = Math.max(0, Q.time-0.1);
+    const bar=$('timerBar'); if(bar){ bar.style.width=(Q.time/Q.max*100)+'%'; $('timer').classList.toggle('low', Q.time<=8); }
+    const s=Math.ceil(Q.time); if(s!==lastSec){ lastSec=s; if(s<=5 && s>0) sfx.tick(); }
+    if(Q.time<=0) answer(-1);
+  },100);
+}
+function stopTimer(){ if(timerId){ clearInterval(timerId); timerId=null; } }
+
+function answer(p){
+  if(!Q || Q.answered || Q.removed.includes(p)) return;
+  Q.answered=true; stopTimer();
+  const ok = p===Q.correct;
+  Q.el.querySelectorAll('.opt').forEach((b,j)=>{
+    b.disabled=true;
+    if(j===Q.correct) b.classList.add('correct'); else if(j===p) b.classList.add('wrong'); else b.classList.add('dim');
+  });
+  const secs=(Date.now()-Q.start)/1000;
+  if(ok){ S.stats.correct++; S.pts+=10; S.stats.ansPts+=10; }
+  else { S.stats.wrong++; }
+  Q.onAnswer(ok, secs, p===-1);
+}
+
+function wrongLeft(){ return [0,1,2,3].filter(p=>p!==Q.correct && !Q.removed.includes(p)); }
+function removeWrong(n){
+  shuffle(wrongLeft()).slice(0,n).forEach(p=>{
+    Q.removed.push(p);
+    const b=Q.el.querySelector(`.opt[data-p="${p}"]`); if(b){ b.disabled=true; b.classList.add('removed'); }
+  });
+}
+function feedback(ok, html, btnText, fn, btnCls=''){
+  const fb=Q.el.querySelector('#fb');
+  fb.innerHTML = `<div class="feedback ${ok?'ok':'no'}">${html}<div><button class="btn ${btnCls}" id="goBtn">${btnText}</button></div></div>`;
+  const go=fb.querySelector('#goBtn');
+  go.onclick = fn;
+  go.focus({preventScroll:true});
+  fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function correctText(){ return `<b>${L[Q.correct]}) ${Q.q.o[Q.q.c]}</b>`; }
+
+/* =====================================================================
+   BATALHA
+   ===================================================================== */
+function startBattle(kind){
+  const prog = S.districts.filter(d=>d.done).length;
+  const t = kind==='final' ? null : THEMES[S.cur];
+  const base = kind==='final' ? FINAL_BOSS : kind==='battle' ? t.mon : kind==='elite' ? t.elite : t.boss;
+  let hp = {battle:24, elite:34, boss:48, final:110}[kind] + (kind==='final'?0:prog*4);
+  if(S.buff){ hp+=S.buff; toast(`🌫️ A poluição deixou o monstro mais forte: +${S.buff} de vida!`); S.buff=0; }
+  const atk = {battle:10, elite:14, boss:17, final:20}[kind] + Math.floor(prog/2);
+  B = {kind, mon:{n:base.n, e:base.e, hp, maxHp:hp, atk}, shield:false, turbo:false, took:false,
+       keyDone: !(kind==='boss'), askKey: kind==='boss', startHp:S.hp};
+  show('battle');
+  $('arena').classList.toggle('boss', kind==='boss'||kind==='final');
+  const intro = {
+    battle:`Um <b>${base.n}</b> selvagem apareceu! ${base.e}`,
+    elite:`💀 Cuidado! O monstro elite <b>${base.n}</b> bloqueia o caminho!`,
+    boss:`👑 <b>${base.n}:</b> "${base.fala}"<br>🗝️ <i>Acerte a Carta-Chave do distrito para poder derrotá-lo!</i>`,
+    final:`😈 <b>${base.n}:</b> "${base.fala}"`
+  }[kind];
+  $('speech').innerHTML = intro;
+  renderFighters(); nextQuestion();
+}
+
+function renderFighters(){
+  const c=CLASSES[S.cls];
+  $('pSprite').textContent=c.ico; $('pName').textContent=`${S.name.toUpperCase()} · NV ${S.lvl}`;
+  $('pHp').style.width=(S.hp/S.maxHp*100)+'%'; $('pHpT').textContent=`❤️ ${S.hp}/${S.maxHp}`;
+  const m=B.mon;
+  $('mSprite').textContent=m.e; $('mName').textContent=m.n.toUpperCase();
+  $('mHp').style.width=(Math.max(0,m.hp)/m.maxHp*100)+'%'; $('mHpT').textContent=`💜 ${Math.max(0,m.hp)}/${m.maxHp}`;
+  let ps=''; if(B.shield) ps+='<span>🛡️ Escudo</span>'; if(B.turbo) ps+='<span>💨 Turbo</span>'; 
+  $('pStatus').innerHTML=ps;
+  let ms=''; if(enraged()) ms+='<span>😡 FÚRIA</span>'; if(!B.keyDone) ms+='<span>🗝️ Protegido pela Carta-Chave</span>';
+  $('mStatus').innerHTML=ms;
+  const sk=c.skill, canAct = Q && !Q.answered;
+  $('skillBtn').innerHTML = `${sk.ico} ${sk.n} (${sk.cost}⚡)<small>${sk.d}</small>`;
+  $('skillBtn').disabled = !canAct || S.en<sk.cost;
+  $('itemBtns').innerHTML = Object.entries(ITEMS).map(([id,it])=>
+    `<button class="ibtn" title="${it.n}: ${it.d}" aria-label="${it.n} (${S.items[id]})" ${!canAct||!S.items[id]?'disabled':''} onclick="useItem('${id}')">${it.ico}<span>${S.items[id]}</span></button>`).join('');
+  $('comboBox').textContent = S.combo>=2 ? `🔥 COMBO x${S.combo} (+${Math.min(S.combo-1,5)*10}% dano)` : '';
+  updateHUD();
+}
+function enraged(){ return B && (B.kind==='boss'||B.kind==='final') && B.mon.hp>0 && B.mon.hp<=B.mon.maxHp/2; }
+
+function nextQuestion(){
+  let q, theme, key=false;
+  if(B.kind==='final'){ theme=rnd(0,7); q=pickQ(theme); }
+  else {
+    theme=S.cur;
+    if(!B.keyDone && B.askKey){ q=THEMES[theme].qs[0]; key=true; }
+    else { q=pickQ(theme); if(!B.keyDone) B.askKey=true; }
+  }
+  B.isKey = key;
+  const t = THEMES[theme];
+  const time = 0; // sem cronômetro
+  renderQuiz($('bq'), q, {
+    label: key ? '🗝️ CARTA-CHAVE DO DISTRITO' : (B.kind==='final'?'😈 PERGUNTA DO IMPERADOR':'⚔️ CARTA DE BATALHA'),
+    tag: t.tema, emoji: t.ico, key, time, onAnswer: battleAnswer
+  });
+  renderFighters();
+}
+
+function floatAt(id, text, cls){
+  const host=$(id).parentElement;
+  const s=document.createElement('span'); s.className='float '+cls; s.textContent=text;
+  host.appendChild(s); setTimeout(()=>s.remove(),1100);
+}
+function hitAnim(id){ const el=$(id); el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); }
+
+function battleAnswer(ok, secs, timeout){
+  const c=CLASSES[S.cls];
+  if(ok){
+    S.combo++; S.stats.maxCombo=Math.max(S.stats.maxCombo,S.combo);
+    const cb = S.combo>=3 ? Math.min((S.combo-2)*2,10) : 0;
+    if(cb){ S.pts+=cb; S.stats.comboPts+=cb; }
+    gainXP(10);
+    S.en=Math.min(EN_MAX, S.en+2+(S.cls==='engenheira'?1:0));
+    if(S.cls==='guardiao'){ const h=heal(5); if(h) floatAt('pSprite','+'+h,'heal'); }
+    let dmg = c.dmg + (S.lvl-1)*2 + S.dmgBonus;
+    dmg = Math.round(dmg*(1+Math.min(S.combo-1,5)*0.1));
+    let tags=[];
+    if(S.cls==='ciclista' && Math.random()<0.25){ dmg*=2; tags.push('CRÍTICO!'); }
+    if(B.turbo){ dmg*=3; B.turbo=false; tags.push('TURBO x3!'); }
+    if(B.isKey){ B.keyDone=true; tags.push('🗝️ Proteção quebrada!'); }
+    let note='';
+    if(!B.keyDone && B.mon.hp-dmg<1){ dmg=Math.max(0,B.mon.hp-1); note='<br>🗝️ <i>O chefe resiste! Só a Carta-Chave pode derrotá-lo.</i>'; }
+    B.mon.hp-=dmg;
+    sfx.ok(); setTimeout(sfx.hit,150); hitAnim('mSprite'); floatAt('mSprite','-'+dmg,'dmg');
+    if(S.combo===3) unlock('combo3'); if(S.combo===5) unlock('combo5'); if(S.combo===10) unlock('combo10');
+    if(secs<5) unlock('fast');
+    renderFighters();
+    feedback(true, `<h3>✨ ACERTOU! +10 PONTOS${cb?` +${cb} COMBO`:''}</h3>
+      Você causou <b>${dmg} de dano</b> ${tags.join(' ')}${note}<br>📖 ${Q.q.ex}`,
+      B.mon.hp<=0 ? 'VITÓRIA! 🏆' : 'PRÓXIMA CARTA ▶', ()=> B.mon.hp<=0 ? victory() : nextQuestion());
+  } else {
+    S.combo=0;
+    if(B.isKey) B.askKey=false; // a carta-chave volta depois de outra pergunta
+    let hurt=0, msg;
+    if(B.shield){ B.shield=false; msg='🛡️ Seu escudo bloqueou o ataque!'; floatAt('pSprite','BLOQUEADO','info'); }
+    else {
+      hurt = Math.round(B.mon.atk*(enraged()?1.5:1)*(S.cls==='mago'?0.75:1));
+      S.hp=Math.max(0,S.hp-hurt); B.took=true;
+      msg=`${B.mon.e} ${B.mon.n} ${enraged()?'<b>furioso</b> ':''}atacou: <b>-${hurt} ❤️</b>`;
+      hitAnim('pSprite'); floatAt('pSprite','-'+hurt,'hurt');
+    }
+    sfx.no();
+    renderFighters();
+    feedback(false, `<h3>${timeout?'⏰ O TEMPO ACABOU!':'💥 NÃO FOI DESSA VEZ!'}</h3>
+      ${msg}<br>A resposta certa é ${correctText()}<br>📖 ${Q.q.ex}
+      ${B.isKey?'<br><i>🗝️ A Carta-Chave voltará em breve!</i>':''}`,
+      S.hp<=0 ? 'OH NÃO... 😵' : 'PRÓXIMA CARTA ▶', ()=> S.hp<=0 ? faint() : nextQuestion(), 'blue');
+  }
+}
+
+function useSkill(){
+  if(!(S.screen==='battle' && Q && !Q.answered)) return;
+  const sk=CLASSES[S.cls].skill;
+  if(S.en<sk.cost){ toast('⚡ Energia insuficiente! Acerte perguntas para recarregar.'); return; }
+  if(S.cls==='guardiao'){ if(S.hp>=S.maxHp){ toast('Sua vida já está cheia!'); return; } const h=heal(Math.round(S.maxHp*0.4)); floatAt('pSprite','+'+h,'heal'); }
+  if(S.cls==='engenheira'){ if(!wrongLeft().length){ toast('Não há mais alternativas para eliminar!'); return; } removeWrong(2); }
+  if(S.cls==='mago'){ if(B.shield){ toast('O Escudo Digital já está ativo!'); return; } B.shield=true; removeWrong(1); }
+  if(S.cls==='ciclista'){ if(B.turbo){ toast('O Turbo já está ativo!'); return; } B.turbo=true; }
+  S.en-=sk.cost; S.stats.skillsUsed++; if(S.stats.skillsUsed>=5) unlock('skill5');
+  sfx.loot(); toast(`${sk.ico} <b>${sk.n}!</b>`);
+  renderFighters();
+}
+
+function useItem(id){
+  if(!S.items[id]) return;
+  const inBattle = S.screen==='battle' && Q && !Q.answered;
+  switch(id){
+    case 'pocao':
+      if(S.hp>=S.maxHp){ toast('Sua vida já está cheia!'); return; }
+      { const h=heal(40); if(S.screen==='battle') floatAt('pSprite','+'+h,'heal'); } break;
+    case 'bateria':
+      if(S.en>=EN_MAX){ toast('Sua energia já está cheia!'); return; }
+      S.en=Math.min(EN_MAX,S.en+5); break;
+    case 'lupa':
+      if(!inBattle){ toast('Use a Lupa durante uma batalha.'); return; }
+      if(!wrongLeft().length){ toast('Não há mais alternativas para eliminar!'); return; }
+      removeWrong(1); break;
+    case 'escudo':
+      if(!inBattle){ toast('Use o Escudo durante uma batalha.'); return; }
+      if(B.shield){ toast('Você já está protegido!'); return; }
+      B.shield=true; break;
+    case 'maca':
+      if(S.hp>=S.maxHp && S.en>=EN_MAX){ toast('Sua vida e energia já estão cheias!'); return; }
+      { const h=heal(20); S.en=Math.min(EN_MAX,S.en+2); if(S.screen==='battle' && h) floatAt('pSprite','+'+h,'heal'); } break;
+  }
+  S.items[id]--; S.stats.itemsUsed++; if(S.stats.itemsUsed>=5) unlock('items5');
+  sfx.coin(); toast(`${ITEMS[id].ico} ${ITEMS[id].n} usado!`);
+  if(S.screen==='battle') renderFighters(); else updateHUD();
+  save();
+}
+
+function victory(){
+  const k=B.kind, m=B.mon;
+  S.stats.kills++; unlock('win1');
+  if(S.fainted){ unlock('phoenix'); S.fainted=false; }
+  const xp={battle:20, elite:30, boss:50, final:100}[k];
+  const coins={battle:rnd(6,12), elite:rnd(12,20), boss:rnd(25,35), final:50}[k];
+  gainXP(xp); addCoins(coins);
+  let extra='';
+  if(k==='elite'){ const it=pick(Object.keys(ITEMS)); S.items[it]++; extra=`<br>${ITEMS[it].ico} O monstro deixou cair: <b>${ITEMS[it].n}</b>!`; }
+  if(k==='boss'||k==='final'){
+    const bp = k==='final'?100:50; S.pts+=bp; S.stats.bossPts+=bp; S.stats.bosses++;
+    extra+=`<br>👑 Bônus de chefe: <b>+${bp} ⭐</b>`;
+    unlock('boss1');
+    if(!B.took){ unlock('flawless'); }
+  }
+  log(`${m.e} Derrotou ${m.n}`);
+  sfx.win(); B=null; Q=null; $('bq').innerHTML=''; save();
+  if(k==='final'){ unlock('final'); endGame(); return; }
+  modal({ico:'🏆', title:`${m.n.toUpperCase()} DERROTADO!`, html:`Recompensas:<br><b>+${xp} ✨ XP · +${coins} 🪙</b>${extra}`,
+    buttons:[{t:'CONTINUAR ▶', fn:()=> k==='boss' ? bossDefeated() : completeNode()}]});
+}
+
+function faint(){
+  S.stats.faints++; S.fainted=true; S.combo=0;
+  const lost=Math.floor(S.coins*0.25); S.coins-=lost;
+  S.hp=Math.ceil(S.maxHp*0.6);
+  const wasFinal = B && B.kind==='final';
+  B=null; Q=null; $('bq').innerHTML=''; log('😵 Desmaiou em batalha e foi resgatado');
+  save();
+  modal({ico:'😵', title:'VOCÊ DESMAIOU!', html:`O Conselho dos Sábios te resgatou e cuidou dos seus ferimentos.<br><br>❤️ Vida recuperada para ${S.hp}<br>🪙 Moedas perdidas: ${lost}<br><br><i>Dica: releia as explicações, use itens e a sua habilidade especial!</i>`,
+    buttons:[{t:'TENTAR DE NOVO ▶', fn:()=>{ if(wasFinal) goMap(); else { show('district'); renderDistrict(); } }}]});
+}
+
+function bossDefeated(){
+  const i=S.cur, t=THEMES[i], d=S.districts[i];
+  d.done=true; d.step=4;
+  const unlockedNow=[];
+  [(i+7)%8,(i+1)%8].forEach(n=>{ if(!S.districts[n].unlocked){ S.districts[n].unlocked=true; unlockedNow.push(THEMES[n].tema); } });
+  S.pieces.push(t.piece.e); S.hand=t.piece.e;
+  log(`🧩 Conquistou a peça ${t.piece.e} ${t.piece.nome}`);
+  save(); sfx.loot();
+  modal({ico:t.piece.e, title:'NOVA PEÇA CONQUISTADA!', html:`<b>${t.piece.nome}</b><br>${t.piece.txt}
+      ${unlockedNow.length?`<br><br>🔓 Distritos liberados: <b>${unlockedNow.join(' e ')}</b>`:''}
+      <br><br>Agora escolha onde colocar esta peça no tabuleiro da cidade!`,
+    buttons:[{t:'🏗️ CONSTRUIR NA CIDADE', fn:openCity}]});
+}
+
+/* =====================================================================
+   EVENTOS, BAÚ, ACAMPAMENTO, LOJA
+   ===================================================================== */
+function startEvent(){
+  let pool=EVENTS.map((_,i)=>i).filter(i=>!S.evUsed.includes(i));
+  if(!pool.length){ S.evUsed=[]; pool=EVENTS.map((_,i)=>i); }
+  const idx=pick(pool); S.evUsed.push(idx);
+  const ev=EVENTS[idx];
+  show('event');
+  Q=null;
+  $('eventBox').innerHTML = `<span class="big">${ev.ico}</span><h2>${ev.t.toUpperCase()}</h2><p>${ev.txt}</p>
+    <div class="evchoices">${ev.ch.map((c,k)=>`<button class="btn blue" ${c.need&&!c.need()?'disabled':''} onclick="eventChoice(${idx},${k})">${c.t}${c.need&&!c.need()?' (moedas insuficientes)':''}</button>`).join('')}</div>`;
+}
+function eventChoice(idx,k){
+  const c=EVENTS[idx].ch[k];
+  if(c.quiz){ sageQuiz(); return; }
+  const res=c.fx();
+  if(c.kind){ S.stats.kind++; if(S.stats.kind>=3) unlock('kind'); }
+  updateHUD();
+  $('eventBox').innerHTML = `<span class="big">${EVENTS[idx].ico}</span><h2>${EVENTS[idx].t.toUpperCase()}</h2><p class="center">${res}</p>
+    <div class="center"><button class="btn" id="evGo" onclick="completeNode()">CONTINUAR ▶</button></div>`;
+  $('evGo').focus();
+}
+function sageQuiz(){
+  const theme = rnd(0,7);
+  $('eventBox').innerHTML = `<span class="big">🧙‍♂️</span><h2>O DESAFIO DO SÁBIO</h2><div id="sageQ"></div>`;
+  renderQuiz($('sageQ'), pickQ(theme), {label:'📜 PERGUNTA DO SÁBIO', tag:THEMES[theme].tema, emoji:THEMES[theme].ico, time:0,
+    onAnswer:(ok)=>{
+      if(ok){ addCoins(25); gainXP(20); S.stats.kind++; if(S.stats.kind>=3) unlock('kind'); sfx.ok();
+        feedback(true, `<h3>✨ SÁBIA RESPOSTA! +10 PONTOS</h3>O sábio te entrega um tesouro: <b>+25 🪙 e +20 ✨ XP</b>!<br>📖 ${Q.q.ex}`, 'CONTINUAR ▶', completeNode); }
+      else { gainXP(5); S.combo=0; sfx.no();
+        feedback(false, `<h3>🤔 NÃO FOI DESSA VEZ</h3>A resposta certa é ${correctText()}<br>📖 ${Q.q.ex}<br>"Errar também ensina", diz o sábio. <b>+5 ✨ XP</b>`, 'CONTINUAR ▶', completeNode, 'blue'); }
+      updateHUD();
+    }});
+}
+
+function openChest(){
+  const coins=rnd(15,30), it=pick(Object.keys(ITEMS));
+  addCoins(coins); S.items[it]++; sfx.loot(); log(`🎁 Abriu um baú: +${coins} moedas`);
+  modal({ico:'🎁', title:'BAÚ DO TESOURO!', html:`Você encontrou um baú feito de madeira reciclada!<br><br><b>+${coins} 🪙</b><br>${ITEMS[it].ico} <b>${ITEMS[it].n}</b>: ${ITEMS[it].d}`,
+    buttons:[{t:'PEGAR TUDO ▶', fn:completeNode}]});
+}
+function openRest(){
+  modal({ico:'🏕️', title:'ACAMPAMENTO', html:'Você encontrou um acampamento seguro, com uma fogueira aquecida por energia solar. O que deseja fazer?',
+    buttons:[
+      {t:'😴 Descansar (+50% ❤️ e +3 ⚡)', cls:'green', fn:()=>{ heal(Math.round(S.maxHp*0.5)); S.en=Math.min(EN_MAX,S.en+3); toast('😴 Você descansou e recuperou as forças!'); completeNode(); }},
+      {t:'🏋️ Treinar (+40 ✨ XP)', cls:'blue', fn:()=>{ gainXP(40); toast('🏋️ O treino valeu a pena!'); completeNode(); }}
+    ]});
+}
+
+const UPGRADES = {
+  forca:{ico:'💪', n:'Treino de Força', d:'+3 de dano em todos os ataques.', price:45, fx:()=>S.dmgBonus+=3},
+  vida:{ico:'❤️', n:'Treino de Resistência', d:'+15 de vida máxima (e cura 15).', price:40, fx:()=>{S.maxHp+=15; heal(15);}}
+};
+function openShop(){ S.shopUp=[]; show('shop'); renderShop(); }
+function renderShop(){
+  $('shopCoins').textContent=S.coins;
+  const card=(id,it,up)=>{
+    const owned = up ? S.shopUp.includes(id) : false;
+    return `<div class="sitem"><div class="ico">${it.ico}</div><b>${it.n}</b><p>${it.d}</p>
+      ${up?'':`<p><small>Na mochila: ${S.items[id]}</small></p>`}
+      <button class="btn sm" ${S.coins<it.price||owned?'disabled':''} onclick="buy('${id}',${up})">${owned?'COMPRADO':`COMPRAR 🪙 ${it.price}`}</button></div>`;
+  };
+  $('shopGrid').innerHTML = Object.entries(ITEMS).map(([id,it])=>card(id,it,false)).join('') +
+                            Object.entries(UPGRADES).map(([id,it])=>card(id,it,true)).join('');
+  updateHUD();
+}
+function buy(id, up){
+  const it = up?UPGRADES[id]:ITEMS[id];
+  if(S.coins<it.price) return;
+  S.coins-=it.price; sfx.coin();
+  if(up){ S.shopUp.push(id); it.fx(); } else S.items[id]++;
+  toast(`${it.ico} Você comprou: ${it.n}`); renderShop(); save();
+}
+function leaveShop(){ completeNode(); }
+
+/* =====================================================================
+   CIDADE (tabuleiro)
+   ===================================================================== */
+function tok(v){ return v==='river' ? '🌊' : v; }
+function neighbors(i){ const r=Math.floor(i/4), c=i%4; return [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].filter(([a,b])=>a>=0&&a<4&&b>=0&&b<4).map(([a,b])=>a*4+b); }
+function cityEval(city){
+  city = city || S.city;
+  const found=[]; const ind={s:0,t:0,v:0};
+  city.forEach(v=>{ if(PIECE_BASE[v]){ const b=PIECE_BASE[v]; ind.s+=b.s; ind.t+=b.t; ind.v+=b.v; } });
+  for(let i=0;i<16;i++) neighbors(i).forEach(j=>{
+    if(j<=i) return;
+    const a=tok(city[i]), b=tok(city[j]); if(!a||!b) return;
+    SYN.forEach(s=>{ if((s.a===a&&s.b===b)||(s.a===b&&s.b===a)){ found.push(s); ind.s+=s.fx.s; ind.t+=s.fx.t; ind.v+=s.fx.v; } });
+  });
+  ind.s=Math.max(0,ind.s); ind.t=Math.max(0,ind.t); ind.v=Math.max(0,ind.v);
+  return {found, ind, score:(ind.s+ind.t+ind.v)*3};
+}
+
+function openCity(){ show('city'); renderCity(); }
+function renderCity(){
+  const board=$('board');
+  board.innerHTML = S.city.map((v,i)=>{
+    if(v==='river') return `<div class="cell river" title="Rio"><span class="e">🌊</span><span class="lbl">Rio</span></div>`;
+    if(v==='ruin') return `<button class="cell ruin" onclick="cellClick(${i})" title="Terreno poluído"><span class="e">🏚️</span><span class="lbl">Poluído<br>🪙 ${RUIN_COST}</span></button>`;
+    if(v) return `<button class="cell piece ${i===freshCell?'fresh':''}" onclick="cellClick(${i})" onmouseenter="hint(${i})" onfocus="hint(${i})"><span class="e">${v}</span><span class="lbl">${PIECE_NAMES[v]}</span></button>`;
+    return `<button class="cell ${S.hand?'target':''}" onclick="cellClick(${i})" onmouseenter="hint(${i})" onfocus="hint(${i})" aria-label="Espaço vazio">${S.hand?'<span class="e" style="opacity:.35">'+S.hand+'</span>':''}</button>`;
+  }).join('');
+  freshCell=-1;
+  $('handBox').innerHTML = S.hand
+    ? `🧩 Peça na mão: <span class="e">${S.hand}</span> ${PIECE_NAMES[S.hand]} — <b>clique em um espaço vazio</b> para construir.`
+    : `🏙️ Tabuleiro de Nova Esperança · Peças no tabuleiro: ${S.city.filter(v=>PIECE_BASE[v]).length}/8`;
+  const ev=cityEval();
+  const bar=(lbl,v)=>`<div class="ind"><span>${lbl}</span><div class="bar"><div style="width:${Math.min(100,v/30*100)}%"></div></div><span>${v}</span></div>`;
+  $('indicators').innerHTML = bar('🌱 Sustentab.',ev.ind.s)+bar('😊 Qualid. vida',ev.ind.v)+bar('🤖 Tecnologia',ev.ind.t)+
+    `<p style="font-weight:900;margin:6px 0">🏆 Pontuação da cidade: ${ev.score}</p>`;
+  $('synList').innerHTML = ev.found.length ? ev.found.map(s=>`<div class="${s.neg?'neg':''}">${s.neg?'⚠️':'🔗'} ${s.a} + ${s.b} ${s.n}</div>`).join('') : '<i>Nenhuma conexão ainda. Coloque peças vizinhas que combinam!</i>';
+  $('synTable').innerHTML = SYN.map(s=>`<div class="${s.neg?'neg':''}">${s.a} + ${s.b} → ${s.n}</div>`).join('');
+  $('cityBack').disabled = !!S.hand;
+  const pos=ev.found.filter(s=>!s.neg).length;
+  if(pos>=3) unlock('syn3'); if(pos>=6) unlock('syn6');
+  updateHUD();
+}
+function hint(i){
+  if(!S.hand || (S.city[i] && !PIECE_BASE[S.city[i]])){ return; }
+  const test=S.city.slice(); test[i]=S.hand;
+  const mine=cityEval(test).found.filter(s=>s.a===S.hand||s.b===S.hand);
+  $('cityHint').innerHTML = mine.length ? mine.map(s=>`${s.neg?'⚠️':'🔗'} ${s.n}`).join(' · ') : 'Nenhuma conexão neste espaço.';
+}
+function cellClick(i){
+  const v=S.city[i];
+  if(v==='ruin'){
+    if(S.hand){ toast('🏚️ Este terreno está poluído. Limpe-o primeiro!'); }
+    modal({ico:'🏚️', title:'TERRENO POLUÍDO', html:`Limpar este terreno custa <b>🪙 ${RUIN_COST}</b>. Você tem 🪙 ${S.coins}.`,
+      buttons:[{t:'🧹 Limpar terreno', cls:'green', disabled:S.coins<RUIN_COST, fn:()=>{ S.coins-=RUIN_COST; S.city[i]=null; sfx.coin(); toast('🧹 Terreno limpo! Novo espaço disponível.'); save(); renderCity(); }},{t:'Cancelar', cls:'blue'}]});
+    return;
+  }
+  if(!v && S.hand){
+    S.city[i]=S.hand; S.hand=null; freshCell=i; sfx.loot();
+    save(); renderCity();
+    const n=cityEval().found.filter(s=>!s.neg).length;
+    if(allPlaced()) toast('🏰 Todas as peças estão na cidade! A névoa da Torre começou a se dissipar...');
+    else toast(`🏗️ Peça construída! Conexões ativas: ${n}`);
+    return;
+  }
+  if(PIECE_BASE[v]){
+    if(S.hand){ S.city[i]=S.hand; S.hand=v; freshCell=i; } // troca
+    else { S.hand=v; S.city[i]=null; }
+    sfx.tick(); renderCity();
+  }
+}
+
+/* =====================================================================
+   MOCHILA E CONQUISTAS
+   ===================================================================== */
+function openBag(){
+  const c=CLASSES[S.cls];
+  const list=Object.entries(ITEMS).map(([id,it])=>`<div class="it"><span class="i">${it.ico}</span><div><b>${it.n}</b> × ${S.items[id]}<br><small>${it.d}</small></div>
+    ${it.field?`<button class="btn sm" ${!S.items[id]?'disabled':''} onclick="useItem('${id}');openBag()">USAR</button>`:'<small>só em batalha</small>'}</div>`).join('');
+  modal({ico:'🎒', title:'MOCHILA', html:`<div class="invlist">
+      <p><b>${c.ico} ${c.nome}</b> · Nível ${S.lvl}<br>⚔️ Dano: ${c.dmg+(S.lvl-1)*2+S.dmgBonus} · ❤️ ${S.hp}/${S.maxHp} · ⚡ ${S.en}/${EN_MAX}<br>
+      ✨ ${c.skill.n}: ${c.skill.d}<br><i>Passiva: ${c.passive}</i></p>${list}
+      <p><small>✅ Acertos: ${S.stats.correct} · ❌ Erros: ${S.stats.wrong} · 👾 Monstros: ${S.stats.kills} · 🔥 Maior combo: ${S.stats.maxCombo}</small></p></div>`,
+    buttons:[{t:'FECHAR'}]});
+}
+function achHTML(){ return ACH.map(a=>`<div class="ach ${S.ach.includes(a.id)?'':'off'}"><span class="i">${a.i}</span><b>${a.n}</b><br><small>${a.d}</small></div>`).join(''); }
+function openAch(){ modal({ico:'🏅', title:`CONQUISTAS ${S.ach.length}/${ACH.length}`, html:`<div class="achgrid">${achHTML()}</div>`, buttons:[{t:'FECHAR'}]}); }
+
+/* =====================================================================
+   FINAL
+   ===================================================================== */
+function endGame(){
+  save();
+  const ev=cityEval();
+  const cityPts=ev.score;
+  S.pts+=cityPts;
+  const st=S.stats, total=st.correct+st.wrong, pct=total?Math.round(st.correct/total*100):0;
+  show('end');
+  $('endBoard').innerHTML = S.city.map(v=>`<div>${v==='river'?'🌊':v==='ruin'?'🏚️':v||''}</div>`).join('');
+  $('breakdown').innerHTML = `
+    <div><span>✅ Respostas certas (${st.correct} × 10)</span><b>${st.ansPts}</b></div>
+    <div><span>🔥 Bônus de combo</span><b>${st.comboPts}</b></div>
+    <div><span>👑 Chefes derrotados</span><b>${st.bossPts}</b></div>
+    <div><span>🏅 Conquistas</span><b>${st.achPts}</b></div>
+    <div><span>🏙️ Pontuação da cidade (${ev.found.filter(s=>!s.neg).length} conexões)</span><b>${cityPts}</b></div>
+    <div class="tot"><span>⭐ TOTAL</span><b>${S.pts}</b></div>`;
+  const mins=Math.round(st.playMs/60000);
+  $('endSummary').innerHTML = `
+    <div>Aproveitamento<b>${pct}%</b></div><div>Nível final<b>${S.lvl}</b></div>
+    <div>Maior combo<b>${st.maxCombo}</b></div><div>Monstros derrotados<b>${st.kills}</b></div>
+    <div>Tempo de jogo<b>${mins} min</b></div>`;
+  let medal,msg;
+  if(pct>=90){ medal='🏆'; msg=`Lendário, ${S.name}! Você é a maior especialista em cidades sustentáveis de Nova Esperança!`; }
+  else if(pct>=75){ medal='🥇'; msg=`Excelente, ${S.name}! Você mostrou que sabe como cuidar de uma cidade.`; }
+  else if(pct>=55){ medal='🥈'; msg=`Muito bem, ${S.name}! Você não desistiu e aprendeu com cada desafio.`; }
+  else { medal='🥉'; msg=`Parabéns pela persistência, ${S.name}! Errar faz parte de aprender — e você salvou a cidade!`; }
+  $('medal').textContent=medal; $('endMsg').textContent=msg;
+  $('endAch').innerHTML=achHTML();
+  clearSave(); sfx.win(); confetti();
+}
+function confetti(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const items=['🎉','⭐','🌱','♻️','☀️','💧','🌳','✨','🚲','🏡'];
+  for(let i=0;i<60;i++){
+    const s=document.createElement('span'); s.className='confetti'; s.textContent=items[i%items.length];
+    s.style.left=Math.random()*100+'vw'; s.style.animationDuration=(2.5+Math.random()*2.5)+'s'; s.style.animationDelay=Math.random()*1.5+'s';
+    document.body.appendChild(s); setTimeout(()=>s.remove(),6500);
+  }
+}
+
+/* =====================================================================
+   TECLADO E INÍCIO
+   ===================================================================== */
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(modalOpen()){ if(e.key==='Escape' && $('mBtns').children.length===1) $('mBtns').children[0].click(); return; }
+  if(document.activeElement && document.activeElement.tagName==='INPUT') return;
+  if(!S || !Q || Q.answered || !['battle','event'].includes(S.screen)) return;
+  const map={A:0,B:1,C:2,D:3,'1':0,'2':1,'3':2,'4':3};
+  const idx=map[e.key.toUpperCase()];
+  if(idx!==undefined){ e.preventDefault(); answer(idx); }
+});
+$('heroName').addEventListener('keydown',e=>{ if(e.key==='Enter') tryNewGame(); });
+window.addEventListener('beforeunload', save);
+renderStart();
+</script>
+</body>
+</html>
