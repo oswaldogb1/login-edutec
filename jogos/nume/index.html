@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nume — palavras e números</title>
+<style>
+:root{
+  --bg:#FFF6E6; --ink:#2B2A33; --muted:#6A6675; --card:#FFFFFF; --line:#EADCC2;
+  --t:#D9480F; --t-bg:#FFEBDD; --t-line:#FFC29B;      /* TEXTO  */
+  --n:#1864AB; --n-bg:#E2F0FD; --n-line:#A5CDF3;      /* NÚMERO */
+  --ok:#2B8A3E; --ok-bg:#E3F6E7; --bad:#C92A2A; --bad-bg:#FDE8E8; --star:#F08C00;
+  --r:20px;
+}
+*{box-sizing:border-box}
+html{height:100%}
+body{
+  margin:0; min-height:100%; height:100vh; height:100dvh; display:flex; flex-direction:column;
+  background:var(--bg); color:var(--ink);
+  font:16px/1.4 ui-rounded,"Nunito","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:default}
+:focus-visible{outline:3px solid #1C7ED6;outline-offset:2px}
+h1,h2,h3,p,ul,ol{margin:0}
+
+/* ---------- topo ---------- */
+.top{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;padding:8px 14px;background:var(--card);border-bottom:2px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{display:flex;width:40px;height:40px;border-radius:12px;overflow:hidden;font-weight:900;font-size:18px;color:#fff}
+.logo b{flex:1;display:grid;place-items:center}
+.logo b:first-child{background:var(--t)}
+.logo b:last-child{background:var(--n)}
+.brand h1{font-size:21px;line-height:1;font-weight:900}
+.brand p{font-size:12px;color:var(--muted)}
+.modes{display:flex;gap:6px;flex-wrap:wrap}
+.modes button{border:2px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-weight:800}
+.modes button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.tools{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tool{border:2px solid var(--line);background:#fff;border-radius:12px;padding:6px 10px;font-weight:800;min-height:38px}
+.tool[aria-pressed=true]{background:#FFF3BF;border-color:#F2C94C}
+#timerBtn{font-variant-numeric:tabular-nums}
+#timerBtn.running{background:var(--n-bg);border-color:var(--n-line)}
+#timerBtn.over{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.stars{color:var(--star);font-weight:900;font-size:18px;padding:0 6px;white-space:nowrap}
+.stars.bump{animation:pop .5s cubic-bezier(.3,1.7,.5,1)}
+
+/* ---------- tabuleiro ---------- */
+.board{flex:1;min-height:0;display:grid;grid-template-columns:minmax(240px,300px) minmax(0,1fr) minmax(240px,300px);gap:14px;padding:14px}
+.side{min-height:0;display:flex;flex-direction:column}
+.center{min-width:0;min-height:0;display:flex;flex-direction:column;gap:10px}
+.tabs{display:none}
+
+body:not([data-mode=criar]) .only-criar{display:none!important}
+body:not([data-mode=criar]):not([data-mode=missoes]) .only-build{display:none!important}
+body:not([data-mode=sort]) .only-sort{display:none!important}
+body:not([data-mode=detetive]) .only-det{display:none!important}
+
+/* ---------- painéis ---------- */
+.panel{flex:1;min-height:0;overflow:auto;border:2px solid var(--line);border-radius:var(--r);padding:12px 14px;scrollbar-width:thin;scrollbar-color:#C9BBA0 transparent;
+  background:linear-gradient(#fff 40%,rgba(255,255,255,0)) top/100% 28px no-repeat local,linear-gradient(rgba(255,255,255,0),#fff 60%) bottom/100% 28px no-repeat local,
+    radial-gradient(farthest-side at 50% 0,rgba(60,40,0,.28),transparent) top/100% 12px no-repeat scroll,radial-gradient(farthest-side at 50% 100%,rgba(60,40,0,.28),transparent) bottom/100% 12px no-repeat scroll,#fff}
+.panel.text{border-color:var(--t-line)}
+.panel.num{border-color:var(--n-line)}
+.phead{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.badge{flex:none;min-width:50px;height:36px;padding:0 8px;border-radius:10px;display:grid;place-items:center;font-weight:900;color:#fff;letter-spacing:.5px;background:var(--ink)}
+.text .badge{background:var(--t)}
+.num .badge{background:var(--n)}
+.phead h2{font-size:19px;font-weight:900;line-height:1.1}
+.phead p{font-size:13px;color:var(--muted);line-height:1.25}
+.field{padding:7px 0 8px;border-top:2px dotted var(--line);border-radius:6px}
+.field h3,.field label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px;font-weight:800;margin-bottom:5px}
+.field.pulse{animation:pulse 1s ease}
+.chips,.digits,.swatches{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:2px solid var(--t-line);background:#fff;border-radius:999px;padding:4px 11px;font-weight:700;font-size:15px;min-height:35px;line-height:1.2}
+.chip i{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.4);margin-right:6px;vertical-align:-2px}
+.chip:hover{background:var(--t-bg)}
+.chip[aria-pressed=true]{background:var(--t);border-color:var(--t);color:#fff}
+.digit{width:36px;height:38px;border:2px solid var(--n-line);background:#fff;border-radius:12px;font-weight:900;font-size:18px;font-variant-numeric:tabular-nums}
+.digit.wide{width:58px}
+.digit:hover{background:var(--n-bg)}
+.digit[aria-pressed=true]{background:var(--n);border-color:var(--n);color:#fff}
+.swatch{width:34px;height:34px;border-radius:50%;border:2px solid rgba(0,0,0,.25)}
+.swatch[aria-pressed=true]{box-shadow:0 0 0 3px #fff,0 0 0 6px var(--ink)}
+.ext{font-size:14px;font-weight:800;color:var(--n);text-align:right}
+body[data-mode=missoes] .ext{display:none}
+#inNome{width:100%;border:2px solid var(--t-line);border-radius:12px;padding:8px 12px;font-weight:800;font-size:17px;background:#fff}
+.agebox{display:flex;align-items:center;gap:6px}
+.agebox .unit{font-weight:800}
+#inIdade{width:70px;text-align:center;border:2px solid var(--n-line);border-radius:12px;padding:6px 4px;font-weight:900;font-size:20px;background:#fff;-moz-appearance:textfield;appearance:textfield}
+#inIdade::-webkit-inner-spin-button,#inIdade::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.step{width:40px;height:40px;border:2px solid var(--n-line);background:#fff;border-radius:12px;font-size:22px;font-weight:900;color:var(--n);line-height:1}
+#rgIdade{display:block;width:100%;margin:8px 0 0;accent-color:var(--n)}
+.chip.right,.digit.right{background:var(--ok);border-color:var(--ok);color:#fff}
+.chip.wrong,.digit.wrong{background:var(--bad-bg);border-color:var(--bad);color:var(--bad);text-decoration:line-through;animation:shake .35s}
+
+/* ---------- cartão de texto (ficha, missão, pergunta) ---------- */
+.task{background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:10px 14px}
+.thead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{background:var(--ink);color:#fff;font-weight:800;font-size:13px;border-radius:999px;padding:3px 12px;white-space:nowrap}
+.grow{flex:1;min-width:140px;color:var(--muted);font-size:14px}
+.score{font-weight:800;font-size:14px;white-space:nowrap}
+.seg{display:inline-flex;border:2px solid var(--n-line);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:4px 12px;font-weight:800;font-size:13px;color:var(--n)}
+.seg button[aria-pressed=true]{background:var(--n);color:#fff}
+.ghost{border:2px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px;font-weight:800;font-size:13px}
+.primary{border:0;background:var(--ok);color:#fff;border-radius:999px;padding:9px 22px;font-weight:900;font-size:16px;box-shadow:0 3px 0 #1E6B2E}
+.primary:active{transform:translateY(2px);box-shadow:0 1px 0 #1E6B2E}
+.sentence{margin-top:8px;font-size:clamp(17px,1.45vw,21px);line-height:1.75}
+.tok{display:inline-block;padding:0 6px;margin:0 1px;border-radius:8px;font-weight:800;line-height:1.45}
+.nb{white-space:nowrap}
+.tok.text{background:var(--t-bg);color:var(--t)}
+.tok.num{background:var(--n-bg);color:var(--n)}
+.tok[data-key]{cursor:pointer}
+.sentence.plain .tok{background:#F3EDE0;color:var(--ink)}
+.sentence .tok.ok{background:var(--ok-bg);color:var(--ok);box-shadow:0 0 0 2px var(--ok)}
+.sentence .tok.bad{background:var(--bad-bg);color:var(--bad);box-shadow:0 0 0 2px var(--bad);animation:shake .35s}
+body[data-mode=criar] .sentence{min-height:5.25em}
+.tfoot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.msg{font-size:15px;font-weight:700;min-height:1.4em}
+p.msg{margin-top:4px;text-align:center}
+.good{color:var(--ok)}
+.oops{color:var(--bad)}
+.won{color:var(--star);font-size:22px;letter-spacing:2px}
+.bigcard{margin:6px 0 2px;text-align:center;font-weight:800;font-size:clamp(26px,3vw,40px);line-height:1.3}
+.bigcard b{background:#FFF3BF;border-radius:12px;padding:0 12px}
+.bigcard.small{font-size:clamp(20px,2.1vw,28px)}
+.bigcard.small b{background:none;padding:0}
+
+/* ---------- palco ---------- */
+.stage{position:relative;flex:1;min-height:230px;border-radius:24px;overflow:hidden;border:2px solid #B5DBF5;background:linear-gradient(#C9E9FF,#EEF9FF)}
+#fig{position:absolute;inset:0;width:100%;height:100%;overflow:visible;font-family:inherit}
+.tags{position:absolute;left:0;right:0;bottom:8px;display:flex;gap:8px;justify-content:center;pointer-events:none}
+.tag{background:#fff;border:3px solid;border-radius:999px;padding:2px 14px;font-weight:900;font-size:16px;max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag.text{border-color:var(--t);color:var(--t)}
+.tag.num{border-color:var(--n);color:var(--n)}
+.tag.empty{opacity:.55;font-weight:700}
+.tag.pop{animation:pop .4s cubic-bezier(.3,1.7,.5,1)}
+.stage-actions{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap}
+.mini{border:2px solid rgba(43,42,51,.15);background:rgba(255,255,255,.9);border-radius:999px;padding:5px 12px;font-weight:800;font-size:14px}
+.mini:hover{background:#fff}
+#confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#confetti i{position:absolute;top:-16px;width:9px;height:14px;border-radius:2px;animation:fall 1.4s ease-in forwards}
+
+.part.pop,.pop-all{animation:pop .5s cubic-bezier(.3,1.7,.5,1);transform-box:fill-box;transform-origin:50% 50%}
+.pop-all{transform-origin:50% 100%}
+@keyframes pop{from{transform:scale(.55)}to{transform:scale(1)}}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes pulse{0%,60%{background:#FFF3BF;box-shadow:0 0 0 6px #FFF3BF}100%{background:transparent;box-shadow:0 0 0 6px transparent}}
+@keyframes fall{to{transform:translateY(720px) rotate(560deg)}}
+
+/* ---------- texto ou número? ---------- */
+.bucket{flex:1;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;border:3px dashed;border-radius:24px;background:#fff;text-align:center}
+.bucket.text{border-color:var(--t);color:var(--t)}
+.bucket.num{border-color:var(--n);color:var(--n)}
+.bucket.text:hover:not(:disabled){background:var(--t-bg)}
+.bucket.num:hover:not(:disabled){background:var(--n-bg)}
+.bucket .badge{min-width:86px;height:60px;font-size:28px;border-radius:16px}
+.bucket strong{font-size:30px;font-weight:900;line-height:1}
+.bucket small{font-size:15px;font-weight:700;color:var(--ink)}
+.bucket kbd{font:inherit;font-size:13px;font-weight:800;border:2px solid currentColor;border-radius:8px;padding:0 8px;opacity:.6}
+.bucket.right{border-style:solid;border-color:var(--ok);background:var(--ok-bg)}
+.bucket.wrong{border-style:solid;border-color:var(--bad);background:var(--bad-bg);animation:shake .35s}
+
+/* ---------- detetive ---------- */
+.notes{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px}
+.notes li{display:flex;justify-content:space-between;align-items:center;gap:8px;border:2px solid var(--line);border-radius:12px;padding:7px 12px;font-weight:700}
+.notes li b{font-weight:900;color:var(--muted)}
+.notes li.now{border-color:var(--ink);background:#FFF9DB}
+.notes li.done.text{border-color:var(--t-line);background:var(--t-bg)}
+.notes li.done.text b{color:var(--t)}
+.notes li.done.num{border-color:var(--n-line);background:var(--n-bg)}
+.notes li.done.num b{color:var(--n)}
+.answers{margin-top:4px}
+
+/* ---------- professor ---------- */
+dialog{border:0;border-radius:24px;padding:0;max-width:min(680px,94vw);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(43,42,51,.5)}
+.dlg{padding:18px 22px 20px;display:flex;flex-direction:column;gap:10px}
+.dlg header{display:flex;align-items:center;justify-content:space-between}
+.dlg h2{font-size:22px;font-weight:900}
+.dlg h3{font-size:16px;font-weight:900;margin-top:6px}
+.dlg ul{padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.roteiro{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px}
+.roteiro li{border:2px solid var(--line);border-radius:12px;padding:7px 12px}
+.roteiro li.now{border-color:var(--n);background:var(--n-bg)}
+.dlg-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+
+/* ---------- telas médias ---------- */
+@media (max-width:1180px){
+  .top{gap:8px 10px}
+  .modes button{padding:7px 11px}
+  .tool{padding:6px 8px}
+  .board{grid-template-columns:minmax(220px,260px) minmax(0,1fr) minmax(220px,260px);gap:10px;padding:10px}
+  .digits{gap:4px}
+  .digit{width:28px}
+  .digit.wide{width:50px}
+  body[data-mode=criar] .grow,body[data-mode=missoes] .grow{display:none}
+  body[data-mode=criar] .seg,body[data-mode=missoes] .thead .ghost{margin-left:auto}
+  .sentence{font-size:16px;line-height:1.6}
+  body[data-mode=criar] .sentence{min-height:0}
+}
+
+/* ---------- telas pequenas ---------- */
+@media (max-width:880px){
+  body{height:auto;display:block}
+  .board{grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+  .center{grid-column:1/-1;order:1;position:sticky;top:0;z-index:5;background:var(--bg);padding-bottom:6px;gap:8px}
+  .stage{flex:none;height:clamp(190px,32vh,300px);min-height:0}
+  .digits{gap:6px}
+  .digit{width:40px;height:42px}
+  .digit.wide{width:60px}
+  .tabs{display:flex;gap:8px;grid-column:1/-1;order:2}
+  .tabs button{flex:1;border:2px solid;background:#fff;border-radius:14px;padding:8px;font-weight:900}
+  .tabs [data-tab=text]{border-color:var(--t-line);color:var(--t)}
+  .tabs [data-tab=num]{border-color:var(--n-line);color:var(--n)}
+  .tabs [data-tab=text][aria-pressed=true]{background:var(--t);border-color:var(--t);color:#fff}
+  .tabs [data-tab=num][aria-pressed=true]{background:var(--n);border-color:var(--n);color:#fff}
+  .side{grid-column:1/-1;order:3}
+  body[data-mode=sort] .side{grid-column:auto}
+  body[data-mode=detetive] .side.right{order:2}
+  body[data-tab=text] #panelNum,body[data-tab=num] #panelText{display:none}
+  .panel{overflow:visible}
+  .bucket{min-height:110px;padding:10px}
+  .bucket kbd{display:none}
+  .bucket strong{font-size:22px}
+  .bucket .badge{min-width:64px;height:44px;font-size:20px}
+  .sentence{line-height:1.6;margin-top:6px}
+}
+body.caps main{text-transform:uppercase}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{
+  .top,.side,.tabs,.stage-actions,.tfoot,.seg,.ghost,.grow,dialog{display:none!important}
+  body{background:#fff;height:auto;display:block}
+  .board{display:block;padding:0}
+  .stage{height:430px;flex:none;margin-top:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .task{border-color:#999}
+}
+</style>
+</head>
+<body data-mode="criar" data-tab="text">
+
+<header class="top">
+  <div class="brand">
+    <span class="logo" aria-hidden="true"><b>A</b><b>1</b></span>
+    <div><h1>Nume</h1><p>palavras e números</p></div>
+  </div>
+  <nav class="modes" aria-label="Modos de jogo">
+    <button type="button" data-mode="criar" aria-pressed="true">Criar</button>
+    <button type="button" data-mode="missoes" aria-pressed="false">Missões</button>
+    <button type="button" data-mode="sort" aria-pressed="false">Texto ou número?</button>
+    <button type="button" data-mode="detetive" aria-pressed="false">Detetive</button>
+  </nav>
+  <div class="tools">
+    <span class="stars" id="stars" title="Estrelas ganhas"><span aria-hidden="true">★</span> <b id="starCount">0</b></span>
+    <button type="button" class="tool" id="timerBtn" title="Cronômetro da aula: clique para iniciar ou pausar">⏱ 50:00</button>
+    <button type="button" class="tool" id="capsBtn" title="Letras maiúsculas" aria-pressed="false">Aa</button>
+    <button type="button" class="tool" id="soundBtn" title="Som" aria-pressed="true">🔊</button>
+    <button type="button" class="tool" id="helpBtn">Professor</button>
+  </div>
+</header>
+
+<main class="board">
+  <aside class="side left">
+    <div id="panelText" class="panel text only-build"></div>
+    <button type="button" class="bucket text only-sort" data-type="text">
+      <span class="badge">ABC</span><strong>Texto</strong><small>dá nome ou conta como é</small><kbd>←</kbd>
+    </button>
+    <div id="notebook" class="panel only-det">
+      <header class="phead"><span class="badge">🔍</span><div><h2>Ficha do detetive</h2><p>O que você já descobriu.</p></div></header>
+      <ul class="notes" id="notes"></ul>
+    </div>
+  </aside>
+
+  <section class="center">
+    <div id="task" class="task"></div>
+    <div class="stage" id="stage">
+      <svg id="fig" viewBox="0 10 640 570" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Pessoa"></svg>
+      <div class="stage-actions">
+        <button type="button" class="mini only-criar" data-act="random">🎲 Surpresa</button>
+        <button type="button" class="mini only-build" data-act="reset">↺ Recomeçar</button>
+        <button type="button" class="mini only-criar" data-act="print">🖨 Imprimir</button>
+      </div>
+      <div class="tags" id="tags"></div>
+      <div id="confetti"></div>
+    </div>
+  </section>
+
+  <div class="tabs only-build">
+    <button type="button" data-tab="text" aria-pressed="true">ABC · Texto</button>
+    <button type="button" data-tab="num" aria-pressed="false">123 · Número</button>
+  </div>
+
+  <aside class="side right">
+    <div id="panelNum" class="panel num only-build"></div>
+    <button type="button" class="bucket num only-sort" data-type="num">
+      <span class="badge">123</span><strong>Número</strong><small>diz quantos</small><kbd>→</kbd>
+    </button>
+    <div id="question" class="panel only-det"></div>
+  </aside>
+</main>
+
+<dialog id="help">
+  <form method="dialog" class="dlg">
+    <header><h2>Para o professor</h2><button class="ghost" value="close" aria-label="Fechar">✕ Fechar</button></header>
+    <p><b>Objetivo:</b> perceber que algumas informações são <b class="tok text">texto</b> (nomes e características) e outras são <b class="tok num">número</b> (quantidades); ler números em algarismos e por extenso; contar e conferir.</p>
+    <h3>Roteiro para 50 minutos</h3>
+    <ol class="roteiro" id="roteiro">
+      <li><b>0–5 min · Abertura.</b> Projete o modo <i>Criar</i> e pergunte: “O que eu preciso dizer para descrever uma pessoa?” Separe as respostas em duas colunas: palavras e números.</li>
+      <li><b>5–15 min · Criar.</b> Cada aluno ou dupla monta uma pessoa e lê a ficha em voz alta. Alterne entre “1, 2, 3” e “um, dois, três”.</li>
+      <li><b>15–30 min · Missões.</b> Ler a ficha e montar a pessoa igual. A partir da missão 5 aparecem números por extenso; a partir da 7 somem as cores de ajuda.</li>
+      <li><b>30–40 min · Texto ou número?</b> Rodadas de 10 cartões. Converse: “duas” tem letras, mas é texto ou número?</li>
+      <li><b>40–47 min · Detetive.</b> Observar, contar e ler o crachá para preencher a ficha.</li>
+      <li><b>47–50 min · Fechamento.</b> No modo <i>Criar</i>, cada um monta a si mesmo e diz um texto e um número sobre si.</li>
+    </ol>
+    <h3>Dicas</h3>
+    <ul>
+      <li>O relógio <b>⏱</b> no topo conta os 50 minutos e mostra a etapa sugerida.</li>
+      <li><b>Aa</b> deixa tudo em LETRAS MAIÚSCULAS, para turmas em alfabetização.</li>
+      <li><b>🔊 Ouvir</b> lê a ficha em voz alta. Clicar numa palavra colorida da ficha mostra onde ela é escolhida.</li>
+      <li>Nas missões, depois do segundo erro o jogo pisca o campo que falta acertar.</li>
+      <li>Em <i>Texto ou número?</i> as setas ← e → do teclado também respondem.</li>
+    </ul>
+    <div class="dlg-foot">
+      <button type="button" class="ghost" id="resetTimer">Zerar cronômetro</button>
+      <button type="button" class="ghost" id="resetProgress">Zerar estrelas e missões</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+'use strict';
+/* ================= utilidades ================= */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const range = (a, b) => Array.from({length: b - a + 1}, (_, i) => a + i);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const r1 = n => Math.round(n * 10) / 10;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const norm = s => String(s).trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+/* ================= dados do jogo ================= */
+const TEXT = {
+  nome:   {label: 'Nome'},
+  humor:  {label: 'Sentimento', opts: [['feliz', 'Feliz'], ['triste', 'Triste'], ['raiva', 'Com raiva'], ['sono', 'Com sono'], ['medo', 'Com medo']]},
+  chapeu: {label: 'Chapéu', opts: [['nenhum', 'Sem chapéu'], ['bone', 'Boné'], ['cartola', 'Cartola'], ['palha', 'Chapéu de palha'], ['gorro', 'Gorro'], ['coroa', 'Coroa']]},
+  cabelo: {label: 'Cabelo', opts: [['careca', 'Careca'], ['curto', 'Curto'], ['comprido', 'Comprido'], ['cacheado', 'Cacheado']]},
+  roupa:  {label: 'Roupa', opts: [['camiseta', 'Camiseta'], ['camisa', 'Camisa'], ['vestido', 'Vestido']]},
+  cor:    {label: 'Cor da roupa', opts: [['branco', 'Branca'], ['vermelho', 'Vermelha'], ['azul', 'Azul'], ['verde', 'Verde'], ['amarelo', 'Amarela'], ['roxo', 'Roxa'], ['rosa', 'Rosa']]},
+  oculos: {label: 'Óculos', opts: [['nao', 'Sem óculos'], ['sim', 'Com óculos']]},
+};
+const NUM = {
+  idade:     {label: 'Idade',     min: 1, max: 99, s: 'ano',      p: 'anos',      g: 'm'},
+  olhos:     {label: 'Olhos',     min: 1, max: 4,  s: 'olho',     p: 'olhos',     g: 'm'},
+  bracos:    {label: 'Braços',    min: 0, max: 4,  s: 'braço',    p: 'braços',    g: 'm'},
+  pernas:    {label: 'Pernas',    min: 0, max: 4,  s: 'perna',    p: 'pernas',    g: 'f'},
+  correntes: {label: 'Correntes', min: 0, max: 4,  s: 'corrente', p: 'correntes', g: 'f'},
+  botoes:    {label: 'Botões',    min: 0, max: 5,  s: 'botão',    p: 'botões',    g: 'm'},
+  baloes:    {label: 'Balões',    min: 0, max: 6,  s: 'balão',    p: 'balões',    g: 'm'},
+  filhos:    {label: 'Filhos',    min: 0, max: 6,  s: 'filho',    p: 'filhos',    g: 'm'},
+};
+const COLORS = {
+  branco:   {hex: '#FFFFFF', m: 'branco',   f: 'branca'},
+  vermelho: {hex: '#E8413B', m: 'vermelho', f: 'vermelha'},
+  azul:     {hex: '#2F80ED', m: 'azul',     f: 'azul'},
+  verde:    {hex: '#37B24D', m: 'verde',    f: 'verde'},
+  amarelo:  {hex: '#FFD43B', m: 'amarelo',  f: 'amarela'},
+  roxo:     {hex: '#845EF7', m: 'roxo',     f: 'roxa'},
+  rosa:     {hex: '#F783AC', m: 'rosa',     f: 'rosa'},
+};
+const ROUPA = {camiseta: {t: 'camiseta', g: 'f'}, camisa: {t: 'camisa', g: 'f'}, vestido: {t: 'vestido', g: 'm'}};
+const HUMOR = {feliz: 'feliz', triste: 'triste', raiva: 'com raiva', sono: 'com sono', medo: 'com medo'};
+const CHAPEU = {bone: 'boné', cartola: 'cartola', palha: 'chapéu de palha', gorro: 'gorro', coroa: 'coroa'};
+const SKIN = ['#FFDCC2', '#F1C39B', '#D9A066', '#A86F45', '#6F4628'];
+const NAMES = ['Ana', 'Bia', 'Caio', 'Davi', 'Eva', 'Gabi', 'Hugo', 'Ian', 'Júlia', 'Kauã', 'Lara', 'Léo', 'Luna', 'Malu', 'Noah', 'Otto', 'Rafa', 'Sofia', 'Téo', 'Vivi', 'Yara', 'Zeca'];
+
+const DEFAULT = Object.freeze({
+  nome: '', humor: 'neutro', chapeu: 'nenhum', cabelo: 'careca', roupa: 'camiseta', cor: 'branco', oculos: 'nao', pele: 1,
+  idade: 20, olhos: 2, bracos: 2, pernas: 2, correntes: 0, botoes: 0, baloes: 0, filhos: 0,
+});
+
+/* ================= números por extenso ================= */
+const UNI = ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+const DEZ = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+function extenso(n, g) {
+  if (n < 20) return g === 'f' && n === 1 ? 'uma' : g === 'f' && n === 2 ? 'duas' : UNI[n];
+  const u = n % 10;
+  return DEZ[Math.floor(n / 10)] + (u ? ' e ' + extenso(u, g) : '');
+}
+const numWord = (key, n, form) => form === 'word' ? extenso(n, NUM[key].g) : String(n);
+const numNoun = (key, n) => n === 1 ? NUM[key].s : NUM[key].p;
+
+/* ================= estado ================= */
+let S = {...DEFAULT};
+let mode = 'criar';
+let form = 'digit';
+let criarSaved = null;
+let pendingTimer = null;
+const store = {stars: 0, level: 1, sound: true, caps: false};
+try { Object.assign(store, JSON.parse(localStorage.getItem('nume.v1') || '{}')); } catch (e) {}
+store.stars = Math.max(0, parseInt(store.stars, 10) || 0);
+store.level = Math.max(1, parseInt(store.level, 10) || 1);
+const save = () => { try { localStorage.setItem('nume.v1', JSON.stringify(store)); } catch (e) {} };
+
+/* ================= frases ================= */
+// Cada parte é um texto solto ou uma ficha {key, text, type}.
+function joinParts(lists) {
+  const out = [];
+  lists.forEach((l, i) => { if (i > 0) out.push(i === lists.length - 1 ? ' e ' : ', '); out.push(...l); });
+  return out;
+}
+function describe(reqs) {
+  const by = {};
+  reqs.forEach(r => { by[r.key] = r; });
+  const T = (key, text) => ({key, text, type: key in NUM ? 'num' : 'text'});
+  const parts = [], sents = [];
+  let subj = 'Esta pessoa';
+  if (by.nome) { parts.push('O nome é ', T('nome', by.nome.value), '. '); subj = by.nome.value; }
+  // frases curtas: como a pessoa é, o que usa, quanto tem
+  const como = [];
+  if (by.humor) como.push(['está ', T('humor', HUMOR[by.humor.value])]);
+  if (by.cabelo) como.push(by.cabelo.value === 'careca' ? ['é ', T('cabelo', 'careca')] : ['tem cabelo ', T('cabelo', by.cabelo.value)]);
+  if (como.length) sents.push(joinParts(como));
+  const usa = [];
+  if (by.chapeu && by.chapeu.value !== 'nenhum') usa.push([T('chapeu', CHAPEU[by.chapeu.value])]);
+  if (by.oculos && by.oculos.value === 'sim') usa.push([T('oculos', 'óculos')]);
+  if (by.roupa || by.cor) {
+    const c = [by.roupa ? T('roupa', ROUPA[by.roupa.value].t) : 'roupa'];
+    if (by.cor) c.push(' ', T('cor', COLORS[by.cor.value][by.roupa ? ROUPA[by.roupa.value].g : 'f']));
+    usa.push(c);
+  }
+  if (usa.length) sents.push(['usa ', ...joinParts(usa)]);
+  const nums = Object.keys(NUM).filter(k => by[k]).map(k => [T(k, numWord(k, by[k].value, by[k].form) + ' ' + numNoun(k, by[k].value))]);
+  if (nums.length) sents.push(['tem ', ...joinParts(nums)]);
+  sents.forEach((s, i) => parts.push(i ? cap(s[0]) : subj + ' ' + s[0], ...s.slice(1), i < sents.length - 1 ? '. ' : '.'));
+  return parts;
+}
+function partsHTML(parts) {
+  let out = '';
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i], nx = parts[i + 1];
+    if (typeof p === 'string') { out += esc(p); continue; }
+    const tok = `<b class="tok ${p.type}" data-key="${p.key}">${esc(p.text)}</b>`;
+    // o ponto ou a vírgula ficam grudados na ficha, sem cair sozinhos na linha de baixo
+    if (typeof nx === 'string' && /^[.,]/.test(nx)) { out += `<span class="nb">${tok}${nx[0]}</span>${esc(nx.slice(1))}`; i++; }
+    else out += tok;
+  }
+  return out;
+}
+const partsText = parts => parts.map(p => typeof p === 'string' ? p : p.text).join('');
+function fullReqs(st, f) {
+  const r = [];
+  if (st.nome) r.push({key: 'nome', value: st.nome});
+  if (st.humor !== 'neutro') r.push({key: 'humor', value: st.humor});
+  if (st.chapeu !== 'nenhum') r.push({key: 'chapeu', value: st.chapeu});
+  if (st.oculos === 'sim') r.push({key: 'oculos', value: 'sim'});
+  r.push({key: 'roupa', value: st.roupa}, {key: 'cor', value: st.cor}, {key: 'cabelo', value: st.cabelo});
+  for (const k in NUM) if (st[k] > 0 || k === 'bracos' || k === 'pernas') r.push({key: k, value: st[k], form: f});
+  return r;
+}
+
+/* ================= desenho da pessoa ================= */
+const O = '#2B2A33';
+const SW = `stroke="${O}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"`;
+const PANTS = '#3F4C6B';
+const EYES = {1: [0], 2: [-17, 17], 3: [-25, 0, 25], 4: [-30, -10, 10, 30]};
+const LEGS = {0: [], 1: [0], 2: [-22, 22], 3: [-30, 0, 30], 4: [-36, -12, 12, 36]};
+const LEGW = [0, 24, 22, 18, 15];
+const BALLOON_POS = [[150, -390], [198, -372], [136, -444], [186, -434], [236, -412], [240, -352]];
+const BALLOON_COL = ['#FF6B6B', '#4DABF7', '#FFD43B', '#69DB7C', '#DA77F2', '#FFA94D'];
+const BACKDROP =
+  '<g fill="#fff" opacity=".9"><ellipse cx="96" cy="96" rx="46" ry="16"/><ellipse cx="126" cy="82" rx="30" ry="16"/>' +
+  '<ellipse cx="540" cy="170" rx="40" ry="14"/><ellipse cx="562" cy="158" rx="26" ry="13"/></g>' +
+  '<rect x="-3000" y="466" width="6640" height="900" fill="#BFE5A0"/><rect x="-3000" y="466" width="6640" height="6" fill="#A6D382"/>';
+
+function limb(pts, w, color) {
+  const p = pts.map(q => r1(q[0]) + ',' + r1(q[1])).join(' ');
+  return `<polyline points="${p}" fill="none" stroke="${O}" stroke-width="${w + 6}" stroke-linecap="round" stroke-linejoin="round"/>` +
+         `<polyline points="${p}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+// Devolve o começo de uma linha quebrada, até a fração t do comprimento.
+function partial(pts, t) {
+  const seg = [];
+  let total = 0;
+  for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(d); total += d; }
+  let left = total * t;
+  const out = [pts[0]];
+  for (let i = 1; i < pts.length; i++) {
+    const d = seg[i - 1];
+    if (left >= d) { out.push(pts[i]); left -= d; continue; }
+    const f = left / d;
+    out.push([pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * f, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * f]);
+    break;
+  }
+  return out;
+}
+function bodyScale(age) {
+  if (age >= 18) return age >= 75 ? 0.95 : 1;
+  return +(0.52 + 0.48 * Math.pow(age / 18, 0.85)).toFixed(3);
+}
+const hairColor = age => age >= 80 ? '#F1F3F5' : age >= 60 ? '#ADB5BD' : '#4A2F1B';
+
+function hatSVG(type) {
+  switch (type) {
+    case 'bone': return `<path d="M -48,-322 C -48,-372 48,-372 48,-322 Z" fill="#E8413B" ${SW}/>` +
+      `<path d="M 28,-327 C 60,-336 90,-328 94,-314 C 72,-319 50,-318 38,-318 Z" fill="#C92A2A" ${SW}/>` +
+      `<circle cx="0" cy="-360" r="5" fill="#C92A2A" ${SW}/>`;
+    case 'cartola': return `<rect x="-34" y="-420" width="68" height="80" rx="6" fill="#454B57" ${SW}/>` +
+      `<rect x="-34" y="-364" width="68" height="15" fill="#E8413B" stroke="${O}" stroke-width="3"/>` +
+      `<rect x="-60" y="-347" width="120" height="14" rx="7" fill="#454B57" ${SW}/>`;
+    case 'palha': return `<ellipse cx="0" cy="-338" rx="80" ry="14" fill="#F2CC6B" ${SW}/>` +
+      `<path d="M -38,-340 C -38,-394 38,-394 38,-340 Z" fill="#F2CC6B" ${SW}/>` +
+      `<path d="M -37,-351 Q 0,-342 37,-351" fill="none" stroke="#A0522D" stroke-width="7" stroke-linecap="round"/>`;
+    case 'gorro': return `<path d="M -47,-322 C -47,-390 47,-390 47,-322 Z" fill="#0CA678" ${SW}/>` +
+      `<rect x="-51" y="-335" width="102" height="19" rx="9.5" fill="#96F2D7" ${SW}/>` +
+      `<circle cx="0" cy="-380" r="11" fill="#fff" ${SW}/>`;
+    case 'coroa': return `<path d="M -38,-336 L -44,-384 L -22,-362 L 0,-394 L 22,-362 L 44,-384 L 38,-336 Z" fill="#FFD43B" ${SW}/>` +
+      `<circle cx="0" cy="-351" r="5.5" fill="#E8413B" stroke="${O}" stroke-width="2"/>` +
+      `<circle cx="-22" cy="-349" r="4" fill="#2F80ED" stroke="${O}" stroke-width="2"/><circle cx="22" cy="-349" r="4" fill="#37B24D" stroke="${O}" stroke-width="2"/>`;
+  }
+  return '';
+}
+
+function personSVG(st, pop) {
+  const skin = SKIN[st.pele], cloth = COLORS[st.cor].hex, hairC = hairColor(st.idade);
+  const s = bodyScale(st.idade), hs = +(1 + (1 - s) * 0.9).toFixed(3);
+  const dress = st.roupa === 'vestido';
+  const shift = st.pernas === 0 ? (dress ? 80 : 106) : 0;
+  const G = (name, inner) => inner ? `<g class="part${pop === name ? ' pop' : ''}">${inner}</g>` : '';
+  const HT = `transform="translate(0,-255) scale(${hs}) translate(0,255)"`;
+
+  // pernas
+  const lw = LEGW[st.pernas];
+  const legs = LEGS[st.pernas].map(x =>
+    limb([[x, -116], [x, -14]], lw, dress ? skin : PANTS) +
+    `<ellipse cx="${x + 4}" cy="-7" rx="${r1(lw * 0.5 + 5)}" ry="9" fill="#7A4B2A" ${SW}/>`).join('');
+
+  // braços (os de cima ficam atrás)
+  const hold = st.baloes > 0;
+  const slots = [
+    hold ? [[46, -232], [86, -196], [108, -234]] : [[46, -232], [84, -150]],
+    [[-46, -232], [-84, -150]],
+    [[-44, -236], [-86, -256], [-94, -314]],
+    [[44, -236], [86, -256], [94, -314]],
+  ];
+  const sleeve = st.roupa === 'camisa' ? 0.86 : dress ? 0.22 : 0.33;
+  const arms = slots.slice(0, st.bracos).reverse().map(pts => {
+    const end = pts[pts.length - 1];
+    return limb(pts, 17, skin) + limb(partial(pts, sleeve), 20, cloth) +
+      `<circle cx="${end[0]}" cy="${end[1]}" r="10.5" fill="${skin}" ${SW}/>`;
+  }).join('');
+
+  // balões
+  const anchor = st.bracos > 0 ? [108, -234] : [48, -200];
+  const balloons = BALLOON_POS.slice(0, st.baloes).map(([bx, by], i) =>
+    `<path d="M ${anchor[0]},${anchor[1]} Q ${(anchor[0] + bx) / 2 + 8},${(anchor[1] + by) / 2 + 26} ${bx},${by + 29}" fill="none" stroke="#6B6B6B" stroke-width="1.6"/>` +
+    `<path d="M ${bx - 4},${by + 31} L ${bx + 4},${by + 31} L ${bx},${by + 23} Z" fill="${BALLOON_COL[i]}" stroke="${O}" stroke-width="2" stroke-linejoin="round"/>` +
+    `<ellipse cx="${bx}" cy="${by}" rx="20" ry="25" fill="${BALLOON_COL[i]}" ${SW}/>` +
+    `<ellipse cx="${bx - 7}" cy="${by - 9}" rx="4" ry="7" fill="#fff" opacity=".55"/>`).join('');
+
+  // roupa
+  let torso;
+  if (dress) {
+    torso = `<path d="M -48,-228 Q -48,-252 -24,-252 L 24,-252 Q 48,-252 48,-228 L 46,-176 L 78,-88 Q 0,-72 -78,-88 L -46,-176 Z" fill="${cloth}" ${SW}/>` +
+      `<path d="M -46,-176 Q 0,-168 46,-176" fill="none" stroke="${O}" stroke-width="2.5" opacity=".45"/>` +
+      `<path d="M -15,-253 Q 0,-234 15,-253 Z" fill="${skin}" ${SW}/>`;
+  } else {
+    torso = `<rect x="-46" y="-140" width="92" height="34" rx="12" fill="${PANTS}" ${SW}/>` +
+      `<rect x="-48" y="-252" width="96" height="134" rx="22" fill="${cloth}" ${SW}/>`;
+    torso += st.roupa === 'camisa'
+      ? `<path d="M 0,-236 L 0,-120" stroke="${O}" stroke-width="2" opacity=".35"/><path d="M -14,-253 L 0,-237 L 14,-253 Z" fill="${skin}" ${SW}/>` +
+        `<path d="M 0,-237 L -20,-255 L -25,-231 Z" fill="${cloth}" ${SW}/><path d="M 0,-237 L 20,-255 L 25,-231 Z" fill="${cloth}" ${SW}/>`
+      : `<path d="M -15,-253 Q 0,-234 15,-253 Z" fill="${skin}" ${SW}/>`;
+  }
+  let buttons = '';
+  for (let j = 0; j < st.botoes; j++) buttons += `<circle cx="0" cy="${-192 + j * 15.5}" r="5.2" fill="#FFF8E1" stroke="${O}" stroke-width="2.4"/>`;
+  let chains = '';
+  for (let i = 0; i < st.correntes; i++) {
+    const a = 12 + 3 * i, p = `M ${-a},-251 Q 0,${-251 + 2 * (17 + 11 * i)} ${a},-251`;
+    chains += `<path d="${p}" fill="none" stroke="#7A5B00" stroke-width="6" stroke-linecap="round"/><path d="${p}" fill="none" stroke="#FFD43B" stroke-width="3.2" stroke-linecap="round"/>`;
+  }
+
+  // cabelo
+  const capHair = `<path d="M -49,-304 C -54,-346 -30,-360 0,-360 C 30,-360 54,-346 49,-304 C 44,-322 34,-333 14,-335 C 4,-329 -14,-329 -24,-335 C -36,-332 -44,-320 -49,-304 Z" fill="${hairC}" ${SW}/>`;
+  let hairBack = '', hairFront = '';
+  if (st.cabelo === 'curto') hairFront = capHair;
+  else if (st.cabelo === 'comprido') {
+    hairBack = `<path d="M -55,-306 C -60,-368 60,-368 55,-306 L 58,-238 Q 58,-224 46,-224 L -46,-224 Q -58,-224 -58,-238 Z" fill="${hairC}" ${SW}/>`;
+    hairFront = capHair;
+  } else if (st.cabelo === 'cacheado') {
+    const cs = [];
+    for (let a = 170; a <= 370; a += 20) { const r = a * Math.PI / 180; cs.push([r1(47 * Math.cos(r)), r1(-305 + 47 * Math.sin(r))]); }
+    hairFront = cs.map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="14" fill="${hairC}" stroke="${O}" stroke-width="6"/>`).join('') +
+                cs.map(c => `<circle cx="${c[0]}" cy="${c[1]}" r="14" fill="${hairC}"/>`).join('');
+  }
+
+  // rosto
+  const mood = st.humor, xs = EYES[st.olhos], ey = -312;
+  const er = st.olhos <= 2 ? 7.5 : st.olhos === 3 ? 7 : 6.2;
+  const eyes = xs.map(x => {
+    if (mood === 'sono') return `<path d="M ${x - er},${ey} Q ${x},${ey + er * 1.2} ${x + er},${ey}" fill="none" ${SW}/>`;
+    const R = mood === 'medo' ? er * 1.18 : er, pr = mood === 'medo' ? er * 0.42 : er * 0.55;
+    return `<circle cx="${x}" cy="${ey}" r="${r1(R)}" fill="#fff" stroke="${O}" stroke-width="2.4"/>` +
+      `<circle cx="${x}" cy="${mood === 'triste' ? ey + 1.5 : ey}" r="${r1(pr)}" fill="${O}"/>` +
+      `<circle cx="${r1(x + pr * 0.35)}" cy="${r1(ey - pr * 0.35)}" r="${r1(pr * 0.32)}" fill="#fff"/>`;
+  }).join('');
+  const by = ey - er - 7;
+  const brows = xs.map(x => {
+    const side = Math.sign(x);
+    if (mood === 'feliz') return `<path d="M ${x - er},${by} Q ${x},${by - 5} ${x + er},${by}" fill="none" ${SW}/>`;
+    if (mood !== 'raiva' && mood !== 'triste' && mood !== 'medo') return '';
+    const k = mood === 'raiva' ? 1 : -1;           // raiva: ponta de dentro mais baixa
+    const dl = side < 0 ? -3 * k : side > 0 ? 4 * k : 3 * k;
+    const dr = side < 0 ? 4 * k : side > 0 ? -3 * k : 3 * k;
+    return `<line x1="${x - er - 1}" y1="${by + dl}" x2="${x + er + 1}" y2="${by + dr}" stroke="${O}" stroke-width="3.4" stroke-linecap="round"/>`;
+  }).join('');
+  const lastX = xs[xs.length - 1];
+  const mouth = {
+    neutro: `<path d="M -10,-284 Q 0,-279 10,-284" fill="none" ${SW}/>`,
+    feliz: `<circle cx="-25" cy="-292" r="6.5" fill="#FF8FA3" opacity=".55"/><circle cx="25" cy="-292" r="6.5" fill="#FF8FA3" opacity=".55"/>` +
+           `<path d="M -16,-289 Q 0,-266 16,-289 Z" fill="#8B1E2D" ${SW}/>`,
+    triste: `<path d="M -13,-278 Q 0,-291 13,-278" fill="none" ${SW}/>` +
+            `<path d="M ${lastX},${ey + er + 3} q -5,9 0,12 q 5,-3 0,-12 Z" fill="#74C0FC" stroke="#1C7ED6" stroke-width="1.5"/>`,
+    raiva: `<rect x="-13" y="-290" width="26" height="11" rx="3" fill="#fff" ${SW}/>` +
+           `<path d="M -4.5,-290 v 11 M 4.5,-290 v 11" stroke="${O}" stroke-width="2"/>`,
+    sono: `<ellipse cx="0" cy="-282" rx="5" ry="6.5" fill="#8B1E2D" stroke="${O}" stroke-width="2.4"/>` +
+          `<g fill="#4C6EF5" font-weight="900"><text x="56" y="-350" font-size="20">z</text><text x="70" y="-368" font-size="26">z</text><text x="88" y="-390" font-size="32">Z</text></g>`,
+    medo: `<path d="M -14,-282 q 3.5,-7 7,0 t 7,0 t 7,0 t 7,0" fill="none" ${SW}/>` +
+          `<path d="M 36,-340 q -6,10 0,14 q 6,-4 0,-14 Z" fill="#A5D8FF" stroke="#1C7ED6" stroke-width="1.5"/>`,
+  }[mood];
+  let glasses = '';
+  if (st.oculos === 'sim') {
+    const lr = st.olhos <= 2 ? 13 : st.olhos === 3 ? 11 : 8.8;
+    const ln = (x1, y1, x2, y2) => `<line x1="${r1(x1)}" y1="${y1}" x2="${r1(x2)}" y2="${y2}" stroke="${O}" stroke-width="3" stroke-linecap="round"/>`;
+    glasses = xs.map(x => `<circle cx="${x}" cy="${ey}" r="${lr}" fill="rgba(255,255,255,.3)" stroke="${O}" stroke-width="3"/>`).join('') +
+      xs.slice(1).map((x, i) => ln(xs[i] + lr, ey, x - lr, ey)).join('') +
+      ln(xs[0] - lr, ey, -45, ey - 3) + ln(lastX + lr, ey, 45, ey - 3);
+  }
+  const wrinkles = st.idade >= 65 ? `<path d="M -36,-297 q 6,4 12,0 M 24,-297 q 6,4 12,0" fill="none" stroke="${O}" stroke-width="2" opacity=".45" stroke-linecap="round"/>` : '';
+  const head = `<g ${HT}>` +
+    `<circle cx="-46" cy="-303" r="8.5" fill="${skin}" ${SW}/><circle cx="46" cy="-303" r="8.5" fill="${skin}" ${SW}/>` +
+    `<circle cx="0" cy="-305" r="46" fill="${skin}" ${SW}/>` + wrinkles +
+    G('hair', hairFront) + G('face', brows + eyes + mouth) + G('glasses', glasses) + G('hat', hatSVG(st.chapeu)) + '</g>';
+
+  // bengala a partir dos 75 anos
+  let cane = '';
+  if (st.idade >= 75) {
+    const d = `M -84,-158 Q -84,-178 -97,-178 Q -110,-178 -109,-160 L -105,${-shift - 3}`;
+    cane = `<path d="${d}" fill="none" stroke="${O}" stroke-width="10" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#B07A3F" stroke-width="5" stroke-linecap="round"/>`;
+  }
+
+  let inner = (hairBack ? `<g ${HT}>${G('hair', hairBack)}</g>` : '') + cane + G('balloons', balloons) + G('legs', legs) + G('arms', arms) +
+    `<rect x="-11" y="-268" width="22" height="26" fill="${skin}" ${SW}/>` +
+    G('torso', torso) + G('buttons', buttons) + G('chains', chains) + head;
+  if (pop === 'all') inner = `<g class="pop-all">${inner}</g>`;
+  return `<ellipse cx="0" cy="3" rx="${r1(74 * s)}" ry="${r1(9 * s)}" fill="rgba(60,90,30,.22)"/>` +
+    `<g transform="scale(${s}) translate(0,${shift})">${inner}</g>`;
+}
+
+const KID_X = [-150, 150, -210, 210, -268, 268];
+const KID_Y = [0, 0, 14, 14, 4, 4];
+const KID_LOOK = [['curto', 'verde', 7], ['cacheado', 'amarelo', 5], ['comprido', 'rosa', 9], ['curto', 'azul', 4], ['cacheado', 'roxo', 8], ['comprido', 'vermelho', 6]];
+function kidsSVG(st, pop) {
+  let out = '';
+  for (let i = 0; i < st.filhos; i++) {
+    const [cabelo, cor, idade] = KID_LOOK[i];
+    const kid = {...DEFAULT, pele: st.pele, humor: 'feliz', cabelo, cor, idade, roupa: i % 3 === 2 ? 'vestido' : 'camiseta'};
+    out += `<g transform="translate(${320 + KID_X[i]},${500 + KID_Y[i]}) scale(.52)"><g class="${pop && i === st.filhos - 1 ? 'pop-all' : ''}">${personSVG(kid)}</g></g>`;
+  }
+  return out;
+}
+
+const POP = {humor: 'face', olhos: 'face', chapeu: 'hat', cabelo: 'hair', roupa: 'torso', cor: 'torso', oculos: 'glasses', idade: 'all', pele: 'all',
+  bracos: 'arms', pernas: 'legs', correntes: 'chains', botoes: 'buttons', baloes: 'balloons'};
+const fig = $('#fig'), tags = $('#tags'), task = $('#task');
+function renderFigure(popKey) {
+  fig.innerHTML = BACKDROP + kidsSVG(S, popKey === 'filhos') + `<g transform="translate(320,500)">${personSVG(S, POP[popKey])}</g>`;
+  fig.setAttribute('aria-label', partsText(describe(fullReqs(S, 'digit'))));
+  tags.innerHTML = `<span class="tag text${S.nome ? '' : ' empty'}${popKey === 'nome' ? ' pop' : ''}">${S.nome ? esc(S.nome) : 'sem nome'}</span>` +
+    `<span class="tag num${popKey === 'idade' ? ' pop' : ''}">${S.idade} ${numNoun('idade', S.idade)}</span>`;
+}
+
+/* ================= som, voz e confete ================= */
+let actx = null;
+function tone(freq, at, dur, type, vol) {
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol || 0.07, at); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+  o.connect(g).connect(actx.destination); o.start(at); o.stop(at + dur);
+}
+function sfx(name) {
+  if (!store.sound) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const n = actx.currentTime;
+    if (name === 'pop') tone(540, n, 0.08, 'triangle', 0.05);
+    else if (name === 'ok') { tone(523, n, 0.12); tone(784, n + 0.1, 0.18); }
+    else if (name === 'bad') { tone(220, n, 0.16, 'sawtooth', 0.035); tone(185, n + 0.14, 0.22, 'sawtooth', 0.035); }
+    else if (name === 'win') [523, 659, 784, 1047].forEach((f, i) => tone(f, n + i * 0.09, 0.18));
+  } catch (e) {}
+}
+const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+const speakBtn = () => canSpeak ? '<button type="button" class="ghost" data-act="speak">🔊 Ouvir</button>' : '';
+function speak(text) {
+  try { const u = new SpeechSynthesisUtterance(text); u.lang = 'pt-BR'; u.rate = 0.9; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
+}
+function confetti() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const box = $('#confetti');
+  for (let i = 0; i < 30; i++) {
+    const d = document.createElement('i');
+    d.style.cssText = `left:${Math.random() * 100}%;background:${pick(BALLOON_COL)};animation-delay:${(Math.random() * 0.3).toFixed(2)}s`;
+    box.appendChild(d);
+    setTimeout(() => d.remove(), 1900);
+  }
+}
+function addStars(n) {
+  if (!n) return;
+  store.stars += n; save();
+  $('#starCount').textContent = store.stars;
+  const el = $('#stars'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+}
+
+/* ================= painéis ================= */
+function buildPanels() {
+  const chipField = ([k, f]) => `<div class="field" data-key="${k}"><h3>${f.label}</h3><div class="chips">` +
+    f.opts.map(([v, l]) => `<button type="button" class="chip" data-key="${k}" data-val="${v}">${k === 'cor' ? `<i style="background:${COLORS[v].hex}"></i>` : ''}<span>${l}</span></button>`).join('') + '</div></div>';
+  $('#panelText').innerHTML =
+    '<header class="phead"><span class="badge">ABC</span><div><h2>Texto</h2><p>Palavras: dão nome e contam como é.</p></div></header>' +
+    '<div class="field" data-key="nome"><label for="inNome">Nome</label><input id="inNome" type="text" maxlength="12" autocomplete="off" spellcheck="false" placeholder="Escreva um nome"></div>' +
+    Object.entries(TEXT).filter(([k]) => k !== 'nome').map(chipField).join('') +
+    '<div class="field" data-key="pele"><h3>Pele</h3><div class="swatches">' +
+    SKIN.map((c, i) => `<button type="button" class="swatch" data-key="pele" data-val="${i}" style="background:${c}" aria-label="Tom de pele ${i + 1}"></button>`).join('') + '</div></div>';
+  $('#panelNum').innerHTML =
+    '<header class="phead"><span class="badge">123</span><div><h2>Número</h2><p>Quantidades: dizem quantos.</p></div></header>' +
+    '<div class="field" data-key="idade"><label for="inIdade"><span>Idade</span><span class="ext"></span></label><div class="agebox">' +
+    '<button type="button" class="step" data-step="-1" aria-label="Um ano a menos">−</button>' +
+    '<input id="inIdade" type="number" min="1" max="99" inputmode="numeric">' +
+    '<button type="button" class="step" data-step="1" aria-label="Um ano a mais">+</button><span class="unit">anos</span></div>' +
+    '<input id="rgIdade" type="range" min="1" max="99" aria-label="Idade"></div>' +
+    Object.entries(NUM).filter(([k]) => k !== 'idade').map(([k, f]) => `<div class="field" data-key="${k}"><h3><span>${f.label}</span><span class="ext"></span></h3><div class="digits">` +
+      range(f.min, f.max).map(v => `<button type="button" class="digit" data-key="${k}" data-val="${v}">${v}</button>`).join('') + '</div></div>').join('');
+
+  $('#inNome').addEventListener('input', e => { S.nome = e.target.value.replace(/\s+/g, ' ').trim().slice(0, 12).trim(); update('nome'); });
+  $('#inIdade').addEventListener('input', e => {
+    const v = parseInt(e.target.value, 10);
+    if (isNaN(v)) return;
+    if (v > 99) e.target.value = 99;
+    setAttr('idade', clamp(v, 1, 99), true);
+  });
+  $('#inIdade').addEventListener('blur', e => { e.target.value = S.idade; });
+  $('#rgIdade').addEventListener('input', e => setAttr('idade', +e.target.value, true));
+}
+function syncPanels() {
+  $$('.chip[data-key], .digit[data-key], .swatch[data-key]').forEach(b => b.setAttribute('aria-pressed', String(String(S[b.dataset.key]) === b.dataset.val)));
+  const g = ROUPA[S.roupa].g;
+  $$('.chip[data-key=cor] span').forEach(sp => { sp.textContent = cap(COLORS[sp.parentNode.dataset.val][g]); });
+  for (const k in NUM) $(`.field[data-key=${k}] .ext`).textContent = extenso(S[k], NUM[k].g) + ' ' + numNoun(k, S[k]);
+  const inNome = $('#inNome'), inIdade = $('#inIdade');
+  if (document.activeElement !== inNome) inNome.value = S.nome;
+  if (document.activeElement !== inIdade) inIdade.value = S.idade;
+  $('#rgIdade').value = S.idade;
+}
+function setAttr(key, val, quiet) {
+  if (S[key] === val) return;
+  S[key] = val;
+  if (!quiet) sfx('pop');
+  update(key);
+}
+function update(popKey) {
+  renderFigure(popKey);
+  syncPanels();
+  if (mode === 'criar') renderFicha();
+  else if (mode === 'missoes') clearMarks();
+}
+function hintField(key) {
+  const f = $(`.field[data-key=${key}]`);
+  if (!f) return;
+  document.body.dataset.tab = key in NUM ? 'num' : 'text';
+  syncTabs();
+  f.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+  f.classList.remove('pulse'); void f.offsetWidth; f.classList.add('pulse');
+}
+function syncTabs() {
+  $$('.tabs button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === document.body.dataset.tab)));
+}
+function randomState() {
+  return {
+    nome: pick(NAMES), humor: pick(Object.keys(HUMOR)), chapeu: pick(['nenhum', 'nenhum', 'bone', 'cartola', 'palha', 'gorro', 'coroa']),
+    cabelo: pick(['careca', 'curto', 'comprido', 'cacheado']), roupa: pick(Object.keys(ROUPA)), cor: pick(Object.keys(COLORS)),
+    oculos: Math.random() < 0.4 ? 'sim' : 'nao', pele: rnd(0, SKIN.length - 1),
+    idade: rnd(1, 99), olhos: pick([1, 2, 2, 2, 3, 3, 4]), bracos: pick([0, 1, 2, 2, 2, 3, 4]), pernas: pick([0, 1, 2, 2, 2, 3, 4]),
+    correntes: rnd(0, 4), botoes: rnd(0, 5), baloes: rnd(0, 6), filhos: rnd(0, 6),
+  };
+}
+
+/* ================= modo Criar ================= */
+function renderFicha() {
+  task.innerHTML = '<div class="thead"><span class="pill">Ficha da pessoa</span>' +
+    '<span class="grow">Escolha <b class="tok text">palavras</b> e <b class="tok num">números</b> e veja a pessoa mudar.</span>' +
+    '<span class="seg" role="group" aria-label="Como escrever os números">' +
+    `<button type="button" data-form="digit" aria-pressed="${form === 'digit'}">1, 2, 3</button>` +
+    `<button type="button" data-form="word" aria-pressed="${form === 'word'}">um, dois, três</button></span>${speakBtn()}</div>` +
+    `<p class="sentence" id="sentence">${partsHTML(describe(fullReqs(S, form)))}</p>`;
+}
+
+/* ================= modo Missões ================= */
+let mission = null;
+function planFor(L) {
+  if (L === 1) return {t: 1, n: 0, word: 0, color: true};
+  if (L === 2) return {t: 0, n: 1, word: 0, color: true};
+  if (L === 3) return {t: 1, n: 1, word: 0, color: true};
+  if (L === 4) return {t: 1, n: 1, word: 0, color: true, name: true};
+  if (L === 5) return {t: 2, n: 1, word: 1, color: true};
+  if (L === 6) return {t: 1, n: 2, word: 0.5, color: true};
+  if (L <= 9) return {t: 2, n: 2, word: 0.5, color: false, name: L === 8};
+  if (L <= 14) return {t: L % 2 ? 3 : 2, n: L % 2 ? 2 : 3, word: 0.5, color: false, name: L % 3 === 0};
+  return {t: 3, n: 3, word: 0.6, color: false, name: Math.random() < 0.4};
+}
+function numValue(k, f, L) {
+  if (k === 'idade' && f === 'word' && L < 15) return pick([3, 5, 8, 10, 12, 15, 30, 40, 50, 60, 70, 80, 90]);
+  let v;
+  do { v = rnd(NUM[k].min, NUM[k].max); } while (v === DEFAULT[k]);
+  return v;
+}
+function newMission() {
+  const L = store.level, p = planFor(L), reqs = [];
+  let nT = p.t;
+  if (p.name && nT > 0) { reqs.push({key: 'nome', value: pick(NAMES)}); nT--; }
+  shuffle(['humor', 'chapeu', 'cabelo', 'roupa', 'cor', 'oculos']).slice(0, nT).forEach(k =>
+    reqs.push({key: k, value: pick(TEXT[k].opts.map(o => o[0]).filter(v => v !== DEFAULT[k]))}));
+  shuffle(L < 4 ? ['olhos', 'bracos', 'pernas', 'baloes', 'filhos'] : Object.keys(NUM)).slice(0, p.n).forEach(k => {
+    const f = Math.random() < p.word ? 'word' : 'digit';
+    reqs.push({key: k, value: numValue(k, f, L), form: f});
+  });
+  mission = {level: L, plan: p, reqs, tries: 0, done: false};
+  S = {...DEFAULT, pele: S.pele};
+  task.innerHTML = `<div class="thead"><span class="pill">Missão ${L}</span><span class="grow">Leia com atenção e monte a pessoa igual.</span>${speakBtn()}</div>` +
+    `<p class="sentence${p.color ? '' : ' plain'}" id="sentence">${partsHTML(describe(reqs))}</p>` +
+    '<div class="tfoot" id="tfoot"><button type="button" class="primary" data-act="check">Conferir ✓</button>' +
+    '<button type="button" class="ghost" data-act="skip">Trocar missão</button><span class="msg" id="msg" aria-live="polite"></span></div>';
+  update();
+}
+function clearMarks() {
+  if (!mission || mission.done) return;
+  $$('#sentence .tok').forEach(t => t.classList.remove('ok', 'bad'));
+  const m = $('#msg');
+  if (m) m.textContent = '';
+}
+function checkMission() {
+  const m = mission;
+  if (!m || m.done) return;
+  m.tries++;
+  const bad = m.reqs.filter(r => r.key === 'nome' ? norm(S.nome) !== norm(r.value) : S[r.key] !== r.value).map(r => r.key);
+  $$('#sentence .tok').forEach(t => { const isBad = bad.includes(t.dataset.key); t.classList.toggle('ok', !isBad); t.classList.toggle('bad', isBad); });
+  if (bad.length) {
+    sfx('bad');
+    $('#msg').innerHTML = `<span class="oops">Quase!</span> ${bad.length > 1 ? 'Faltam ' + bad.length + ' informações' : 'Falta 1 informação'}. Veja o que ficou vermelho.`;
+    if (m.tries >= 2) hintField(bad[0]);
+    return;
+  }
+  m.done = true;
+  const stars = m.tries === 1 ? 3 : m.tries === 2 ? 2 : 1;
+  store.level++;
+  addStars(stars); save();
+  sfx('win'); confetti();
+  $('#tfoot').innerHTML = '<button type="button" class="primary" data-act="next">Próxima missão →</button>' +
+    `<span class="msg"><span class="good">Muito bem!</span> <span class="won">${'★'.repeat(stars)}</span></span>`;
+  $('#tfoot .primary').focus();
+}
+
+/* ================= modo Texto ou número? ================= */
+let sort = null;
+function textCard(key) {
+  const value = key === 'nome' ? pick(NAMES) : pick(TEXT[key].opts.map(o => o[0]).filter(v => v !== DEFAULT[key]));
+  const w = {nome: value, humor: HUMOR[value], chapeu: CHAPEU[value], cabelo: value, roupa: ROUPA[value] && ROUPA[value].t, cor: COLORS[value] && COLORS[value].f, oculos: 'óculos'}[key];
+  const lead = {nome: 'o nome é ', humor: 'está ', chapeu: 'usa ', cabelo: 'cabelo ', roupa: 'usa ', cor: 'roupa ', oculos: 'usa '}[key];
+  const why = key === 'nome' ? `«${w}» é um nome. Nome é TEXTO.`
+    : key === 'humor' ? `«${w}» conta como a pessoa está. É uma palavra: TEXTO.`
+    : key === 'cabelo' || key === 'cor' ? `«${w}» conta como é. É uma palavra: TEXTO.`
+    : `«${w}» é o nome de uma coisa que a pessoa usa. É uma palavra: TEXTO.`;
+  return {key, value, type: 'text', html: `${lead}<b>${esc(w)}</b>`, why};
+}
+function numCard(key, f) {
+  const value = key === 'idade' && f === 'word' ? pick([3, 5, 8, 10, 12, 15, 30, 40, 50, 60, 70, 80, 90]) : numValue(key, f, 99);
+  const w = numWord(key, value, f), noun = numNoun(key, value), q = NUM[key].g === 'f' ? 'quantas' : 'quantos';
+  const why = f === 'word' ? `«${w}» quer dizer ${value}. Diz ${q} ${NUM[key].p}: é NÚMERO, mesmo escrito com letras.`
+    : `«${w}» diz ${q} ${NUM[key].p}. É NÚMERO.`;
+  return {key, value, type: 'num', form: f, html: `<b>${w}</b> ${noun}`, why};
+}
+function newSort() {
+  const t = shuffle(Object.keys(TEXT)).slice(0, 5).map(textCard);
+  const n = shuffle(Object.keys(NUM)).slice(0, 5).map((k, i) => numCard(k, i % 2 ? 'word' : 'digit'));
+  sort = {cards: shuffle([...t, ...n]), i: 0, hits: 0, locked: false};
+  S = {...DEFAULT, pele: S.pele};
+  renderSort(); update();
+}
+function renderSort() {
+  const s = sort, n = s.cards.length, end = s.i >= n;
+  $$('.bucket').forEach(b => { b.disabled = end; b.classList.remove('right', 'wrong'); });
+  if (end) {
+    const stars = s.hits === n ? 3 : s.hits >= n - 2 ? 2 : s.hits >= n - 4 ? 1 : 0;
+    addStars(stars);
+    task.innerHTML = '<div class="thead"><span class="pill">Fim da rodada</span></div>' +
+      `<p class="bigcard small">Você acertou ${s.hits} de ${n} cartões! <span class="won">${'★'.repeat(stars)}</span></p>` +
+      '<div class="tfoot" style="justify-content:center"><button type="button" class="primary" data-act="sortAgain">Jogar de novo</button></div>';
+    if (stars) { sfx('win'); confetti(); }
+    return;
+  }
+  s.locked = false;
+  task.innerHTML = `<div class="thead"><span class="pill">Cartão ${s.i + 1} de ${n}</span><span class="grow">A parte em destaque é texto ou número?</span><span class="score">Acertos: ${s.hits}</span></div>` +
+    `<p class="bigcard">${s.cards[s.i].html}</p><p class="msg" id="msg" aria-live="polite">Clique em <b class="tok text">ABC Texto</b> ou em <b class="tok num">123 Número</b>.</p>`;
+}
+function sortNext() { clearTimeout(pendingTimer); sort.i++; renderSort(); }
+function answerSort(type) {
+  const s = sort;
+  if (!s || s.locked || s.i >= s.cards.length) return;
+  s.locked = true;
+  const c = s.cards[s.i], right = c.type === type;
+  $$('.bucket').forEach(b => { b.disabled = true; b.classList.toggle('right', b.dataset.type === c.type); b.classList.toggle('wrong', !right && b.dataset.type === type); });
+  S[c.key] = c.value;
+  update(c.key);                        // a pessoa se transforma com a informação do cartão
+  if (right) {
+    s.hits++; sfx('ok');
+    $('#msg').innerHTML = `<span class="good">Isso!</span> ${esc(c.why)}`;
+    pendingTimer = setTimeout(sortNext, c.form === 'word' ? 3200 : 2000);
+  } else {
+    sfx('bad');
+    $('#msg').innerHTML = `<span class="oops">Ops!</span> ${esc(c.why)} <button type="button" class="ghost" data-act="sortNext">Entendi →</button>`;
+    $('#msg button').focus();
+  }
+}
+
+/* ================= modo Detetive ================= */
+let det = null;
+const QTEXT = {
+  nome: 'Qual é o nome desta pessoa?', humor: 'Como esta pessoa está?', chapeu: 'O que ela usa na cabeça?', cabelo: 'Como é o cabelo dela?',
+  roupa: 'Que roupa ela veste?', cor: 'De que cor é a roupa?', oculos: 'Ela usa óculos?',
+  idade: 'Quantos anos ela tem? Leia o crachá.', olhos: 'Quantos olhos ela tem?', bracos: 'Quantos braços ela tem?', pernas: 'Quantas pernas ela tem?',
+  correntes: 'Quantas correntes ela usa no pescoço?', botoes: 'Quantos botões tem a roupa?', baloes: 'Quantos balões ela segura?', filhos: 'Quantos filhos estão com ela?',
+};
+const fieldLabel = k => (TEXT[k] || NUM[k]).label;
+function valueLabel(k) {
+  if (k in NUM) return S[k] + ' ' + numNoun(k, S[k]);
+  if (k === 'nome') return S.nome;
+  if (k === 'cor') return cap(COLORS[S.cor].f);            // concorda com "a roupa" da pergunta
+  return TEXT[k].opts.find(o => o[0] === S[k])[1];
+}
+function options(k) {
+  if (k === 'nome') return shuffle([S.nome, ...shuffle(NAMES.filter(x => x !== S.nome)).slice(0, 3)]).map(v => ({v, l: v}));
+  if (k === 'idade') {
+    const a = S.idade, set = new Set([a]);
+    for (const c of shuffle([a + 1, a - 1, a + 10, a - 10, +String(a).split('').reverse().join(''), a + 2, a - 2, a + 5, a - 5])) {
+      if (set.size >= 4) break;
+      if (c >= 1 && c <= 99) set.add(c);
+    }
+    return [...set].sort((x, y) => x - y).map(v => ({v, l: String(v)}));
+  }
+  if (k in NUM) return range(NUM[k].min, NUM[k].max).map(v => ({v, l: String(v)}));
+  return TEXT[k].opts.map(([v, l]) => ({v, l: k === 'cor' ? cap(COLORS[v].f) : l}));
+}
+function newCase() {
+  S = randomState();
+  let t = shuffle(Object.keys(TEXT));
+  if (['bone', 'gorro', 'cartola', 'palha'].includes(S.chapeu)) t = t.filter(k => k !== 'cabelo');   // o chapéu esconde o cabelo
+  det = {qs: shuffle([...t.slice(0, 3), ...shuffle(Object.keys(NUM)).slice(0, 3)]), i: 0, hits: 0, first: true, locked: false};
+  renderDet(); update();
+}
+function renderDet() {
+  const d = det, n = d.qs.length, end = d.i >= n, q = $('#question');
+  $('#notes').innerHTML = d.qs.map((k, j) =>
+    `<li class="${k in NUM ? 'num' : 'text'}${j === d.i ? ' now' : ''}${j < d.i ? ' done' : ''}"><span>${fieldLabel(k)}</span><b>${j < d.i ? esc(valueLabel(k)) : '?'}</b></li>`).join('');
+  if (end) {
+    const stars = d.hits === n ? 3 : d.hits >= n - 1 ? 2 : d.hits >= n - 3 ? 1 : 0;
+    addStars(stars);
+    task.innerHTML = '<div class="thead"><span class="pill">Caso resolvido</span></div>' +
+      `<p class="bigcard small">Você acertou ${d.hits} de ${n} de primeira! <span class="won">${'★'.repeat(stars)}</span></p>`;
+    q.className = 'panel only-det';
+    q.innerHTML = '<header class="phead"><span class="badge">🔍</span><div><h2>Muito bem!</h2><p>A ficha está completa.</p></div></header>' +
+      '<button type="button" class="primary" data-act="caseAgain">Novo caso →</button>';
+    sfx('win'); confetti();
+    return;
+  }
+  const k = d.qs[d.i], isNum = k in NUM;
+  task.innerHTML = `<div class="thead"><span class="pill">Pergunta ${d.i + 1} de ${n}</span><span class="grow">Observe a pessoa e responda ao lado.</span><span class="score">De primeira: ${d.hits}</span></div>` +
+    `<p class="bigcard small">${QTEXT[k]}</p>`;
+  q.className = 'panel only-det ' + (isNum ? 'num' : 'text');
+  q.innerHTML = `<header class="phead"><span class="badge">${isNum ? '123' : 'ABC'}</span><div><h2>Resposta</h2><p>${isNum ? 'É um número: diz quantos.' : 'É um texto: uma palavra.'}</p></div></header>` +
+    `<div class="${isNum ? 'digits' : 'chips'} answers">` +
+    options(k).map(o => `<button type="button" class="${isNum ? 'digit' + (k === 'idade' ? ' wide' : '') : 'chip'}" data-ans="${esc(o.v)}">${esc(o.l)}</button>`).join('') +
+    '</div><p class="msg" id="dmsg" aria-live="polite">&nbsp;</p>';
+}
+function answerDet(btn) {
+  const d = det;
+  if (!d || d.locked || d.i >= d.qs.length) return;
+  const k = d.qs[d.i];
+  if (btn.dataset.ans === String(S[k])) {
+    if (d.first) d.hits++;
+    d.locked = true;
+    btn.classList.add('right'); sfx('ok');
+    $('#dmsg').innerHTML = '<span class="good">Isso mesmo!</span>';
+    pendingTimer = setTimeout(() => { d.i++; d.first = true; d.locked = false; renderDet(); }, 900);
+  } else {
+    d.first = false;
+    btn.classList.add('wrong'); btn.disabled = true; sfx('bad');
+    $('#dmsg').innerHTML = '<span class="oops">Ainda não.</span> Olhe a pessoa de novo.';
+  }
+}
+
+/* ================= troca de modo e cliques ================= */
+function setMode(m) {
+  if (mode === 'criar') criarSaved = {...S};
+  clearTimeout(pendingTimer);
+  mode = m;
+  document.body.dataset.mode = m;
+  $$('.modes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+  if (m === 'criar') { S = {...(criarSaved || DEFAULT)}; update(); }
+  else if (m === 'missoes') newMission();
+  else if (m === 'sort') newSort();
+  else newCase();
+}
+const ACT = {
+  speak: () => speak(($('#sentence') || $('.bigcard')).textContent),
+  check: checkMission, skip: newMission, next: newMission,
+  random: () => { S = randomState(); sfx('pop'); update('idade'); },
+  reset: () => { S = {...DEFAULT, pele: S.pele}; update('idade'); },
+  print: () => window.print(),
+  sortNext, sortAgain: newSort, caseAgain: newCase,
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('button, .tok[data-key]');
+  if (!el) return;
+  const d = el.dataset;
+  if (d.mode) return setMode(d.mode);
+  if (d.tab) { document.body.dataset.tab = d.tab; return syncTabs(); }
+  if (d.form) { form = d.form; return renderFicha(); }
+  if (d.type) return answerSort(d.type);
+  if (d.ans !== undefined) return answerDet(el);
+  if (d.act) return ACT[d.act] && ACT[d.act]();
+  if (d.step) return setAttr('idade', clamp(S.idade + (+d.step), 1, 99));
+  if (el.classList.contains('tok')) return hintField(d.key);
+  if (d.key) {
+    if (d.key === 'humor' && S.humor === d.val) return setAttr('humor', 'neutro');   // clicar de novo desmarca
+    return setAttr(d.key, d.key in NUM || d.key === 'pele' ? +d.val : d.val);
+  }
+});
+document.addEventListener('keydown', e => {
+  if (mode !== 'sort' || $('#help').open) return;
+  if (e.key === 'ArrowLeft') answerSort('text');
+  else if (e.key === 'ArrowRight') answerSort('num');
+});
+
+/* ================= barra de ferramentas ================= */
+const LESSON = 50 * 60;
+const STAGES = [[0, 'Abertura'], [5, 'Criar'], [15, 'Missões'], [30, 'Texto ou número?'], [40, 'Detetive'], [47, 'Fechamento']];
+let tLeft = LESSON, tEnd = 0, tInt = null;
+function stageNow() {
+  const min = (LESSON - tLeft) / 60;
+  let i = 0;
+  STAGES.forEach((s, j) => { if (min >= s[0]) i = j; });
+  return i;
+}
+function paintTimer() {
+  const b = $('#timerBtn'), over = tLeft <= 0;
+  const clock = String(Math.floor(tLeft / 60)).padStart(2, '0') + ':' + String(tLeft % 60).padStart(2, '0');
+  b.textContent = over ? '⏱ Fim da aula!' : '⏱ ' + clock + (tInt ? ' · ' + STAGES[stageNow()][1] : '');
+  b.classList.toggle('running', !!tInt);
+  b.classList.toggle('over', over);
+  const started = tLeft < LESSON && !over;
+  $$('#roteiro li').forEach((li, j) => li.classList.toggle('now', started && j === stageNow()));
+}
+function stopTimer() { clearInterval(tInt); tInt = null; }
+$('#timerBtn').addEventListener('click', () => {
+  if (tInt) stopTimer();
+  else {
+    if (tLeft <= 0) tLeft = LESSON;
+    tEnd = Date.now() + tLeft * 1000;
+    tInt = setInterval(() => {
+      tLeft = Math.max(0, Math.round((tEnd - Date.now()) / 1000));
+      if (tLeft <= 0) { stopTimer(); sfx('win'); }
+      paintTimer();
+    }, 500);
+  }
+  paintTimer();
+});
+$('#resetTimer').addEventListener('click', () => { stopTimer(); tLeft = LESSON; paintTimer(); });
+$('#resetProgress').addEventListener('click', e => {
+  const b = e.currentTarget;
+  if (!b.dataset.sure) { b.dataset.sure = '1'; b.textContent = 'Clique de novo para confirmar'; return; }
+  delete b.dataset.sure; b.textContent = 'Zerar estrelas e missões';
+  store.stars = 0; store.level = 1; save();
+  $('#starCount').textContent = 0;
+  if (mode === 'missoes') newMission();
+});
+function paintPrefs() {
+  document.body.classList.toggle('caps', store.caps);
+  $('#capsBtn').setAttribute('aria-pressed', String(store.caps));
+  $('#capsBtn').textContent = store.caps ? 'AA' : 'Aa';
+  $('#soundBtn').setAttribute('aria-pressed', String(store.sound));
+  $('#soundBtn').textContent = store.sound ? '🔊' : '🔇';
+}
+$('#capsBtn').addEventListener('click', () => { store.caps = !store.caps; save(); paintPrefs(); });
+$('#soundBtn').addEventListener('click', () => { store.sound = !store.sound; save(); paintPrefs(); sfx('ok'); });
+$('#helpBtn').addEventListener('click', () => { const d = $('#help'); if (d.showModal) d.showModal(); else d.setAttribute('open', ''); });
+
+/* ================= início ================= */
+buildPanels();
+paintPrefs();
+paintTimer();
+$('#starCount').textContent = store.stars;
+setMode('criar');
+</script>
+</body>
+</html>
