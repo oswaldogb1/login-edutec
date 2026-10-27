@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Semáforo das Mensagens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: mensagem em destaque à esquerda, semáforo vertical à direita; no celular o semáforo deita e fica abaixo. */
+:root{
+  --bg:#E9EDF2; --surface:#FFFFFF; --ink:#1A2130; --muted:#586174; --line:#D3D9E2;
+  --housing:#232A36; --housing-edge:#141922; --housing-ink:#E8ECF2; --housing-muted:#A3ADBD;
+  --go:#22A45D; --go-dim:#21412F; --go-text:#137A3F; --go-soft:#E2F4EA;
+  --wait:#F4B90A; --wait-dim:#4D4219; --wait-text:#8A6200; --wait-soft:#FDF3D3;
+  --stop:#DE3B2F; --stop-dim:#4E2622; --stop-text:#B02A1F; --stop-soft:#FBE4E1;
+  --focus:#2B6CDF;
+  --f-display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121722; --surface:#1C2330; --ink:#E9EDF4; --muted:#9BA5B7; --line:#2E3746;
+  --housing:#0B0F16; --housing-edge:#05070B; --housing-ink:#E8ECF2; --housing-muted:#8D97A8;
+  --go-text:#5FD394; --go-soft:#173326; --wait-text:#F6CB4A; --wait-soft:#3A3115; --stop-text:#FF8478; --stop-soft:#3D1D1A;
+  --focus:#7AA8FF; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121722; --surface:#1C2330; --ink:#E9EDF4; --muted:#9BA5B7; --line:#2E3746;
+  --housing:#0B0F16; --housing-edge:#05070B; --housing-ink:#E8ECF2; --housing-muted:#8D97A8;
+  --go-text:#5FD394; --go-soft:#173326; --wait-text:#F6CB4A; --wait-soft:#3A3115; --stop-text:#FF8478; --stop-soft:#3D1D1A;
+  --focus:#7AA8FF; color-scheme:dark}
+
+html{overflow-x:clip}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.1}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+
+/* topo */
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+.brand{display:flex;align-items:center;gap:14px}
+.mini{display:flex;gap:4px;background:var(--housing);padding:6px 7px;border-radius:999px}
+.mini i{width:12px;height:12px;border-radius:50%;display:block}
+.mini i:nth-child(1){background:var(--stop)}.mini i:nth-child(2){background:var(--wait)}.mini i:nth-child(3){background:var(--go)}
+h1{font-size:clamp(28px,5vw,42px);font-weight:800;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:2px 0 0;font-size:15px}
+.status{display:flex;gap:18px;align-items:center;font-variant-numeric:tabular-nums}
+.stat{display:flex;flex-direction:column;align-items:flex-end}
+.stat b{font-family:var(--f-display);font-size:26px;line-height:1}
+.stat span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>div{height:100%;width:0;background:var(--ink);border-radius:99px;transition:width .35s ease}
+
+/* jogo */
+.game{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:start}
+.stage{display:flex;flex-direction:column;gap:16px;min-width:0}
+.hint{margin:0;color:var(--muted);font-size:15px}
+.hint kbd{font-family:var(--f-body);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--surface)}
+
+.card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px 16px;
+  box-shadow:0 1px 0 var(--line),0 10px 24px -14px rgba(20,30,50,.35);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;z-index:5}
+.card.dragging{cursor:grabbing;transition:none;box-shadow:0 22px 40px -12px rgba(10,15,30,.45);z-index:50}
+.card.settle{transition:transform .25s cubic-bezier(.2,.8,.3,1)}
+.card.done{cursor:default}
+.ctx{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:baseline;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed var(--line)}
+.ctx strong{text-transform:uppercase;letter-spacing:.08em;font-size:11px;color:var(--muted)}
+.post{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px}
+.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:16px}
+.who{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.who b{font-size:15px}.who span{font-size:13px;color:var(--muted)}
+.text{font-size:clamp(19px,2.6vw,23px);line-height:1.4;margin:4px 0 0}
+.actions{display:flex;gap:18px;margin-top:12px;font-size:13px;color:var(--muted)}
+.stamp{position:absolute;top:12px;right:14px;font-family:var(--f-display);font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 10px;border-radius:99px;border:2px solid currentColor;transform:rotate(4deg)}
+.c-verde{color:var(--go-text)}.c-amarelo{color:var(--wait-text)}.c-vermelho{color:var(--stop-text)}
+
+.feedback{border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);background:var(--surface)}
+.feedback.ok{background:var(--go-soft);border-color:transparent}
+.feedback.no{background:var(--stop-soft);border-color:transparent}
+.feedback h3{font-size:22px}
+.feedback p{margin:0;max-width:62ch}
+.feedback .tip{font-size:15px;border-top:1px solid var(--line);padding-top:10px}
+.btn{align-self:flex-start;background:var(--ink);color:var(--bg);border:0;border-radius:10px;padding:10px 18px;font-weight:700}
+.btn:hover{filter:brightness(1.15)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+
+/* semáforo */
+.light{background:var(--housing);border-radius:28px;padding:18px 14px;display:flex;flex-direction:column;gap:10px;
+  box-shadow:inset 0 0 0 3px var(--housing-edge),0 16px 30px -18px rgba(0,0,0,.6);position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+.lamp{display:grid;grid-template-columns:76px minmax(0,1fr);align-items:center;gap:14px;text-align:left;background:transparent;border:0;
+  border-radius:18px;padding:8px;color:var(--housing-ink);transition:background .2s}
+.lamp:hover:not(:disabled),.lamp.over{background:rgba(255,255,255,.07)}
+.lamp:disabled{cursor:default}
+.bulb{width:76px;height:76px;border-radius:50%;position:relative;box-shadow:inset 0 -6px 12px rgba(0,0,0,.35),0 0 0 5px var(--housing-edge);transition:background .2s,box-shadow .25s}
+.bulb::after{content:"";position:absolute;left:18%;top:14%;width:30%;height:22%;border-radius:50%;background:rgba(255,255,255,.18)}
+.l-vermelho .bulb{background:var(--stop-dim)}.l-amarelo .bulb{background:var(--wait-dim)}.l-verde .bulb{background:var(--go-dim)}
+.l-vermelho.on .bulb,.l-vermelho.over .bulb{background:var(--stop);box-shadow:0 0 0 5px var(--housing-edge),0 0 30px 6px color-mix(in srgb,var(--stop) 60%,transparent)}
+.l-amarelo.on .bulb,.l-amarelo.over .bulb{background:var(--wait);box-shadow:0 0 0 5px var(--housing-edge),0 0 30px 6px color-mix(in srgb,var(--wait) 55%,transparent)}
+.l-verde.on .bulb,.l-verde.over .bulb{background:var(--go);box-shadow:0 0 0 5px var(--housing-edge),0 0 30px 6px color-mix(in srgb,var(--go) 55%,transparent)}
+.lamp .name{font-family:var(--f-display);font-weight:800;font-size:20px;line-height:1.05;display:block}
+.lamp .key{font-size:11px;color:var(--housing-muted);margin-left:4px;font-family:var(--f-body);font-weight:400}
+.lamp .desc{font-size:13.5px;color:var(--housing-muted);line-height:1.35;display:block;margin-top:3px}
+.lamp.wrong .bulb{outline:3px dashed var(--housing-muted);outline-offset:6px}
+
+/* resultado */
+.results{display:flex;flex-direction:column;gap:22px}
+.score{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
+.score .big{font-family:var(--f-display);font-weight:800;font-size:64px;line-height:.9;font-variant-numeric:tabular-nums}
+.score .big small{font-size:28px;color:var(--muted)}
+.score h2{font-size:26px}
+.score p{margin:4px 0 0;color:var(--muted)}
+.cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cat{border-radius:12px;padding:12px 14px;font-variant-numeric:tabular-nums}
+.cat b{font-family:var(--f-display);font-size:28px;display:block;line-height:1}
+.cat span{font-size:13px}
+.cat.verde{background:var(--go-soft);color:var(--go-text)}.cat.amarelo{background:var(--wait-soft);color:var(--wait-text)}.cat.vermelho{background:var(--stop-soft);color:var(--stop-text)}
+.review{display:flex;flex-direction:column;gap:10px}
+.review h3{font-size:22px}
+.rv{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px}
+.rv q{font-size:17px;quotes:"“" "”"}
+.rv .meta{font-size:14px;color:var(--muted)}
+.talk{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
+.talk ul{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+
+@media (max-width:820px){
+  .game{grid-template-columns:minmax(0,1fr)}
+  .light{flex-direction:row;padding:12px 8px;border-radius:22px;position:static;order:2}
+  .lamp{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center;gap:8px;flex:1 1 0;min-width:0;padding:8px 4px}
+  .bulb{width:60px;height:60px}
+  .lamp .name{font-size:17px}.lamp .key{display:none}
+  .lamp .desc{font-size:12px}
+  .status{width:100%;justify-content:flex-start}.stat{align-items:flex-start}
+  .cats{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:440px){ .lamp .desc{display:none} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mini" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div>
+        <h1>Semáforo das Mensagens</h1>
+        <p class="sub">Leia o comentário e decida: ele constrói, preocupa ou ataca?</p>
+      </div>
+    </div>
+    <div class="status" id="status">
+      <div class="stat"><b id="pos">1/30</b><span>Mensagem</span></div>
+      <div class="stat"><b id="pts">0</b><span>Acertos</span></div>
+    </div>
+  </header>
+  <div class="bar" aria-hidden="true"><div id="bar"></div></div>
+
+  <main id="main">
+    <section class="game" id="game">
+      <div class="stage">
+        <p class="hint">Arraste a mensagem até uma luz do semáforo, ou clique na luz. No teclado: <kbd>1</kbd> verde, <kbd>2</kbd> amarelo, <kbd>3</kbd> vermelho.</p>
+        <article class="card" id="card" tabindex="0" aria-live="polite"></article>
+        <div id="fb"></div>
+      </div>
+      <div class="light" id="light" role="group" aria-label="Semáforo">
+        <button class="lamp l-vermelho" data-cat="vermelho" id="lamp-vermelho">
+          <span class="bulb" aria-hidden="true"></span>
+          <span><span class="name">Vermelho<span class="key">tecla 3</span></span><span class="desc">Ataque ou cyberbullying: quer humilhar, ofender, ameaçar ou perseguir.</span></span>
+        </button>
+        <button class="lamp l-amarelo" data-cat="amarelo" id="lamp-amarelo">
+          <span class="bulb" aria-hidden="true"></span>
+          <span><span class="name">Amarelo<span class="key">tecla 2</span></span><span class="desc">Atenção: tom inadequado ou que pode causar desconforto.</span></span>
+        </button>
+        <button class="lamp l-verde" data-cat="verde" id="lamp-verde">
+          <span class="bulb" aria-hidden="true"></span>
+          <span><span class="name">Verde<span class="key">tecla 1</span></span><span class="desc">Crítica construtiva: opinião ou sugestão com respeito.</span></span>
+        </button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const LABEL={verde:"Verde",amarelo:"Amarelo",vermelho:"Vermelho"};
+const NOME={verde:"Crítica construtiva",amarelo:"Atenção",vermelho:"Ataque / Cyberbullying"};
+const AJUDA="Se acontecer com você ou com um colega: não responda no mesmo tom, guarde os prints, bloqueie e denuncie o perfil e conte para um adulto de confiança.";
+
+const MSGS=[
+ {cat:"verde",ctx:"Vídeo de uma colega cantando no sarau da escola",user:"rafa.lima",text:"Sua voz ficou muito bonita! Só achei o violão um pouco alto. Se abaixar, dá pra ouvir você melhor.",
+  why:"Começa reconhecendo o que ficou bom e dá uma sugestão concreta, sem desmerecer a pessoa."},
+ {cat:"verde",ctx:"Slides do trabalho de Ciências no grupo da turma",user:"bia_souza",text:"Gostei dos slides, mas faltou colocar de onde vieram as imagens. Quer que eu te ajude a achar as fontes?",
+  why:"Aponta um problema real do trabalho e ainda oferece ajuda. A crítica é sobre o trabalho, não sobre quem fez."},
+ {cat:"verde",ctx:"Desenho publicado por um colega",user:"theo.art",text:"Curti muito as cores! Uma dica: as mãos ficariam mais naturais com os dedos um pouco mais compridos.",
+  why:"Elogio sincero mais uma dica específica e possível de aplicar. Isso é crítica construtiva."},
+ {cat:"verde",ctx:"Post sobre o final de uma série",user:"duda.reis",text:"Não concordo com você, achei o final fraco. Mas entendo por que você gostou, tem cenas muito boas.",
+  why:"Discordar é normal. A mensagem dá a opinião com respeito e reconhece o ponto de vista do outro."},
+ {cat:"verde",ctx:"Vídeo de receita de bolo de um colega",user:"gui_moraes",text:"Fiz aqui em casa e ficou ótimo! Achei que dá pra usar um pouco menos de açúcar, fica a sugestão.",
+  why:"Conta a experiência, elogia e faz uma sugestão leve. Ninguém sai diminuído."},
+ {cat:"verde",ctx:"Post do time da escola depois de uma derrota",user:"caio.goleiro",text:"Faltou pontaria hoje, mas o time jogou junto o tempo todo. Bora treinar finalização na quinta!",
+  why:"Reconhece o que deu errado sem culpar ninguém e propõe uma solução para o grupo."},
+
+ {cat:"amarelo",ctx:"Vídeo de dança postado por uma colega",user:"leo.zoeiro",text:"kkkkkkk sério que você teve coragem de postar isso?",
+  why:"Não chega a ser uma ameaça, mas o deboche pode constranger. É o tipo de comentário que vale repensar antes de enviar."},
+ {cat:"amarelo",ctx:"Foto de um colega com corte de cabelo novo",user:"mari.lopes",text:"Preferia antes. Esse ficou estranho.",
+  why:"Ninguém pediu essa opinião e ela vem seca, sem cuidado. Pode deixar a pessoa insegura."},
+ {cat:"amarelo",ctx:"Texto do grupo publicado no mural virtual",user:"pedro_hs",text:"Nossa, que preguiça de ler isso. Textão enorme.",
+  why:"Desvaloriza o esforço do grupo sem dizer o que poderia melhorar. O tom é inadequado."},
+ {cat:"amarelo",ctx:"Dúvida sobre a tarefa no grupo da turma",user:"julia.f",text:"Já explicaram isso três vezes aqui. Presta atenção, né.",
+  why:"Mostra impaciência e pode fazer a pessoa ter vergonha de perguntar de novo. Dava para ajudar de outro jeito."},
+ {cat:"amarelo",ctx:"Partida de jogo online com colegas",user:"nick_pro77",text:"Você joga muito mal, hein. Ficou só atrapalhando.",
+  why:"É uma provocação comum em jogos, mas machuca. Se virar repetição contra a mesma pessoa, pode se tornar perseguição."},
+ {cat:"amarelo",ctx:"Post de um colega com erros de digitação",user:"ana.c",text:"Escreveu tudo errado. Vai aprender português primeiro.",
+  why:"Corrigir pode ser útil, mas desse jeito expõe a pessoa em público. Uma mensagem privada e gentil funcionaria melhor."},
+
+ {cat:"vermelho",ctx:"Comentário na foto de um aluno novo",user:"anonimo_8b",text:"Ninguém aguenta você. Sai dessa escola que é melhor pra todo mundo.",
+  why:"Quer humilhar e excluir a pessoa do grupo. Isso é cyberbullying.",tip:true},
+ {cat:"vermelho",ctx:"Mensagem privada enviada a uma colega",user:"perfil_x",text:"Vou espalhar aquele print seu pra escola inteira ver.",
+  why:"É uma ameaça de exposição. Usar prints para chantagear ou envergonhar alguém é uma forma grave de ataque.",tip:true},
+ {cat:"vermelho",ctx:"Grupo de mensagens de uma turma",user:"vini.rx",text:"Pessoal, vamos todo mundo comentar “feia” em todas as fotos dela.",
+  why:"Organiza um ataque em grupo contra uma pessoa. A perseguição combinada é cyberbullying, e quem participa também é responsável.",tip:true},
+ {cat:"vermelho",ctx:"Mensagem enviada para um colega",user:"fake_2026",text:"Criei um perfil com a sua foto só pra todo mundo rir de você.",
+  why:"Criar perfil falso para ridicularizar alguém é ataque e pode ser crime. Deve ser denunciado.",tip:true},
+ {cat:"vermelho",ctx:"Mensagem privada depois de uma discussão",user:"desconhecido",text:"Te espero na saída. E é melhor você não contar pra ninguém.",
+  why:"É uma ameaça e ainda tenta isolar a vítima pedindo silêncio. Esse é justamente o momento de contar a um adulto.",tip:true},
+ {cat:"vermelho",ctx:"Foto da turma no passeio da escola",user:"zoa.tudo",text:"Com esse corpo ele nem devia aparecer em foto.",
+  why:"Ofende a pessoa pela aparência do corpo, com intenção de humilhar. Isso é cyberbullying.",tip:true},
+
+ {cat:"verde",ctx:"Vídeo de apresentação oral de um colega",user:"lara.mendes",text:"Você explicou muito bem! Na próxima, tenta falar um pouco mais devagar no começo, assim fica mais fácil de acompanhar.",
+  why:"Valoriza o trabalho e dá uma dica clara para a próxima vez. A crítica ajuda a pessoa a melhorar."},
+ {cat:"verde",ctx:"Foto da maquete da feira de ciências",user:"enzo.b",text:"A maquete ficou caprichada! Acho que uma legenda em cada parte ajudaria quem não conhece o projeto.",
+  why:"Elogia o esforço e sugere algo simples que deixa o trabalho ainda melhor."},
+ {cat:"verde",ctx:"Post de uma colega sobre os animais do Pantanal",user:"sofi.campos",text:"Adorei o post! Só um detalhe: a capivara é mamífero, não réptil. Dá pra corrigir na legenda.",
+  why:"Corrige uma informação de forma educada e sem expor a colega ao ridículo."},
+ {cat:"verde",ctx:"Vídeo de um colega andando de skate",user:"davi.rolê",text:"Manobra muito boa! Só usa capacete nas próximas, vai que você cai feio.",
+  why:"Elogia e demonstra cuidado com a segurança do colega. É uma sugestão feita com respeito."},
+
+ {cat:"amarelo",ctx:"Foto do lanche que um colega trouxe de casa",user:"bruno_k",text:"Que comida mais esquisita. Eca.",
+  why:"Desfaz do que é do outro sem motivo e pode envergonhar. Hábitos e comidas de família merecem respeito."},
+ {cat:"amarelo",ctx:"Áudio longo enviado por uma colega no grupo da turma",user:"isa.rocha",text:"Ninguém vai ouvir esse áudio de cinco minutos não, kkk.",
+  why:"A brincadeira tem tom de desprezo e pode deixar a colega sem graça na frente de todos."},
+ {cat:"amarelo",ctx:"Foto de um colega com roupa nova",user:"mel.prado",text:"Comprou isso onde? Na liquidação? kkkk",
+  why:"O deboche sobre a roupa pode causar desconforto e tocar em questões como dinheiro. Melhor não comentar assim."},
+ {cat:"amarelo",ctx:"Grupo do trabalho, um colega atrasou a parte dele",user:"arthur.v",text:"Sempre você atrasando. Que saco.",
+  why:"A frustração é compreensível, mas o tom culpa e generaliza. Dava para cobrar o prazo com respeito, de preferência no privado."},
+
+ {cat:"vermelho",ctx:"Mensagem enviada a um colega depois da aula",user:"zoeira_9a",text:"Tirei uma foto sua dormindo na aula e vou postar com uma legenda bem humilhante.",
+  why:"Postar a imagem de alguém sem permissão para humilhar é exposição e cyberbullying.",tip:true},
+ {cat:"vermelho",ctx:"Mensagens privadas repetidas para uma colega",user:"insistente",text:"Vou te mandar mensagem todo dia até você sair do grupo.",
+  why:"É perseguição: repetir ataques para pressionar e isolar alguém.",tip:true},
+ {cat:"vermelho",ctx:"Comentário no vídeo de um aluno que veio de outra cidade",user:"local_100",text:"Volta pra sua cidade. Aqui ninguém quer ouvir esse seu sotaque.",
+  why:"Ataca a origem e o jeito de falar da pessoa para excluí-la. Isso é discriminação e cyberbullying.",tip:true},
+ {cat:"vermelho",ctx:"Mensagem privada na semana de provas",user:"anonimo_77",text:"Se você não me passar as respostas, conto seu segredo pra todo mundo.",
+  why:"É chantagem: usa uma ameaça de exposição para obrigar a pessoa a fazer algo.",tip:true},
+];
+
+const AV=["#3B7BD9","#8A4FD1","#D2477E","#1F9488","#C9661C","#4A6A8C","#6B8E23","#B5476B"];
+const $=s=>document.querySelector(s);
+const card=$("#card"),fb=$("#fb"),lamps=[...document.querySelectorAll(".lamp")];
+let order=[],i=0,answers=[],answered=false;
+
+function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function hash(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)}
+
+function start(){
+  order=shuffle(MSGS);i=0;answers=[];
+  $("#main").innerHTML="";$("#main").appendChild(gameEl);$("#status").hidden=false;
+  render();
+}
+const gameEl=$("#game");
+
+function render(){
+  answered=false;
+  const m=order[i];
+  const ini=m.user.replace(/[^a-z]/gi,"").slice(0,2).toUpperCase();
+  const mins=[2,5,8,12,17,23,31,44][hash(m.user)%8];
+  card.className="card";card.style.transform="";
+  card.innerHTML=`<div class="ctx"><strong>Situação</strong><span>${esc(m.ctx)}</span></div>
+   <div class="post"><div class="avatar" style="background:${AV[hash(m.user)%AV.length]}" aria-hidden="true">${ini}</div>
+   <div><div class="who"><b>@${esc(m.user)}</b><span>há ${mins} min</span></div>
+   <p class="text">${esc(m.text)}</p>
+   <div class="actions" aria-hidden="true"><span>Curtir</span><span>Responder</span><span>Denunciar</span></div></div></div>`;
+  fb.innerHTML="";
+  lamps.forEach(l=>{l.classList.remove("on","over","wrong");l.disabled=false});
+  $("#pos").textContent=`${i+1}/${order.length}`;
+  $("#pts").textContent=answers.filter(a=>a.ok).length;
+  $("#bar").style.width=`${(i/order.length)*100}%`;
+}
+
+function classify(cat){
+  if(answered)return;answered=true;
+  const m=order[i],ok=cat===m.cat;
+  answers.push({m,cat,ok});
+  card.classList.add("done");
+  card.insertAdjacentHTML("beforeend",`<span class="stamp c-${cat}">${LABEL[cat]}</span>`);
+  lamps.forEach(l=>{l.disabled=true;l.classList.remove("over");
+    if(l.dataset.cat===m.cat)l.classList.add("on");
+    if(!ok&&l.dataset.cat===cat)l.classList.add("wrong");});
+  const last=i===order.length-1;
+  fb.innerHTML=`<div class="feedback ${ok?"ok":"no"}">
+    <h3>${ok?"Isso mesmo!":"Quase."} <span class="c-${m.cat}">${LABEL[m.cat]}: ${NOME[m.cat]}</span></h3>
+    ${ok?"":`<p>Você escolheu <strong class="c-${cat}">${LABEL[cat]}</strong>.</p>`}
+    <p>${esc(m.why)}</p>
+    ${m.tip?`<p class="tip"><strong>O que fazer:</strong> ${AJUDA}</p>`:""}
+    <button class="btn" id="next">${last?"Ver resultado":"Próxima mensagem"}</button></div>`;
+  $("#pts").textContent=answers.filter(a=>a.ok).length;
+  $("#bar").style.width=`${((i+1)/order.length)*100}%`;
+  const nb=$("#next");nb.addEventListener("click",next);nb.focus({preventScroll:true});
+  fb.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+function next(){ if(i<order.length-1){i++;render();card.focus({preventScroll:true});card.scrollIntoView({behavior:"smooth",block:"nearest"})} else results(); }
+
+function results(){
+  const tot=answers.length,ok=answers.filter(a=>a.ok).length;
+  const by=c=>{const a=answers.filter(x=>x.m.cat===c);return [a.filter(x=>x.ok).length,a.length]};
+  const msg=ok===tot?"Leitura certeira em todas as mensagens.":ok>=tot*.75?"Você reconhece bem a diferença entre criticar e atacar.":ok>=tot*.5?"Bom caminho. Reveja as mensagens abaixo e compare com a turma.":"Vale rever as mensagens abaixo com calma e conversar com a turma.";
+  const miss=answers.filter(a=>!a.ok);
+  $("#status").hidden=true;$("#bar").style.width="100%";
+  $("#main").innerHTML=`<section class="results">
+   <div class="score"><div class="big">${ok}<small>/${tot}</small></div><div><h2>${msg}</h2><p>Acertos por cor do semáforo:</p></div></div>
+   <div class="cats">${["verde","amarelo","vermelho"].map(c=>{const [a,b]=by(c);return `<div class="cat ${c}"><b>${a}/${b}</b><span>${LABEL[c]}: ${NOME[c]}</span></div>`}).join("")}</div>
+   ${miss.length?`<div class="review"><h3>Mensagens para rever</h3>${miss.map(a=>`<div class="rv"><q>${esc(a.m.text)}</q>
+     <span class="meta">Você marcou <strong class="c-${a.cat}">${LABEL[a.cat]}</strong>. A resposta é <strong class="c-${a.m.cat}">${LABEL[a.m.cat]}</strong>. ${esc(a.m.why)}</span></div>`).join("")}</div>`:""}
+   <div class="talk"><h3>Para conversar com a turma</h3><ul>
+     <li>Qual mensagem gerou mais dúvida? Por quê?</li>
+     <li>Como reescrever uma mensagem amarela para que ela fique verde?</li>
+     <li>O que você faria se visse um colega recebendo uma mensagem vermelha?</li></ul></div>
+   <div class="row"><button class="btn" id="again">Jogar de novo</button></div></section>`;
+  $("#again").addEventListener("click",()=>{start();window.scrollTo({top:0,behavior:"smooth"})});
+}
+
+lamps.forEach(l=>l.addEventListener("click",()=>classify(l.dataset.cat)));
+document.addEventListener("keydown",e=>{
+  if(!document.body.contains(card)||answered||e.ctrlKey||e.metaKey||e.altKey)return;
+  const k={"1":"verde","2":"amarelo","3":"vermelho"}[e.key];if(k){e.preventDefault();classify(k)}
+});
+
+/* arrastar e soltar (mouse e toque) */
+let drag=null;
+function lampAt(x,y){return lamps.find(l=>{const r=l.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom})}
+card.addEventListener("pointerdown",e=>{
+  if(answered||e.button>0)return;
+  drag={x:e.clientX,y:e.clientY,id:e.pointerId,moving:false};
+  try{card.setPointerCapture(e.pointerId)}catch(_){}
+});
+card.addEventListener("pointermove",e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+  if(!drag.moving&&Math.hypot(dx,dy)<6)return;
+  if(!drag.moving){drag.moving=true;card.classList.remove("settle");card.classList.add("dragging")}
+  card.style.transform=`translate(${dx}px,${dy}px) rotate(${Math.max(-6,Math.min(6,dx/40))}deg) scale(.96)`;
+  const over=lampAt(e.clientX,e.clientY);
+  lamps.forEach(l=>l.classList.toggle("over",l===over));
+});
+function endDrag(e){
+  if(!drag||e.pointerId!==drag.id)return;
+  const target=drag.moving?lampAt(e.clientX,e.clientY):null;
+  drag=null;card.classList.remove("dragging");card.classList.add("settle");card.style.transform="";
+  lamps.forEach(l=>l.classList.remove("over"));
+  if(target)classify(target.dataset.cat);
+}
+card.addEventListener("pointerup",endDrag);
+card.addEventListener("pointercancel",endDrag);
+
+start();
+</script>
+
+</body>
+</html>
