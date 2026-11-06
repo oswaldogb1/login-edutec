@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grêmio Estudantil</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #1d4ed8;
+      --ok: #15803d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+    h1 { margin: 0 0 4px; font-size: 1.6rem; }
+    .sub { margin: 0 0 24px; color: var(--muted); }
+    h2 { font-size: 1.1rem; margin: 28px 0 12px; }
+
+    /* Links */
+    .links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .links a {
+      display: block;
+      padding: 14px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 1px 2px rgba(0,0,0,.08);
+      transition: transform .1s, filter .1s;
+    }
+    .links a:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .links a small { display: block; font-weight: 400; opacity: .9; }
+    .links a.fotos   { background: #0f766e; }
+    .links a.rosa    { background: #db2777; }
+    .links a.amarelo { background: #eab308; color: #1f2937; }
+
+    /* Lista de estudantes */
+    .lista {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .lista li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .lista li:last-child { border-bottom: none; }
+    .info { flex: 1; min-width: 0; }
+    .nome { font-weight: 600; }
+    .cpf {
+      font-family: ui-monospace, Consolas, "Courier New", monospace;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+    button.copiar {
+      flex-shrink: 0;
+      border: 1px solid var(--primary);
+      background: #fff;
+      color: var(--primary);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: .9rem;
+      cursor: pointer;
+      min-width: 112px;
+    }
+    button.copiar:hover { background: #eff6ff; }
+    button.copiar.ok {
+      border-color: var(--ok);
+      color: var(--ok);
+      background: #f0fdf4;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Grêmio Estudantil</h1>
+    <p class="sub">Links do curso e lista de estudantes</p>
+
+    <h2>Links</h2>
+    <div class="links">
+      <a href="https://aprender.sed.ms.gov.br/login/index.php" target="_blank" rel="noopener">
+        Acessar o curso
+        <small>aprender.sed.ms.gov.br</small>
+      </a>
+      <a class="fotos" href="https://drive.google.com/drive/folders/1voX2guA9dy3hbDtjbCFuCD5rdmLkf8zb?usp=drive_link" target="_blank" rel="noopener">
+        Anexar as fotos
+        <small>Pasta no Google Drive</small>
+      </a>
+      <a class="rosa" href="https://drive.google.com/file/d/1nUcxdJStn7JkPN6I5Q8NQ7QihqXmkqIB/view?usp=drive_link" target="_blank" rel="noopener">
+        Vídeo Outubro Rosa
+        <small>Google Drive</small>
+      </a>
+      <a class="amarelo" href="https://drive.google.com/file/d/12i4ylrSvbNnLS2qAL_cIW_plGgmIU17R/view?usp=drive_link" target="_blank" rel="noopener">
+        Vídeo Setembro Amarelo
+        <small>Google Drive</small>
+      </a>
+    </div>
+
+    <h2>Estudantes</h2>
+    <ul class="lista" id="lista"></ul>
+  </main>
+
+  <script>
+    const estudantes = [
+      { nome: "Nicolly Arantes Gonçalves",            cpf: "05963378176" },
+      { nome: "Italo Batista dos Santos",             cpf: "07479919107" },
+      { nome: "Oton Brites Oliveira",                 cpf: "07451143180" },
+      { nome: "Izabela Bruschi da Mata",              cpf: "09124170161" },
+      { nome: "Maria Fernanda Aimi Ramos",            cpf: "05822615112" },
+      { nome: "Ana Júlia Garcia Amorim",              cpf: "05990525117" },
+      { nome: "Sophia Martins Godoy",                 cpf: "05645926170" },
+      { nome: "Nayana Negrão da Rocha",               cpf: "10691062161" },
+      { nome: "Esttefany Patrícia Pimenta de Souza",  cpf: "10437913104" },
+      { nome: "Fernanda Sousa Cândido",               cpf: "06562533104" }
+    ];
+
+    function formatarCPF(cpf) {
+      return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    }
+
+    async function copiarTexto(texto) {
+      try {
+        await navigator.clipboard.writeText(texto);
+        return true;
+      } catch (e) {
+        // Alternativa para navegadores que bloqueiam a API de área de transferência
+        const area = document.createElement("textarea");
+        area.value = texto;
+        area.setAttribute("readonly", "");
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        document.body.appendChild(area);
+        area.select();
+        let ok = false;
+        try { ok = document.execCommand("copy"); } catch (_) {}
+        document.body.removeChild(area);
+        return ok;
+      }
+    }
+
+    const lista = document.getElementById("lista");
+
+    estudantes.forEach(({ nome, cpf }) => {
+      const li = document.createElement("li");
+
+      const info = document.createElement("div");
+      info.className = "info";
+      info.innerHTML = `<div class="nome"></div><div class="cpf">CPF: ${formatarCPF(cpf)}</div>`;
+      info.querySelector(".nome").textContent = nome;
+
+      const botao = document.createElement("button");
+      botao.className = "copiar";
+      botao.type = "button";
+      botao.textContent = "Copiar CPF";
+      botao.addEventListener("click", async () => {
+        const ok = await copiarTexto(cpf); // copia só os números
+        botao.textContent = ok ? "Copiado!" : "Erro ao copiar";
+        botao.classList.toggle("ok", ok);
+        setTimeout(() => {
+          botao.textContent = "Copiar CPF";
+          botao.classList.remove("ok");
+        }, 1500);
+      });
+
+      li.append(info, botao);
+      lista.appendChild(li);
+    });
+  </script>
+</body>
+</html>
