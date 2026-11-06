@@ -37,22 +37,30 @@
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 12px;
     }
-    .links a {
+    .links a,
+    .links button {
       display: block;
+      width: 100%;
       padding: 14px 16px;
+      border: none;
       border-radius: 10px;
+      text-align: left;
       text-decoration: none;
+      font: inherit;
       font-weight: 600;
       color: #fff;
       background: var(--primary);
       box-shadow: 0 1px 2px rgba(0,0,0,.08);
+      cursor: pointer;
       transition: transform .1s, filter .1s;
     }
-    .links a:hover { filter: brightness(1.08); transform: translateY(-1px); }
-    .links a small { display: block; font-weight: 400; opacity: .9; }
-    .links a.fotos   { background: #0f766e; }
-    .links a.rosa    { background: #db2777; }
-    .links a.amarelo { background: #eab308; color: #1f2937; }
+    .links a:hover,
+    .links button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .links small { display: block; font-weight: 400; opacity: .9; }
+    .links .fotos   { background: #0f766e; }
+    .links .rosa    { background: #db2777; }
+    .links .amarelo { background: #eab308; color: #1f2937; }
+    .links button.ok small { font-weight: 700; opacity: 1; }
 
     /* Lista de estudantes */
     .lista {
@@ -110,18 +118,18 @@
         Acessar o curso
         <small>aprender.sed.ms.gov.br</small>
       </a>
-      <a class="fotos" href="https://drive.google.com/drive/folders/1voX2guA9dy3hbDtjbCFuCD5rdmLkf8zb?usp=drive_link" target="_blank" rel="noopener">
-        Anexar as fotos
-        <small>Pasta no Google Drive</small>
-      </a>
-      <a class="rosa" href="https://drive.google.com/file/d/1nUcxdJStn7JkPN6I5Q8NQ7QihqXmkqIB/view?usp=drive_link" target="_blank" rel="noopener">
+      <button type="button" class="copiar-link fotos" data-link="https://drive.google.com/drive/folders/1voX2guA9dy3hbDtjbCFuCD5rdmLkf8zb?usp=drive_link">
+        Link para anexar as fotos
+        <small>Clique para copiar o link</small>
+      </button>
+      <button type="button" class="copiar-link rosa" data-link="https://drive.google.com/file/d/1nUcxdJStn7JkPN6I5Q8NQ7QihqXmkqIB/view?usp=drive_link">
         Vídeo Outubro Rosa
-        <small>Google Drive</small>
-      </a>
-      <a class="amarelo" href="https://drive.google.com/file/d/12i4ylrSvbNnLS2qAL_cIW_plGgmIU17R/view?usp=drive_link" target="_blank" rel="noopener">
+        <small>Clique para copiar o link</small>
+      </button>
+      <button type="button" class="copiar-link amarelo" data-link="https://drive.google.com/file/d/12i4ylrSvbNnLS2qAL_cIW_plGgmIU17R/view?usp=drive_link">
         Vídeo Setembro Amarelo
-        <small>Google Drive</small>
-      </a>
+        <small>Clique para copiar o link</small>
+      </button>
     </div>
 
     <h2>Estudantes</h2>
@@ -165,6 +173,21 @@
         return ok;
       }
     }
+
+    // Botões dos links do Drive: copiam o link em vez de abrir
+    document.querySelectorAll(".copiar-link").forEach((botao) => {
+      const legenda = botao.querySelector("small");
+      const textoOriginal = legenda.textContent;
+      botao.addEventListener("click", async () => {
+        const ok = await copiarTexto(botao.dataset.link);
+        legenda.textContent = ok ? "✔ Link copiado!" : "Erro ao copiar";
+        botao.classList.toggle("ok", ok);
+        setTimeout(() => {
+          legenda.textContent = textoOriginal;
+          botao.classList.remove("ok");
+        }, 1800);
+      });
+    });
 
     const lista = document.getElementById("lista");
 
